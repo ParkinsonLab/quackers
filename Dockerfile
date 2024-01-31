@@ -18,7 +18,7 @@ RUN apt-get update \
 && apt-get install -y valgrind \
 && apt-get install -y heaptrack \
 && apt-get install -y nano \
-&& apt-get install -y libgsl-dev
+&& apt-get install -y libgsl-dev 
 
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
@@ -46,10 +46,38 @@ RUN wget http://eddylab.org/software/hmmer/hmmer.tar.gz \
 WORKDIR hmmer-3.4
 RUN sh configure && make 
 
+WORKDIR /quackers_tools
+RUN wget https://github.com/hyattpd/Prodigal/archive/refs/tags/v2.6.3.zip -O prodigal.zip \
+&& unzip prodigal.zip
+WORKDIR Prodigal-2.6.3
+RUN make
+
+RUN pip install numpy \
+&& pip install matplotlib \
+&& pip install pysam \
+&& pip install checkm-genome
+
+WORKDIR /quackers_tools
+RUN wget https://github.com/bxlab/metaWRAP/archive/refs/tags/v1.3.zip -O metawrap.zip \
+&& unzip metawrap.zip
+
+WORKDIR /quackers_tools
+RUN wget https://github.com/Ecogenomics/GTDBTk/archive/refs/tags/2.3.2.zip -O gtdbtk.zip \
+&& unzip gtdbtk.zip
+
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.5.3/bowtie2-2.5.3-linux-x86_64.zip -O bowtie2.zip \
+&& unzip bowtie2.zip
+
+RUN wget https://github.com/samtools/samtools/releases/download/1.19.2/samtools-1.19.2.tar.bz2 -O samtools.tar.bz2 \
+&& tar -xvf samtools.tar.bz2
+
+RUN rm *.tar.gz \
+&& rm *.zip
 
 RUN chmod -R 777 /quackers_tools
 
 
-WORKDIR /quackers_tools/hmmer-3.4
+WORKDIR /quackers_tools
+
 #/CONCOCT-1.1.0
 CMD ["bash"]
