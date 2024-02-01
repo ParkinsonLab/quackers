@@ -50,7 +50,7 @@ WORKDIR /quackers_tools
 RUN wget https://github.com/hyattpd/Prodigal/archive/refs/tags/v2.6.3.zip -O prodigal.zip \
 && unzip prodigal.zip
 WORKDIR Prodigal-2.6.3
-RUN make
+RUN make 
 
 RUN pip install numpy \
 && pip install matplotlib \
@@ -58,21 +58,33 @@ RUN pip install numpy \
 && pip install checkm-genome
 
 WORKDIR /quackers_tools
-RUN wget https://github.com/bxlab/metaWRAP/archive/refs/tags/v1.3.zip -O metawrap.zip \
-&& unzip metawrap.zip
+RUN wget https://compsysbio.org/metawrap_mod/metawrap_modules.tar.gz \
+&& tar -xzvf metawrap_modules.tar.gz
+
+RUN wget https://compsysbio.org/metawrap_mod/metawrap_scripts.tar.gz \
+&& tar -xzvf metawrap_scripts.tar.gz
 
 WORKDIR /quackers_tools
 RUN wget https://github.com/Ecogenomics/GTDBTk/archive/refs/tags/2.3.2.zip -O gtdbtk.zip \
-&& unzip gtdbtk.zip
+&& unzip gtdbtk.zip 
 
 RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.5.3/bowtie2-2.5.3-linux-x86_64.zip -O bowtie2.zip \
-&& unzip bowtie2.zip
+&& unzip bowtie2.zip \
+&& mv bowtie2-2.5.3-linux-x86_64 bowtie2
 
 RUN wget https://github.com/samtools/samtools/releases/download/1.19.2/samtools-1.19.2.tar.bz2 -O samtools.tar.bz2 \
-&& tar -xvf samtools.tar.bz2
+&& tar -xvf samtools.tar.bz2 
 
 RUN rm *.tar.gz \
-&& rm *.zip
+&& rm *.zip \
+&& rm *.bz2
+
+RUN mv CONCOCT-1.1.0 concoct \
+&& mv hmmer-3.4 hmmer \
+&& mv Prodigal-2.6.3 prodigal \
+&& mv MEGAHIT-1.2.9-Linux-x86_64-static megahit \
+&& mv samtools-1.19.2 samtools \
+&& mv GTDBTk-2.3.2 gtdbtk 
 
 RUN chmod -R 777 /quackers_tools
 
