@@ -18,7 +18,10 @@ RUN apt-get update \
 && apt-get install -y valgrind \
 && apt-get install -y heaptrack \
 && apt-get install -y nano \
-&& apt-get install -y libgsl-dev 
+&& apt-get install -y libgsl-dev \
+&& apt-get install -y libncurses5-dev \
+&& apt-get install -y libbz2-dev \
+&& apt-get install -y liblzma-dev
 
 RUN apt-get install -y python3
 RUN apt-get install -y python3-pip
@@ -75,16 +78,45 @@ RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.5.3/bowtie2
 RUN wget https://github.com/samtools/samtools/releases/download/1.19.2/samtools-1.19.2.tar.bz2 -O samtools.tar.bz2 \
 && tar -xvf samtools.tar.bz2 
 
-RUN rm *.tar.gz \
-&& rm *.zip \
-&& rm *.bz2
 
+WORKDIR samtools-1.19.2
+RUN sh configure \
+&& make \
+&& make install
+
+
+# Install AdapaterRemoval
+WORKDIR /quackers_tools
+RUN wget https://github.com/MikkelSchubert/adapterremoval/archive/v2.1.7.tar.gz -O adapterremoval.tar.gz \
+&& tar -xzvf adapterremoval.tar.gz \ 
+&& mv adapterremoval-2.1.7 adapterremoval \
+&& cd adapterremoval \
+&& make && mv build/AdapterRemoval /quackers_tools/adapterremoval/ 
+
+
+# Install CD-HIT-DUP (from auxtools)
+RUN wget https://github.com/weizhongli/cdhit/releases/download/V4.6.8/cd-hit-v4.6.8-2017-1208-source.tar.gz -O cdhit.tar.gz \
+&& tar --remove-files -xzvf cdhit.tar.gz \
+&& rm cdhit.tar.gz \
+&& mkdir cdhit_dup \ 
+&& cd cd-hit-v4.6.8-2017-1208/ \ 
+&& make \
+&& mv cd-hit-auxtools/cd-hit-dup /quackers_tools/cdhit_dup/ \
+&& cd /quackers_tools \
+&& rm -r cd-hit-v4.6.8-2017-1208
+
+WORKDIR /quackers_tools
 RUN mv CONCOCT-1.1.0 concoct \
 && mv hmmer-3.4 hmmer \
 && mv Prodigal-2.6.3 prodigal \
 && mv MEGAHIT-1.2.9-Linux-x86_64-static megahit \
 && mv samtools-1.19.2 samtools \
 && mv GTDBTk-2.3.2 gtdbtk 
+
+WORKDIR /quackers_tools
+RUN rm *.tar.gz \
+&& rm *.zip \
+&& rm *.bz2
 
 RUN chmod -R 777 /quackers_tools
 
