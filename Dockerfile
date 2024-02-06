@@ -114,6 +114,11 @@ RUN mv CONCOCT-1.1.0 concoct \
 && mv GTDBTk-2.3.2 gtdbtk 
 
 WORKDIR /quackers_tools
+RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz \
+&& tar --remove-files -xzvf bbmap.tar.gz
+
+
+WORKDIR /quackers_tools
 RUN rm *.tar.gz \
 && rm *.zip \
 && rm *.bz2
