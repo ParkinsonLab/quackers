@@ -20,3 +20,6 @@ class quackers_command:
     def megahit_command(self):
         command = self.path_obj.megahit_path + " "
         command += 
+
+    def bowtie2_index_command(self):
+        
