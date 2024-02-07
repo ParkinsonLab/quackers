@@ -13,14 +13,16 @@ class q_stage:
         self.job_control = mp_util.mp_util(out_path, self.path_obj.bypass_log_path)
         self.operating_mode = self.path_obj.operating_mode
 
-    def trim_adapters(self):
+    def trim_adapters(self, ref_path):
         command = ""
         if(self.operating_mode == "single"):
-            command = self.command_obj.clean_reads_single_command
+            command = self.command_obj.clean_reads_single_command(ref_path)
         else:
-            command = self.command_obj.clean_reads_command_paired
+            command = self.command_obj.clean_reads_command_paired(ref_path)
 
-        self.job_control.launch_and_create_simple(self.path_obj.)
+        script_path = os.path.join(self.path_obj.trim_dir, "launch_job.sh")
+        self.job_control.launch_and_create_v2(script_path, command)
+        
 
 
 
