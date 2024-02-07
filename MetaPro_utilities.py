@@ -30,10 +30,10 @@ import psutil as psu
 
 
 class mp_util:
-    def __init__(self, output_folder_path, path_obj):
+    def __init__(self, output_folder_path, bypass_log_name):
         self.mp_store = []
         self.output_folder_path = output_folder_path
-        self.bypass_log_name = path_obj.bypass_log_name
+        self.bypass_log_name = bypass_log_name
 
     def mem_checker(self, threshold):
         #threshold is a percentage for available memory.  
@@ -516,7 +516,7 @@ class mp_util:
             self.delete_folder(analysis_path)
 
 
-    def launch_stage_simple(self, job_label, job_path, commands, command_list, keep_all, keep_job):
+    def launch_stage_simple(self, job_label, job_path, command_list, keep_all, keep_job):
         #wrapper for simple job launches (quality, host)
         cleanup_job_start = 0
         cleanup_job_end = 0
@@ -524,7 +524,7 @@ class mp_util:
         
         if self.check_bypass_log(self.output_folder_path, job_label):
             print(dt.today(), "NEW CHECK running:", job_label)
-            self.launch_and_create_simple(job_label, job_label, commands, command_list)
+            self.launch_and_create_simple(job_label, job_label, command_list)
             
             self.write_to_bypass_log(self.output_folder_path, job_label)
             cleanup_job_start = time.time()
@@ -535,7 +535,7 @@ class mp_util:
 
         return cleanup_job_start, cleanup_job_end
     
-    def launch_stage_with_cleanup(self, commands, command_list, marker_path, data_path, job_label, keep_all, keep_job):
+    def launch_stage_with_cleanup(self, command_list, marker_path, data_path, job_label, keep_all, keep_job):
         #wrapper for simple job launches (quality, host)
         cleanup_job_start = time.time()
         cleanup_job_end = time.time()
@@ -543,7 +543,7 @@ class mp_util:
         if self.check_bypass_log(self.output_folder_path, job_label):
             if not os.path.exists(marker_path):
                 print(dt.today(), "NEW CHECK running:", job_label)
-                self.launch_and_create_simple(job_label, job_label, commands, command_list)
+                self.launch_and_create_simple(job_label, job_label, command_list)
                 print(dt.today(), "job launched")
             #structured to catch instance where bypass isn't written, but marker is present.
             #it's not a if/else case.  Marker will be created once the job finishes.

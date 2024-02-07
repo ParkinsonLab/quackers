@@ -58,20 +58,31 @@ class path_obj:
         self.bbduk_path     = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
 
 
+
         #------------------------------------------------------------------
         #Assign singular values for settings
 
-
-        self.operating_mode = self.assign_value("settings", "operating_mode", "single")
-        self.BBMAP_k        = self.assign_value("BBMAP_settings", "k", 25)
-        self.BBMAP_hdist    = self.assign_value("BBMAP_settings", "hdist", 1)
-        self.BBMAP_ftm      = self.assign_value("BBMAP_settings", "ftm", 5)
+        self.bypass_log_name    = self.assign_value("settings", "bypass_log_name", "bypass_log.txt")
+        self.operating_mode     = self.assign_value("settings", "operating_mode", "single")
+        self.BBMAP_k            = self.assign_value("BBMAP_settings", "k", 25)
+        self.BBMAP_hdist        = self.assign_value("BBMAP_settings", "hdist", 1)
+        self.BBMAP_ftm          = self.assign_value("BBMAP_settings", "ftm", 5)
 
         #--------------------------------------------------------------
         #directory structure
 
+        self.host_dir   = self.assign_value("directory", "host_filter", os.path.join(output_folder_path, "0_host_filter"))
+        self.trim_dir   = self.assign_value("directory", "trim_adapters", os.path.join(output_folder_path, "1_trim_adapters"))
+        
 
+        #-----------------------------------------------------------
+        #keep flags
+        self.keep_all       = self.assign_value("keep_options", "all", "yes")
+        self.keep_trim      = self.assign_value("keep_options", "trim", "yes")
+        self.keep_host      = 
+        
 
+ 
         #---------------------------------------------------------------
         #libraries
 
