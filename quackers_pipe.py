@@ -25,7 +25,7 @@ def parse_inputs():
     parser = ArgumentParser(description="Quackers: a metagenomic processing pipeline <and maybe more>. 2024. "
                             "Version 1.0.0")
     parser.add_argument("-o", "-O", "--output_dir", "--Output_dir", type=str, help="Path to the output directory")
-    parser.add_argument("-c", "--config", type=str, help="Path to a configuration file")
+    parser.add_argument("-c", "-C", "--config", type=str, help="Path to a configuration file")
     parser.add_argument("-1", "--forward", "--f", type=str, help="Used only for paired-end reads: Path to the forward-end data")
     parser.add_argument("-2", "--reverse", "--r", type=str, help="Used only for paired-end reads: Path to the reverse-end data")
     parser.add_argument("-s", "--single", type=str, help="For single-ended reads:, Path to the single-end data")
@@ -44,6 +44,13 @@ def parse_inputs():
     if(not s_path is None):
         if(not p1_path is None):
             sys.exit("expecting either single-end OR both paired-end data. not both")
+    if(config_path is None):
+        sys.exit("expecting a config file. Use the < -c/C > or < --config > flag" )
+    if(output_dir is None):
+        sys.exit("expecting an output directory. Use the < -o/O > or < --output_dir > flag")
+
+    if not(os.path.exists(output_dir)):
+        os.mkdir(output_dir)
 
     args_pack = dict()
     args_pack["out"] = output_dir
