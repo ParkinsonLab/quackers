@@ -117,6 +117,8 @@ WORKDIR /quackers_tools
 RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz \
 && tar --remove-files -xzvf bbmap.tar.gz
 
+RUN pip install psutil
+
 
 WORKDIR /quackers_tools
 RUN rm *.tar.gz \

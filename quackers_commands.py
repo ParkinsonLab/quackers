@@ -17,7 +17,7 @@ class command_obj:
 
     
 
-    def clean_reads_single_command(self, ref_path, in_path, out_path):
+    def clean_reads_single_command(self, ref_path, in_dict, out_dict):
         #to be called on for each host/adapter cluster
         command = self.path_obj.bbduk_path + " "
         command += "in=" + in_path + " "
@@ -48,7 +48,8 @@ class command_obj:
 
     def megahit_command(self):
         command = self.path_obj.megahit_path + " "
-        command += 
+        command += "-r" + " "
+        
 
     def bowtie2_index_command(self, lib_path):
         command = self.path_obj.bowtie2_path + "-build" + " "

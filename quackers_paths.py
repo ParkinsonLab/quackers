@@ -68,6 +68,10 @@ class path_obj:
         self.BBMAP_hdist        = self.assign_value("BBMAP_settings", "hdist", 1)
         self.BBMAP_ftm          = self.assign_value("BBMAP_settings", "ftm", 5)
 
+        self.megahit_contig_len = self.assign_value("MEGAHIT_settings", "contig_len", 1000)
+        self.megehit_threads    = self.assign_value("settings", "threads", 64)
+        
+
         #--------------------------------------------------------------
         #directory structure
 
@@ -79,7 +83,7 @@ class path_obj:
         #keep flags
         self.keep_all       = self.assign_value("keep_options", "all", "yes")
         self.keep_trim      = self.assign_value("keep_options", "trim", "yes")
-        self.keep_host      = 
+        self.keep_host      = self.assign_value("keep_options", "host", "yes")
         
 
  
@@ -102,7 +106,7 @@ class path_obj:
             print("no hosts section found in Config")
 
         if("artifacts" in self.config):
-            for artifact_entry in self.config["artifacts"]):
+            for artifact_entry in self.config["artifacts"]:
                 self.check_lib_integrity(artifact_entry)
 
         
