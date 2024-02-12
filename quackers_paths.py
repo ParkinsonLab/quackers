@@ -6,8 +6,22 @@ import time
 from datetime import datetime as dt
 from configparser import ConfigParser
 
-#class that stores all tool paths for Quackers.
+#classes that store all tool paths for Quackers.
+#also classes that store all datapaths.
 
+class data_paths:
+    #A series of dictionaries to track all output locations.
+    #Used as a way to track the paths of multiple host filters.
+    def __init__(self):
+        self.p1_host_in_path_dict = dict()
+        self.p2_host_in_path_dict = dict()
+        self.s_host_in_path_dict = dict()
+
+        self.p1_host_out_path_dict = dict()
+        self.p2_host_out_path_dict = dict()
+        self.s_host_out_path_dict = dict()
+
+        
 
 class path_obj:
 

@@ -15,6 +15,8 @@ def run_pipe(path_obj, stage_obj, output_dir, mp_util):
     #step 1: hosts
     list_of_hosts = sorted(path_obj.config["hosts"].keys())
     
+    host_count = 0
+    
     for host_entry in list_of_hosts:
         print(host_entry)
         #stage_obj.host_filter(host_entry)
