@@ -16,6 +16,11 @@
 #MetaPro_utilities.py
 #This code houses the various helper functions MetaPro uses to coordinate the multi-threaded traffic.
 
+
+#Feb 13, 2024
+#--------------------------------------------------------------
+#Now used in Quackers Metagenomic pipe
+
 import sys
 import os
 import os.path
@@ -326,6 +331,16 @@ class mp_util:
         )
         process.start()
         process.join()
+
+    def launch_and_create_v2_with_mp_store(self, job_path, commands):
+        #launches a job. doesn't wait. but stores it in the mp_store queue
+        process = mp.Process(
+            target=self.create_and_launch_v2,
+            args=(job_path, commands)
+        )
+        process.start()
+        self.mp_store.append(process)
+
 
     def launch_and_create_with_mp_store(self, job_location, job_label, commands):
         #launches a job. doesn't wait. but stores it in the mp_store queue

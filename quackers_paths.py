@@ -6,22 +6,41 @@ import time
 from datetime import datetime as dt
 from configparser import ConfigParser
 
+
+def make_folder(dir):
+    if(not os.path.exists(dir)):
+        os.mkdir(dir)
+
+class dir_structure:
+    def __init__(self, args_pack):
+        self.output_dir = args_pack["out"]
+
+        self.host_dir_top = os.path.join(self.output_dir, "1_host_filter")
+        self.host_dir_data = os.path.join(self.host_dir_top, "data")
+        self.host_dir_end  = os.path.join(self.host_dir_top, "export")
+        
+        self.adapters_dir_top = os.path.join(self.output_dir, "2_adapters_filter")
+        self.adapters_dir_data = os.path.join(self.adapters_dir_top, "data")
+        self.adapters_dir_end = os.path.join(self.adapters_dir_top, "export")
+
+        
+
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
 
 class data_paths:
     #A series of dictionaries to track all output locations.
     #Used as a way to track the paths of multiple host filters.
+    
     def __init__(self):
-        self.p1_host_in_path_dict = dict()
-        self.p2_host_in_path_dict = dict()
-        self.s_host_in_path_dict = dict()
+        #reminder/note: these aren't supposed to store sequential paths.  They should all be run in parallel
+        #and be reconciled before moving on.    
+
 
         self.p1_host_out_path_dict = dict()
         self.p2_host_out_path_dict = dict()
         self.s_host_out_path_dict = dict()
 
-        
 
 class path_obj:
 

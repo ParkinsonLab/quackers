@@ -10,17 +10,14 @@ import quackers_stages as q_stage
 from argparse import ArgumentParser
 
 
-def run_pipe(path_obj, stage_obj, output_dir, mp_util):
+def run_pipe(path_obj, args_pack, stage_obj, mp_util):
     #-------------------------------------------------------
     #step 1: hosts
-    list_of_hosts = sorted(path_obj.config["hosts"].keys())
-    
-    host_count = 0
-    
-    for host_entry in list_of_hosts:
-        print(host_entry)
-        #stage_obj.host_filter(host_entry)
-
+        dir_obj = q_path.dir_structure(args_pack)
+        
+        
+        print(host_key)
+        stage_obj.host_filter(path_obj, dir_obj)
 
 
 def parse_inputs():
@@ -40,12 +37,19 @@ def parse_inputs():
     p2_path     = args.reverse
     s_path      = args.single
 
+    operating_mode = ""
     if(p1_path is None):
         if(s_path is None):
             sys.exit("expecting at least 1 set of input data: single OR forward + reverse")
+        else:
+            operating_mode = "single"
     if(not s_path is None):
         if(not p1_path is None):
             sys.exit("expecting either single-end OR both paired-end data. not both")
+        else:
+            operating_mode = "paired"
+
+
     if(config_path is None):
         sys.exit("expecting a config file. Use the < -c/C > or < --config > flag" )
     if(output_dir is None):
@@ -60,6 +64,8 @@ def parse_inputs():
     args_pack["p1_path"] = p1_path
     args_pack["p2_path"] = p2_path
     args_pack["s_path"] = s_path
+    args_pack["op_mode"] = operating_mode
+    
 
     return args_pack
 
@@ -75,7 +81,7 @@ if __name__ == "__main__":
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj)
     mp_util = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
 
-    run_pipe(path_obj, stage_obj, args_pack["out"], mp_util)
+    run_pipe(path_obj, args_pack, stage_obj, args_pack["out"], mp_util)
 
 
 
