@@ -45,9 +45,11 @@ class data_paths:
 class path_obj:
 
     def check_lib_integrity(self, lib_path):
+        print("looking at:", lib_path)
         if os.path.exists(lib_path):
             if(os.path.getsize(lib_path) > 0):
                 if((lib_path.endswith(".fasta")) or (lib_path.endswith(".fa")) or (lib_path.endswith(".fna"))):
+                    print("library check: OK!")
                     return True
                 else:
                     print("library not a fasta/fa/fna file", lib_path)
@@ -92,6 +94,8 @@ class path_obj:
 
 
 
+
+
         #------------------------------------------------------------------
         #Assign singular values for settings
 
@@ -132,7 +136,7 @@ class path_obj:
             print("number of hosts:", number_of_hosts)
             for host_entry in self.config["hosts"]:
                 #print(host_entry)
-                self.check_lib_integrity(host_entry)
+                self.check_lib_integrity(self.config["hosts"][host_entry])
                 self.hosts_path_dict[str(host_entry)] = self.assign_value("hosts", host_entry, "none")
         
         else:

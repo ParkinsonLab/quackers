@@ -11,13 +11,13 @@ class command_obj:
             os.mkdir(folder_path)
 
 
-    def __init__(self):
-        self.path_obj = q_path.quackers_path()
+    def __init__(self, output_path):
+        self.path_obj = q_path.path_obj(output_path)
         self.op_mode = self.path_obj.operating_mode
 
     
 
-    def clean_reads_single_command(self, ref_path, in_dict, out_dict):
+    def clean_reads_single_command(self, ref_path, in_path, out_path):
         #to be called on for each host/adapter cluster
         command = self.path_obj.bbduk_path + " "
         command += "in=" + in_path + " "
