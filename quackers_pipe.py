@@ -10,13 +10,14 @@ import quackers_stages as q_stage
 from argparse import ArgumentParser
 
 
-def run_pipe(path_obj, args_pack, stage_obj, mp_util):
+def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
     #step 1: hosts
-        dir_obj = q_path.dir_structure(args_pack)
+        dir_obj = q_path.dir_structure(args_pack["out"], path_obj)
+        mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
         
-        
-        stage_obj.host_filter(path_obj, args_pack, dir_obj)
+        stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj)
+        stage_obj.host_filter(path_obj, args_pack)
 
 
 def parse_inputs():
@@ -94,10 +95,10 @@ if __name__ == "__main__":
     
     path_obj = q_path.path_obj(args_pack["out"], args_pack["config"])
     path_obj.operating_mode = args_pack["op_mode"]
-    stage_obj = q_stage.q_stage(args_pack["out"], path_obj)
-    mp_util = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
+    
+    #mp_util = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
 
-    run_pipe(path_obj, args_pack, stage_obj,  mp_util)
+    run_pipe(path_obj, args_pack)
 
 
 

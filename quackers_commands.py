@@ -23,9 +23,9 @@ class command_obj:
         command += "in=" + in_path + " "
         command += "out=" + out_path + " "
     
-        command += "k=" + self.BBMAP_k + " "
-        command += "ftm=" + self.BBMAP_ftm + " "
-        command += "hdist=" + self.BBMAP_hdist + " "
+        command += "k=" + str(self.path_obj.BBMAP_k) + " "
+        command += "ftm=" + str(self.path_obj.BBMAP_ftm) + " "
+        command += "hdist=" + str(self.path_obj.BBMAP_hdist) + " "
         command += "ref=" + ref_path
 
         return [command]
@@ -39,9 +39,9 @@ class command_obj:
         command += "out1=" + out1_path + " "
         command += "out2=" + out2_path + " "
 
-        command += "k=" + self.BBMAP_k + " "
-        command += "ftm=" + self.BBMAP_ftm + " "
-        command += "hdist=" + self.BBMAP_hdist + " "
+        command += "k=" + str(self.path_obj.BBMAP_k) + " "
+        command += "ftm=" + str(self.path_obj.BBMAP_ftm) + " "
+        command += "hdist=" + str(self.path_obj.BBMAP_hdist) + " "
         command += "ref=" + ref_path
         
         return [command]

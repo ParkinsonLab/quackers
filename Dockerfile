@@ -118,6 +118,7 @@ RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz 
 && tar --remove-files -xzvf bbmap.tar.gz
 
 RUN pip install psutil
+RUN apt install -y default-jre
 
 
 WORKDIR /quackers_tools
