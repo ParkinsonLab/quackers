@@ -1,0 +1,1 @@
+python3 quackers_pipe.py -o ~/storage/quackers_test_run_s -s ~/storage/HLHS_sample/out/aa_f.fastq -c Config.ini

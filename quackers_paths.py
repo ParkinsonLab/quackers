@@ -53,6 +53,22 @@ class data_paths:
 
 class path_obj:
 
+
+    def check_if_indexed(self, lib_path):
+        print("looking at:", lib_path)
+        if os.path.exists(lib_path):
+            list_of_files = os.listdir(lib_path)
+            bt2_count = 0
+            for item in list_of_files:
+                if(item.endswith(".bt2")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        bt2_count += 1
+
+            if(bt2_count > 0):
+                return True
+            else:
+                sys.exit("no bowtie2 indexed files found")
     def check_lib_integrity(self, lib_path):
         print("looking at:", lib_path)
         if os.path.exists(lib_path):
@@ -97,7 +113,7 @@ class path_obj:
 
     def __init__(self, output_folder_path, config_path = None):
         self.config = ConfigParser()
-        if(config_path is None):
+        if(not config_path):
             print("No config: Using default")
         else:
             self.config.read(config_path)
@@ -114,6 +130,7 @@ class path_obj:
         self.ar_path        = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
         self.cdhit_path     = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path     = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
+        
 
 
 
@@ -153,18 +170,19 @@ class path_obj:
         #multi-host support:
         #expecting to loop over all hosts.
         self.hosts_path_dict = dict()
-        if("hosts" in self.config):
+        if(not "hosts" in self.config):
+            print("no hosts section found in Config")
+        else:
             number_of_hosts = len(self.config["hosts"])
-
             print("number of hosts:", number_of_hosts)
             for host_entry in self.config["hosts"]:
                 #print(host_entry)
-                self.check_lib_integrity(self.config["hosts"][host_entry])
+                #self.check_lib_integrity(self.config["hosts"][host_entry])
+                self.check_if_indexed(self.config["hosts"][host_entry])
                 self.hosts_path_dict[str(host_entry)] = self.assign_value("hosts", host_entry, "str", "none")
         
-        else:
-            print("no hosts section found in Config")
-
+        
+        
         if("artifacts" in self.config):
             for artifact_entry in self.config["artifacts"]:
                 self.check_lib_integrity(artifact_entry)

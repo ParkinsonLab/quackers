@@ -9,7 +9,7 @@ import MetaPro_utilities as mp_util
 class q_stage:
     def __init__(self, out_path, path_obj, dir_obj):
         self.path_obj = path_obj
-        self.command_obj = q_com.command_obj(out_path)
+        self.command_obj = q_com.command_obj(path_obj)
         self.job_control = mp_util.mp_util(out_path, self.path_obj.bypass_log_name)
         self.operating_mode = self.path_obj.operating_mode
         self.dir_obj = dir_obj
@@ -38,10 +38,10 @@ class q_stage:
             p2_host_export_path = None
             host_ref_path = path_obj.hosts_path_dict[host_key]
             if(args_pack["op_mode"] == "single"):
-                s_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_s.fastq")
+                s_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_s.sam")
             elif(args_pack["op_mode"] == "paired"):
-                p1_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p1.fastq")
-                p2_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p2.fastq")
+                p1_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p1.sam")
+                p2_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p2.sam")
 
 
             ref_basename = os.path.basename(host_ref_path)
