@@ -18,7 +18,7 @@ class command_obj:
 
     
 
-    def clean_reads_single_command(self, ref_path, in_path, out_path):
+    def clean_reads_command_s(self, ref_path, in_path, out_path):
         #to be called on for each host/adapter cluster
         command = self.path_obj.bowtie2_path
         command += " -x " + ref_path
@@ -34,7 +34,7 @@ class command_obj:
 
         return [command + " && " + sifting_command]
     
-    def clean_reads_paired_command(self, ref_path, export_path, in1_path, in2_path, ):
+    def clean_reads_command_p(self, ref_path, export_path, in1_path, in2_path, ):
         #to be called on for each host/adapter cluster
         ref_basename = os.path.basename(ref_path)
         #export_path = os.path.dirname(out1_path)
@@ -79,15 +79,25 @@ class command_obj:
         return [command]
 
 
-    def megahit_command(self):
+    def megahit_command_p(self, forward_path, reverse_path, export_path):
         command = self.path_obj.megahit_path + " "
-        command += "-r" + " "
+        command += "-1" + " " + forward_path + " "
+        command += "-2" + " " + reverse_path + " "
+        command += "-o" + " " + export_path + " "
+        command += "--out-prefix" + " " + "assembled_contigs" + " "
+        command += "-t" + " " + str(os.cpu_count()) + " "
+        command += "-m" + " " + 0.8
         
+        return [command]
 
-    def bowtie2_index_command(self, lib_path):
-        command = self.path_obj.bowtie2_path + "-build" + " "
-        command += lib_path + " "
-
-    
+    def megahit_command_s(self, single_path, export_path):
+        command = self.path_obj.megahit_path + " "
+        command += "-r" + " " + single_path + " ""
+        command += "-o" + " " + export_path + " "
+        command += "--out-prefix" + " " + "assembled_contigs" + " "
+        command += "-t" + " " + str(os.cpu_count()) + " "
+        command += "-m" + " " + 0.8
+        
+        return [command]
 
         

@@ -17,22 +17,24 @@ class dir_structure:
         os.umask(0)
         self.output_dir = out_path
 
-        self.host_dir_top = os.path.join(self.output_dir, path_obj.host_dir)
-        self.host_dir_data = os.path.join(self.host_dir_top, "data")
-        self.host_dir_end  = os.path.join(self.host_dir_top, "export")
+        self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
+        self.host_dir_data  = os.path.join(self.host_dir_top, "data")
+        self.host_dir_end   = os.path.join(self.host_dir_top, "export")
+        self.host_final_p1  = os.path.join(self.host_dir_end, "forward.fastq")
+        self.host_final_p2  = os.path.join(self.host_dir_end, "reverse.fastq")
+        self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
 
         make_folder(self.host_dir_top)
         make_folder(self.host_dir_data)
         make_folder(self.host_dir_end)
         
-        self.adapters_dir_top = os.path.join(self.output_dir, path_obj.trim_dir)
-        self.adapters_dir_data = os.path.join(self.adapters_dir_top, "data")
-        self.adapters_dir_end = os.path.join(self.adapters_dir_top, "export")
+        self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assemble_dir)
+        self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
+        self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
 
-        make_folder(self.adapters_dir_top)
-        make_folder(self.adapters_dir_data)
-        make_folder(self.adapters_dir_end)
-        
+        make_folder(self.assembly_dir_top)
+        make_folder(self.assembly_dir_data)
+        make_folder(self.assembly_dir_end)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -155,8 +157,8 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
-        self.host_dir   = self.assign_value("directory", "host_filter", "str", "1_host_filter")
-        self.trim_dir   = self.assign_value("directory", "trim_adapters", "str", "2_trim_adapters")
+        self.host_dir       = self.assign_value("directory", "host_filter", "str", "1_host_filter")
+        self.assemble_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
         
 
         #-----------------------------------------------------------
