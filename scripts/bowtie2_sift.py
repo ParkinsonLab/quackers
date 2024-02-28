@@ -2,6 +2,10 @@ import os
 import sys
 import re
 
+#----------------------------------------------------
+#Sift through the SAMFILE created from bowtie2
+#Designed to be safe to overwrite the samfile, and leave only alignments that have a score.
+
 def get_match_score(cigar_segment):
     CIGAR = re.split("([MIDNSHPX=])", cigar_segment) # Split CIGAR string into list, placing
     CIGAR = CIGAR[:-1]                      #lop off the empty char artifact from the split
@@ -27,19 +31,26 @@ def get_match_score(cigar_segment):
 
 
 if __name__ == "__main__":
+
     sam_file = sys.argv[1]
     export_file = sys.argv[2]
+    out_list = list()
+
+    with open(sam_file, "r") as sam_in:
+        for line in sam_in:
+            if(line.startswith("@")):
+                continue
+            else:
+                line_split = line.split("\t")
+                read_ID = line_split[0]
+                read_quality = line_split[5]
+                match_score = get_match_score(read_quality)
+                if(match_score  != 0):
+                    #print("quality[", read_quality, "]:", line)
+                    out_line = read_ID + "\t" + str(match_score) + "\n"
+                    #out_file.write(out_line)
+                    out_list.append(out_line)
+                    
     with open(export_file, "w") as out_file:
-        with open(sam_file, "r") as sam_in:
-            for line in sam_in:
-                if(line.startswith("@")):
-                    continue
-                else:
-                    line_split = line.split("\t")
-                    read_ID = line_split[0]
-                    read_quality = line_split[5]
-                    match_score = get_match_score(read_quality)
-                    if(match_score  != 0):
-                        #print("quality[", read_quality, "]:", line)
-                        out_line = read_ID + "\t" + match_score + "\n"
-                        out_file.write(line)
+        for item in out_list:
+            out_file.write(item)

@@ -34,28 +34,50 @@ class q_stage:
         for host_key in list_of_hosts:
             
             s_host_export_path = None
-            p1_host_export_path = None
-            p2_host_export_path = None
+            p_host_export_path = None
+            marker_exists = False
+            
             host_ref_path = path_obj.hosts_path_dict[host_key]
+            
             if(args_pack["op_mode"] == "single"):
-                s_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_s.sam")
+                s_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_s.sam")
+                print("using s host export path:", s_host_export_path)
+                if(os.path.exists(s_host_export_path)):
+                    marker_exists = True
             elif(args_pack["op_mode"] == "paired"):
-                p1_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p1.sam")
-                p2_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_free_p2.sam")
+                p_host_export_path = os.path.join(self.dir_obj.host_dir_data, host_key + "_p.sam")
+                print("using p host export path:", p_host_export_path)
+                if(os.path.exists(p_host_export_path)):
+                    marker_exists = True
+            
 
-
-            ref_basename = os.path.basename(host_ref_path)
-            ref_basename = ref_basename.split(".")[0]
-            command = ""
-            if(self.operating_mode == "single"):
-                command = self.command_obj.clean_reads_single_command(host_ref_path, args_pack["s_path"], s_host_export_path)
+            if(marker_exists):
+                print("skipping Host filter")
             else:
-                command = self.command_obj.clean_reads_paired_command(host_ref_path, args_pack["p1_path"], args_pack["p2_path"], p1_host_export_path, p2_host_export_path)
+                ref_basename = os.path.basename(host_ref_path)
+                ref_basename = ref_basename.split(".")[0]
+                command = ""
+                if(self.operating_mode == "single"):
+                    command = self.command_obj.clean_reads_single_command(host_ref_path, args_pack["s_path"], s_host_export_path)
+                else:
+                    command = self.command_obj.clean_reads_paired_command(host_ref_path, p_host_export_path, args_pack["p1_path"], args_pack["p2_path"])
 
-            script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
-            self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
+                self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
         self.job_control.wait_for_mp_store()
+
+
+        command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, args_pack["s_path"], args_pack["p1_path"], args_pack["p2_path"])
+        script_path = os.path.join(self.dir_obj.host_dir_top, "reconcile.sh")
+        self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+        self.job_control.wait_for_mp_store()
+
+        
+
+
+        #for host_key in list_of_hosts:
+            #post-processing.
 
         #collect everything here
 

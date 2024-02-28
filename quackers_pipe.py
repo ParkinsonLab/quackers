@@ -13,12 +13,13 @@ from argparse import ArgumentParser
 def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
     #step 1: hosts
-        dir_obj = q_path.dir_structure(args_pack["out"], path_obj)
-        mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
-        
-        stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj)
-        stage_obj.host_filter(path_obj, args_pack)
+    dir_obj = q_path.dir_structure(args_pack["out"], path_obj)
+    mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
+    
+    stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj)
+    stage_obj.host_filter(path_obj, args_pack)
 
+    print(dt.today(), "DONE!")
 
 def parse_inputs():
     parser = ArgumentParser(description="Quackers: a metagenomic processing pipeline <and maybe more>. 2024. "

@@ -130,11 +130,14 @@ class path_obj:
         self.ar_path        = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
         self.cdhit_path     = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path     = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
+        self.py_path    = "python3"
         
 
 
-
-
+        #---------------------------------------------------------------------------
+        #Assign paths for scripts
+        self.bowtie2_sift       = self.assign_value("scripts", "bowtie2_sift", "str", "scripts/bowtie2_sift.py")
+        self.bowtie2_reconcile  = self.assign_value("scripts", "bowtie2_reconcile", "str", "scripts/clean_reads_reconcile.py")
 
         #------------------------------------------------------------------
         #Assign singular values for settings
