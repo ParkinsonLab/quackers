@@ -118,7 +118,8 @@ RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz 
 && tar --remove-files -xzvf bbmap.tar.gz
 
 RUN pip install psutil
-RUN apt install -y default-jre
+RUN apt-get update
+RUN apt-get install -y default-jre
 
 RUN wget https://compsysbio.org/quackers_deps/bwa_0.17.7_parkinsonlab.tar.gz -O bwa.tar.gz \
 && mkdir BWA \

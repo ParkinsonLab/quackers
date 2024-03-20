@@ -20,9 +20,11 @@ class dir_structure:
         self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
         self.host_dir_data  = os.path.join(self.host_dir_top, "data")
         self.host_dir_end   = os.path.join(self.host_dir_top, "export")
-        self.host_final_p1  = os.path.join(self.host_dir_end, "forward.fastq")
-        self.host_final_p2  = os.path.join(self.host_dir_end, "reverse.fastq")
+        self.host_final_f  = os.path.join(self.host_dir_end, "forward.fastq")
+        self.host_final_r  = os.path.join(self.host_dir_end, "reverse.fastq")
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
+
+        self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
 
         make_folder(self.host_dir_top)
         make_folder(self.host_dir_data)
@@ -31,9 +33,28 @@ class dir_structure:
         self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assemble_dir)
         self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
         self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
+        self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
+        self.assembly_contigs   = os.path.join(self.assembly_dir_data, "assembled.contigs.fa")
+        self.assembly_bwa       = os.path.join(self.assembly_dir_data, "bwa_out.sam")
+        self.assembly_final_c   = os.path.join(self.assembly_dir_data, "assembled_contigs.fa")
+        self.assembly_final_s   = os.path.join(self.assembly_dir_end, "single.fastq")
+        self.assembly_final_f   = os.path.join(self.assembly_dir_end, "forward.fastq")
+        self.assembly_final_r   = os.path.join(self.assembly_dir_end, "reverse.fastq")
+
+
+
+        self.assembly_mkr        = os.path.join(self.assembly_dir_top, "assembly_megahit")
+        self.assembly_pp_mkr     = os.path.join(self.assembly_dir_top, "assembly_bwa_pp")
+        self.assembly_reconcile_mkr = os.path.join(self.assembly_dir_top, "assembly_reconcile")
+        self.cct_top            = os.path.join(self.output_dir, path_obj.contig_binning)
+        self.cct_data           = os.path.join(self.cct_top, "data")
+        self.cct_bed            = os.path.join(self.cct_data, "contigs.bed")
+        self.cct_cut_contig     = os.path.join(self.cct_data, "cut_contgs.fa")
+        self.contig_h_fixed     = os.path.join(self.cct_data, "assembled_contigs_header_patch.fa")
 
         make_folder(self.assembly_dir_top)
-        make_folder(self.assembly_dir_data)
+        make_folder(self.assembly_dir_temp)
+        #make_folder(self.assembly_dir_data)
         make_folder(self.assembly_dir_end)
 
 #classes that store all tool paths for Quackers.
@@ -71,6 +92,47 @@ class path_obj:
                 return True
             else:
                 sys.exit("no bowtie2 indexed files found")
+
+
+    def check_if_indexed_bwa(self, lib_file):
+        lib_path = os.path.dirname(lib_file)
+
+        print("looking at:", lib_path)
+        if os.path.exists(lib_path):
+            list_of_files = os.listdir(lib_path)
+            ok_count = 0
+            for item in list_of_files:
+                if(item.endswith(".bwt")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        ok_count += 1
+
+                elif(item.endswith(".amb")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        ok_count += 1
+                elif(item.endswith(".ann")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        ok_count += 1
+                elif(item.endswith(".pac")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        ok_count += 1
+                elif(item.endswith(".sa")):
+                    file_path = os.path.join(lib_path, item)
+                    if(os.path.getsize(file_path)>0):
+                        ok_count += 1
+            if(ok_count >= 5):
+                print("LIB is BWA-INDEXED")
+                return True
+            else:
+                print("NOT INDEXED")
+                sys.exit("not enough BWA index files found")
+        else:
+            print("lib path does not exist")
+            sys.exit("not valid library")
+    
     def check_lib_integrity(self, lib_path):
         print("looking at:", lib_path)
         if os.path.exists(lib_path):
@@ -122,17 +184,24 @@ class path_obj:
             print("Config found: using custom args")
         self.output_path = output_folder_path   
 
+
+        
+
         self.tool_install_path = "/quackers_tools"
 
-        self.megahit_path   = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
-        self.samtools_path  = "samtools"
-        self.bowtie2_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
-        self.concoct_path   = "concoct"
-        self.checkm_path    = "checkm"
-        self.ar_path        = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
-        self.cdhit_path     = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
-        self.bbduk_path     = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
-        self.py_path    = "python3"
+        self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
+        self.samtools_path      = "samtools"
+        self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
+        self.bowtie2_index      = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
+        self.concoct_path       = "concoct"
+        self.checkm_path        = "checkm"
+        self.ar_path            = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
+        self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
+        self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
+        self.py_path            = "python3"
+        self.BWA_path           = os.path.join(self.tool_install_path, "BWA", "bwa")
+        self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
+        self.cct_cov_table      = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "concoct_coverage_table.py")
         
 
 
@@ -144,7 +213,8 @@ class path_obj:
         #------------------------------------------------------------------
         #Assign singular values for settings
 
-        self.bypass_log_name    = self.assign_value("settings", "bypass_log_name", "str", "bypass_log.txt")
+        self.bypass_log         = self.assign_value("settings", "bypass_log_name", "str", "bypass_log.txt")
+        self.bypass_log         = os.path.join(self.output_path, self.bypass_log)
         self.operating_mode     = self.assign_value("settings", "operating_mode", "str", "single")
         self.BBMAP_k            = self.assign_value("BBMAP_settings", "k", "int", 25)
         self.BBMAP_hdist        = self.assign_value("BBMAP_settings", "hdist", "int", 1)
@@ -159,13 +229,14 @@ class path_obj:
 
         self.host_dir       = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assemble_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
-        
+        self.contig_binning = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
 
         #-----------------------------------------------------------
         #keep flags
         self.keep_all       = self.assign_value("keep_options", "all", "flag", "yes")
         self.keep_trim      = self.assign_value("keep_options", "trim", "flag", "yes")
         self.keep_host      = self.assign_value("keep_options", "host", "flag", "yes")
+        self.keep_bin       = self.assign_value("keep_options", "bin", "flag", "yes")
         
 
  
@@ -175,6 +246,7 @@ class path_obj:
         #multi-host support:
         #expecting to loop over all hosts.
         self.hosts_path_dict = dict()
+
         if(not "hosts" in self.config):
             print("no hosts section found in Config")
         else:
@@ -183,10 +255,12 @@ class path_obj:
             for host_entry in self.config["hosts"]:
                 #print(host_entry)
                 #self.check_lib_integrity(self.config["hosts"][host_entry])
-                self.check_if_indexed(self.config["hosts"][host_entry])
+                #self.check_if_indexed(self.config["hosts"][host_entry])
+                self.check_if_indexed_bwa(self.config["hosts"][host_entry])
+                
                 self.hosts_path_dict[str(host_entry)] = self.assign_value("hosts", host_entry, "str", "none")
-        
-        
+                print("check host:", "key:", host_entry, "value:", self.hosts_path_dict[str(host_entry)])
+                
         
         if("artifacts" in self.config):
             for artifact_entry in self.config["artifacts"]:

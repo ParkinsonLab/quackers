@@ -14,10 +14,16 @@ def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
     #step 1: hosts
     dir_obj = q_path.dir_structure(args_pack["out"], path_obj)
-    mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
-    
+    mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
-    stage_obj.host_filter(path_obj)
+
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
+        
+        stage_obj.host_filter()
+    
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assemble_dir)):
+        stage_obj.megahit_assembly()
 
     print(dt.today(), "DONE!")
 

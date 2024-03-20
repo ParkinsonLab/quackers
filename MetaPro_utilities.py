@@ -35,10 +35,17 @@ import subprocess as sp
 
 
 class mp_util:
-    def __init__(self, output_folder_path, bypass_log_name):
+    def __init__(self, output_folder_path):#, bypass_log_name):
         self.mp_store = []
         self.output_folder_path = output_folder_path
-        self.bypass_log_name = bypass_log_name
+        #self.bypass_log_name = bypass_log_name
+
+    def check_file_integrity(self, file_path):
+        if(os.path.exists(file_path)):
+            if(os.path.getsize(file_path)> 0):
+                return True
+            
+        return False
 
     def mem_checker(self, threshold):
         #threshold is a percentage for available memory.  
@@ -99,8 +106,8 @@ class mp_util:
                 z.write(os.path.join(root, file))
         z.close()
             
-    def write_to_bypass_log(self, folder_path, message):
-        bypass_log_path = os.path.join(folder_path, self.bypass_log_name)
+    def write_to_bypass_log(self, bypass_log_path, message):
+        #bypass_log_path = os.path.join(folder_path, self.bypass_log_name)
         with open(bypass_log_path, "a") as bypass_log:
             bypass_log.write("\n")
             new_message = message + "\n"
@@ -108,10 +115,12 @@ class mp_util:
             
 
 
-    def check_bypass_log(self, folder_path, message):
+    def check_bypass_log(self, bypass_log_path, message):
+        print("message used:", message)
+        print("path:", bypass_log_path)
         stop_message = "stop_" + str(message)
         bypass_keys_list = list()
-        bypass_log_path = os.path.join(folder_path, self.bypass_log_name)
+        #bypass_log_path = os.path.join(folder_path, self.bypass_log_name)
         if(os.path.exists(bypass_log_path)):
             with open(bypass_log_path, "r") as bypass_log:
                 for line in bypass_log:

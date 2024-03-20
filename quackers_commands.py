@@ -16,7 +16,26 @@ class command_obj:
         self.path_obj = path_obj
         self.op_mode = self.path_obj.operating_mode
 
-    
+    def bwa_index_ref(self, ref_path):
+        command = self.path_obj.BWA_path
+        command += " index " + ref_path
+        return [command]
+
+    def clean_reads_bwa_command_s(self, ref_path, in_path, out_path):
+        command = self.path_obj.BWA_path 
+        command += " mem "
+        command += ref_path + " "
+        command += in_path + " "
+        command += ">" + " " + out_path
+
+
+        sifting_command = self.path_obj.py_path + " "
+        sifting_command += self.path_obj.bowtie2_sift + " "
+        sifting_command += out_path + " "
+        sifting_command += out_path
+
+        return [command + " && " + sifting_command]
+
 
     def clean_reads_command_s(self, ref_path, in_path, out_path):
         #to be called on for each host/adapter cluster
@@ -31,6 +50,21 @@ class command_obj:
         sifting_command += self.path_obj.bowtie2_sift + " "
         sifting_command += out_path + " "
         sifting_command += out_path
+
+        return [command + " && " + sifting_command]
+    
+    def clean_reads_bwa_command_p(self, ref_path, export_path, in1_path, in2_path, ):
+        command = self.path_obj.BWA_path
+        command += " mem "
+        command += ref_path + " "
+        command += in1_path + " "
+        command += in2_path + " "
+        command += ">" + " " + export_path
+
+        sifting_command = self.path_obj.py_path + " "
+        sifting_command += self.path_obj.bowtie2_sift + " "
+        sifting_command += export_path + " "#bowtie2_out_path + " "
+        sifting_command += export_path #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
 
         return [command + " && " + sifting_command]
     
@@ -79,25 +113,73 @@ class command_obj:
         return [command]
 
 
-    def megahit_command_p(self, forward_path, reverse_path, export_path):
+    def megahit_command_p(self, forward_path, reverse_path, export_path, temp_path):
         command = self.path_obj.megahit_path + " "
         command += "-1" + " " + forward_path + " "
         command += "-2" + " " + reverse_path + " "
         command += "-o" + " " + export_path + " "
-        command += "--out-prefix" + " " + "assembled_contigs" + " "
+        command += "--out-prefix" + " " + "assembled" + " "
         command += "-t" + " " + str(os.cpu_count()) + " "
-        command += "-m" + " " + 0.8
-        
-        return [command]
+        command += "-m" + " " + str(0.8) + " "
+        command += "--continue" + " "
+        command += "--tmp-dir" + " " + temp_path
 
-    def megahit_command_s(self, single_path, export_path):
+        make_marker = "touch"  + " "
+        make_marker += self.dir_obj.megahit_mkr
+        
+        return [command + " && " + make_marker]
+
+    def megahit_command_s(self, single_path, export_path, temp_path):
         command = self.path_obj.megahit_path + " "
-        command += "-r" + " " + single_path + " ""
+        command += "-r" + " " + single_path + " "
         command += "-o" + " " + export_path + " "
-        command += "--out-prefix" + " " + "assembled_contigs" + " "
+        command += "--out-prefix" + " " + "assembled" + " "
         command += "-t" + " " + str(os.cpu_count()) + " "
-        command += "-m" + " " + 0.8
+        command += "-m" + " " + str(0.8) + " "
+        command += "--continue" + " "
+        command += "--tmp-dir" + " " + temp_path
+
+        make_marker = "touch"  + " "
+        make_marker += self.dir_obj.megahit_mkr
+        
+        return [command + " && " + make_marker]
+    
+    def megahit_pp_command_s(self, single_path, export_path):
+
+        command = self.path_obj.bowtie2_index + " "
+        command += self.dir_obj.assembly_contigs + " "
+        command += "-c" + " "
+        command += "--threads" + " " + str(os.cpu_count())
+
+
+        scan_for_hits = self.path_obj.bowtie2_path + " "
+        scan_for_hits += "-x" + " " + self.dir_obj.assembly_contigs + " "
+        scan_for_hits += "-U" + " " + single_path + " "
+        scan_for_hits += "-S" + " " + export_path
+
+        return [command + " && " + scan_for_hits]
+
+    def bowtie2_index_command(self, ref_path):
+
+        command = self.path_obj.bowtie2_index + " "
+        command += ref_path + " "
+        command += "-c" + " "
+        command += "--threads" + " " + str(os.cpu_count())
         
         return [command]
+    
+    def concoct_command(self):
 
-        
+        concoct_prep = self.path_obj.cct_cut_up_fasta + " "
+        concoct_prep += self.dir_obj.assembly_contigs + " "
+        concoct_prep += "-c" + " " + "10000" + " "
+        concoct_prep += "-o" + " " + "0"
+
+        concoct_table_prep  = self.path_obj.cct_cov_table + " "
+        concoct_table_prep += self.dir_obj.cct_bed + " "
+        #concoct_table_prep += 
+
+        prep_header = "awk" + " " + "'/^>/ {print $1} !/^>/ {print}'" + " "
+        prep_header += self.dir_obj.assembly_contigs + " "
+        prep_header += ">" + " " 
+        prep_header += self.dir_obj.contig_h_fixed
