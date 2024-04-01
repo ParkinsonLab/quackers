@@ -25,37 +25,57 @@ class dir_structure:
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
+        self.host_bwa_mkr = os.path.join(self.host_dir_top, "host_filter_bwa")
+        self.host_pp_mkr = os.path.join(self.host_dir_top, "host_filter_reconcile")
 
         make_folder(self.host_dir_top)
         make_folder(self.host_dir_data)
         make_folder(self.host_dir_end)
         
-        self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assemble_dir)
+        self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assembly_dir)
         self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
         self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
         self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
         self.assembly_contigs   = os.path.join(self.assembly_dir_data, "assembled.contigs.fa")
-        self.assembly_bwa       = os.path.join(self.assembly_dir_data, "bwa_out.sam")
+        self.assembly_sam       = os.path.join(self.assembly_dir_data, "bwa_out.sam")
+        self.assembly_bam       = os.path.join(self.assembly_dir_data, "bwa_out.bam")
+        self.assembly_s_bam     = os.path.join(self.assembly_dir_data, "bwa_out_sorted.bam") 
         self.assembly_final_c   = os.path.join(self.assembly_dir_data, "assembled_contigs.fa")
         self.assembly_final_s   = os.path.join(self.assembly_dir_end, "single.fastq")
         self.assembly_final_f   = os.path.join(self.assembly_dir_end, "forward.fastq")
         self.assembly_final_r   = os.path.join(self.assembly_dir_end, "reverse.fastq")
 
+        self.assembly_megahit_s_job = os.path.join(self.assembly_dir_top, "assemble_s.sh")
+        self.assembly_megahit_p_job = os.path.join(self.assembly_dir_top, "assemble_p.sh")
+        self.assembly_bwa_idx_job = os.path.join(self.assembly_dir_top, "index_contigs.sh")
+        self.assembly_bwa_job = os.path.join(self.assembly_dir_top, "clean_reads.sh")
+        self.assembly_sam_convert_job = os.path.join(self.assembly_dir_top, "sam_convert.sh")
+
+        self.assembly_mkr                       = os.path.join(self.assembly_dir_top, "assembly_megahit")
+        self.assembly_pp_mkr                    = os.path.join(self.assembly_dir_top, "assembly_bwa_pp")
+        self.assembly_reconcile_mkr             = os.path.join(self.assembly_dir_top, "assembly_reconcile")
+        self.assembly_sam_convert_mkr   = os.path.join(self.assembly_dir_top, "assembly_sam_convert")
 
 
-        self.assembly_mkr        = os.path.join(self.assembly_dir_top, "assembly_megahit")
-        self.assembly_pp_mkr     = os.path.join(self.assembly_dir_top, "assembly_bwa_pp")
-        self.assembly_reconcile_mkr = os.path.join(self.assembly_dir_top, "assembly_reconcile")
-        self.cct_top            = os.path.join(self.output_dir, path_obj.contig_binning)
-        self.cct_data           = os.path.join(self.cct_top, "data")
-        self.cct_bed            = os.path.join(self.cct_data, "contigs.bed")
-        self.cct_cut_contig     = os.path.join(self.cct_data, "cut_contgs.fa")
-        self.contig_h_fixed     = os.path.join(self.cct_data, "assembled_contigs_header_patch.fa")
+        self.cct_dir_top            = os.path.join(self.output_dir, path_obj.binning_dir)
+        self.cct_dir_data           = os.path.join(self.cct_dir_top, "data")
+        self.cct_bed            = os.path.join(self.cct_dir_data, "contigs.bed")
+        self.cct_cut_contig     = os.path.join(self.cct_dir_data, "cut_contgs.fa")
+        self.cct_cov_table      = os.path.join(self.cct_dir_data, "coverage_table.tsv")
+        self.contig_h_fixed     = os.path.join(self.cct_dir_data, "assembled_contigs_header_patch.fa")
+        
+        self.cct_prep_mkr       = os.path.join(self.cct_dir_top, "concoct_prep")
+        self.cct_mkr            = os.path.join(self.cct_dir_top, "concoct_binning")
+
+        self.cct_prep_job_path  = os.path.join(self.cct_dir_top, "cct_prep.sh")
+        self.cct_job_path  = os.path.join(self.cct_dir_top, "cct.sh")
 
         make_folder(self.assembly_dir_top)
         make_folder(self.assembly_dir_temp)
-        #make_folder(self.assembly_dir_data)
         make_folder(self.assembly_dir_end)
+
+        make_folder(self.cct_dir_top)
+        make_folder(self.cct_dir_data)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -188,6 +208,7 @@ class path_obj:
         
 
         self.tool_install_path = "/quackers_tools"
+        self.temp_internal_scripts_path = "/home/billy/storage/quackers"
 
         self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
         self.samtools_path      = "samtools"
@@ -201,7 +222,7 @@ class path_obj:
         self.py_path            = "python3"
         self.BWA_path           = os.path.join(self.tool_install_path, "BWA", "bwa")
         self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
-        self.cct_cov_table      = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "concoct_coverage_table.py")
+        self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
         
 
 
@@ -228,8 +249,8 @@ class path_obj:
         #directory structure
 
         self.host_dir       = self.assign_value("directory", "host_filter", "str", "1_host_filter")
-        self.assemble_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
-        self.contig_binning = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
+        self.assembly_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
+        self.binning_dir    = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
 
         #-----------------------------------------------------------
         #keep flags

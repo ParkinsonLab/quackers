@@ -22,8 +22,11 @@ def run_pipe(path_obj, args_pack):
         
         stage_obj.host_filter()
     
-    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assemble_dir)):
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.megahit_assembly()
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.binning_dir)):
+        stage_obj.concoct_binning()    
 
     print(dt.today(), "DONE!")
 

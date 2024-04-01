@@ -10,10 +10,11 @@ import MetaPro_utilities as mp_util
 class q_stage:
     def __init__(self, out_path, path_obj, dir_obj, args_pack):
         self.path_obj = path_obj
-        self.command_obj = q_com.command_obj(path_obj)
+        self.dir_obj = dir_obj
+        self.command_obj = q_com.command_obj(path_obj, dir_obj)
         self.job_control = mp_util.mp_util(out_path)#, self.path_obj.bypass_log_name)
         self.operating_mode = self.path_obj.operating_mode
-        self.dir_obj = dir_obj
+        
         self.op_mode = args_pack["op_mode"]
 
         self.start_s_path   = args_pack["s_path"]
@@ -65,7 +66,7 @@ class q_stage:
                     if(self.operating_mode == "single"):
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
-                        command = self.command_obj.clean_reads_bwa_command_s(host_ref_path, self.start_s_path, s_host_export_path)
+                        command = self.command_obj.clean_reads_bwa_command_s(host_ref_path, self.start_s_path, s_host_export_path, self.host_pp_)
                     else:
                         #command = self.command_obj.clean_reads_command_p(host_ref_path, p_host_export_path, self.start_f_path, self.start_r_path)
                         command = self.command_obj.clean_reads_bwa_command_p(host_ref_path, p_host_export_path, self.start_f_path, self.start_r_path)
@@ -81,6 +82,8 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
             self.job_control.wait_for_mp_store()
 
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
+
         
 
 
@@ -94,15 +97,14 @@ class q_stage:
             if(self.op_mode == "single"):
                 print("[S] using data from:", self.dir_obj.host_final_s)
                 command = self.command_obj.megahit_command_s(self.dir_obj.host_final_s, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_dir_temp)
-                script_path = os.path.join(self.dir_obj.assembly_dir_top, "assemble_s.sh")
+                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_megahit_s_job, command)
 
             elif(self.op_mode == "paired"):
                 print("[F] using data from:", self.dir_obj.host_final_f)
                 print("[R] using data from:", self.dir_obj.host_final_r)
                 command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_dir_temp)
-                script_path = os.path.join(self.dir_obj.assembly_dir_top, "assemble_p.sh")
-
-            self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_megahit_p_job, command)
+            
             self.job_control.wait_for_mp_store()
         else:
             print(dt.today(), "skipping: megahit")
@@ -114,20 +116,21 @@ class q_stage:
                 #print(dt.today(), "todo: finish megahit PP")
                 #command = self.command_obj.bowtie2_index_command(self.dir_obj.assembly_contigs)
                 command = self.command_obj.bwa_index_ref(self.dir_obj.assembly_contigs)
-                script_path = os.path.join(self.dir_obj.assembly_dir_top, "index_contigs.sh")
-                self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
-
+                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_bwa_idx_job, command)
                 self.job_control.wait_for_mp_store()
 
                 if(self.op_mode == "paired"):
-                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.assembly_bwa, self.dir_obj.host_final_f, self.dir_obj.host_final_r)
+                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_f, self.dir_obj.host_final_r)
                     
 
                 elif(self.op_mode == "single"):
-                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.assembly_bwa, self.dir_obj.host_final_s)
-                script_path = os.path.join(self.dir_obj.assembly_dir_top, "clean_reads.sh")
-                self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_s)
+                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_bwa_job, command)
                 self.job_control.wait_for_mp_store()
+
+        if(not os.path.exists(self.dir_obj.assembly_sam_convert_mkr)):
+            command = self.command_obj.sam_convert_command(self.dir_obj.assembly_sam, self.dir_obj.assembly_bam, self.dir_obj.assembly_s_bam)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_sam_convert_job, command)
 
         if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr)):
 
@@ -137,11 +140,21 @@ class q_stage:
             self.job_control.wait_for_mp_store()
 
         else:
-            print(dt.today(), "WARNING: NO contigs formed from this sample")
+            print(dt.today(), "skipping assembly reconcile")
+            #print(dt.today(), "WARNING: NO contigs formed from this sample")
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
+        
 
-    #def concoct_binning(self):
+    def concoct_binning(self):
+        #print(dt.today(), "temp holder")
         #requires adjusting headers and junk before sending off to concoct.
         #code just removes the dangling portion of the ID in each contig
+        if(not os.path.exists(self.dir_obj.cct_prep_mkr)):
+            command = self.command_obj.concoct_prep_command(self.dir_obj.cct_prep_mkr)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_prep_job_path, command)
+            self.job_control.wait_for_mp_store()
 
-
-
+        if(not os.path.exists(self.dir_obj.cct_mkr)):
+            command = self.command_obj.concoct_command(self.dir_obj.cct_mkr)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_job_path, command)
+            self.job_control.wait_for_mp_store()

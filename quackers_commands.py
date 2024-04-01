@@ -11,9 +11,10 @@ class command_obj:
             os.mkdir(folder_path)
 
 
-    def __init__(self, path_obj):
+    def __init__(self, path_obj, dir_obj):
         #self.path_obj = q_path.path_obj(output_path)
         self.path_obj = path_obj
+        self.dir_obj = dir_obj
         self.op_mode = self.path_obj.operating_mode
 
     def bwa_index_ref(self, ref_path):
@@ -21,7 +22,7 @@ class command_obj:
         command += " index " + ref_path
         return [command]
 
-    def clean_reads_bwa_command_s(self, ref_path, in_path, out_path):
+    def clean_reads_bwa_command_s(self, ref_path, in_path, out_path, marker_path):
         command = self.path_obj.BWA_path 
         command += " mem "
         command += ref_path + " "
@@ -34,10 +35,12 @@ class command_obj:
         sifting_command += out_path + " "
         sifting_command += out_path
 
-        return [command + " && " + sifting_command]
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + sifting_command + " && " + make_marker]
 
 
-    def clean_reads_command_s(self, ref_path, in_path, out_path):
+    def clean_reads_command_s(self, ref_path, in_path, out_path, marker_path):
         #to be called on for each host/adapter cluster
         command = self.path_obj.bowtie2_path
         command += " -x " + ref_path
@@ -51,9 +54,10 @@ class command_obj:
         sifting_command += out_path + " "
         sifting_command += out_path
 
-        return [command + " && " + sifting_command]
+        make_marker = "touch"  + " " + marker_path
+        return [command + " && " + sifting_command + " && " +  make_marker]
     
-    def clean_reads_bwa_command_p(self, ref_path, export_path, in1_path, in2_path, ):
+    def clean_reads_bwa_command_p(self, ref_path, export_path, in1_path, in2_path, marker_path):
         command = self.path_obj.BWA_path
         command += " mem "
         command += ref_path + " "
@@ -66,9 +70,11 @@ class command_obj:
         sifting_command += export_path + " "#bowtie2_out_path + " "
         sifting_command += export_path #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
 
-        return [command + " && " + sifting_command]
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + sifting_command + " && " + make_marker]
     
-    def clean_reads_command_p(self, ref_path, export_path, in1_path, in2_path, ):
+    def clean_reads_command_p(self, ref_path, export_path, in1_path, in2_path, marker_path):
         #to be called on for each host/adapter cluster
         ref_basename = os.path.basename(ref_path)
         #export_path = os.path.dirname(out1_path)
@@ -85,8 +91,8 @@ class command_obj:
         sifting_command += export_path + " "#bowtie2_out_path + " "
         sifting_command += export_path #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
         
-        
-        return [command + " && " + sifting_command]
+        make_marker = "touch" + " " + marker_path
+        return [command + " && " + sifting_command + " && " + make_marker]
 
     def clean_reads_reconcile(self, sam_path, export_path, s_reads, p1_reads, p2_reads):
         command = self.path_obj.py_path + " "
@@ -108,9 +114,9 @@ class command_obj:
         else:
             command += p2_reads
 
+        make_marker = "touch" + " " + self.dir_obj.host_pp_mkr
 
-
-        return [command]
+        return [command + " && " + make_marker]
 
 
     def megahit_command_p(self, forward_path, reverse_path, export_path, temp_path):
@@ -157,7 +163,26 @@ class command_obj:
         scan_for_hits += "-U" + " " + single_path + " "
         scan_for_hits += "-S" + " " + export_path
 
+
         return [command + " && " + scan_for_hits]
+
+    def sam_convert_command(self, sam_path, bam_path, sorted_bam_path):
+        sam_convert = self.path_obj.samtools_path + " "
+        sam_convert += "view" + " " + "-F" + " " + "4" + " " + "-bS" + " "
+        sam_convert += sam_path + " "
+        sam_convert += ">" + " " + bam_path
+
+        sam_sort = self.path_obj.samtools_path + " "
+        sam_sort += "sort" + " "
+        sam_sort += bam_path + " "
+        sam_sort += "-o" + " " + sorted_bam_path
+
+        sam_index = self.path_obj.samtools_path + " "
+        sam_index += "index" + " "
+        sam_index += sorted_bam_path
+
+        return [sam_convert + " && "+ sam_sort + " && " + sam_index]
+
 
     def bowtie2_index_command(self, ref_path):
 
@@ -168,18 +193,42 @@ class command_obj:
         
         return [command]
     
-    def concoct_command(self):
+    def concoct_prep_command(self, marker_path):
 
         concoct_prep = self.path_obj.cct_cut_up_fasta + " "
         concoct_prep += self.dir_obj.assembly_contigs + " "
         concoct_prep += "-c" + " " + "10000" + " "
-        concoct_prep += "-o" + " " + "0"
+        concoct_prep += "-o" + " " + "0" + " "
+        concoct_prep += "--merge_last" + " " 
+        concoct_prep += "-b" + " " + self.dir_obj.cct_bed + " "
+        concoct_prep += ">" + " " + self.dir_obj.cct_cut_contig
 
         concoct_table_prep  = self.path_obj.cct_cov_table + " "
         concoct_table_prep += self.dir_obj.cct_bed + " "
+        concoct_table_prep += self.dir_obj.assembly_s_bam + " "
+        concoct_table_prep +=">" + " " + self.dir_obj.cct_cov_table
         #concoct_table_prep += 
 
         prep_header = "awk" + " " + "'/^>/ {print $1} !/^>/ {print}'" + " "
         prep_header += self.dir_obj.assembly_contigs + " "
         prep_header += ">" + " " 
         prep_header += self.dir_obj.contig_h_fixed
+
+        make_marker = "touch" + " " + marker_path
+
+        return [concoct_prep + " && " + concoct_table_prep + " && " + prep_header + " && " + make_marker]
+    
+
+    def concoct_command(self, marker_path):
+        run_concoct = self.path_obj.concoct_path + " "
+        run_concoct += "--composition_file" + " "
+        run_concoct += self.dir_obj.cct_cut_contig + " "
+        run_concoct += "--coverage_file" + " "
+        run_concoct += self.dir_obj.cct_cov_table + " "
+        run_concoct += "-c" + " " + "400" + " "
+        run_concoct += "-t" + " " + str(os.cpu_count()) + " "
+        run_concoct += "-b" + " " + os.path.join(self.dir_obj.cct_dir_data, "concoct_run")
+
+        make_marker = "touch" + " " + marker_path
+
+        return [run_concoct + " && " + make_marker]
