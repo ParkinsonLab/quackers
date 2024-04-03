@@ -55,11 +55,6 @@ RUN wget https://github.com/hyattpd/Prodigal/archive/refs/tags/v2.6.3.zip -O pro
 WORKDIR Prodigal-2.6.3
 RUN make 
 
-RUN pip install numpy \
-&& pip install matplotlib \
-&& pip install pysam \
-&& pip install checkm-genome
-
 WORKDIR /quackers_tools
 RUN wget https://compsysbio.org/metawrap_mod/metawrap_modules.tar.gz \
 && tar -xzvf metawrap_modules.tar.gz
@@ -118,18 +113,8 @@ RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz 
 && tar --remove-files -xzvf bbmap.tar.gz
 
 RUN pip install psutil
-RUN apt-get update
-RUN apt-get install -y default-jre
+RUN apt install -y default-jre
 
-RUN wget https://compsysbio.org/quackers_deps/bwa_0.17.7_parkinsonlab.tar.gz -O bwa.tar.gz \
-&& mkdir BWA \
-&& tar --remove-files -xzvf bwa.tar.gz \
-&& rm bwa.tar.gz \
-&& cd /quackers_tools/bwa-0.7.17 \
-&& make \
-&& cd /quackers_tools \
-&& mv bwa-0.7.17/bwa BWA/ \
-&& rm -r bwa-0.7.17
 
 WORKDIR /quackers_tools
 RUN rm *.tar.gz \
@@ -138,8 +123,43 @@ RUN rm *.tar.gz \
 
 RUN chmod -R 777 /quackers_tools
 
+RUN apt-get install -y python-profiler
+
+WORKDIR /quackers
+
+RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/MetaPro_utilities.py 
+RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_commands.py
+RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_paths.py
+RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_pipe.py
+RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_stages.py
+
+#WORKDIR /quackers/scripts
+#RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/scripts/0a_Run_bbduk_trimming_filtering.sh
+
+RUN pip install --force-reinstall -v "scikit-learn==1.1.0"
+
+RUN pip install numpy \
+&& pip install matplotlib \
+&& pip install pysam \
+&& pip install checkm-genome
 
 WORKDIR /quackers_tools
+RUN wget https://github.com/matsen/pplacer/releases/download/v1.1.alpha17/pplacer-Linux-v1.1.alpha17.zip -O pplacer.zip \
+&& unzip pplacer.zip \
+&& mv pplacer-Linux-v1.1.alpha17 pplacer \
+&& rm *.zip
+
+
+
+#for linux-only
+ENV CHECKM_DATA_PATH=/home/billy/storage/checkm_data_path
+ENV PATH="${PATH}:/quackers_tools/hmmer/src"
+ENV PATH="${PATH}:/quackers_tools/prodigal"
+ENV PATH="${PATH}:/quackers_tools/pplacer"
+
+
+
+
 
 #/CONCOCT-1.1.0
 CMD ["bash"]

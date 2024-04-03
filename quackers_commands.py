@@ -229,6 +229,28 @@ class command_obj:
         run_concoct += "-t" + " " + str(os.cpu_count()) + " "
         run_concoct += "-b" + " " + os.path.join(self.dir_obj.cct_dir_data, "concoct_run")
 
+        merge_cutup = self.path_obj.cct_merge_cutup + " "
+        merge_cutup += self.dir_obj.cct_clust + " "
+        merge_cutup += ">" + " " 
+        merge_cutup += self.dir_obj.cct_clust_merge
+
+        get_bins = self.path_obj.cct_get_bins + " "
+        get_bins += self.dir_obj.assembly_contigs + " "
+        get_bins += self.dir_obj.cct_clust_merge + " "
+        get_bins += "--output_path" + " "
+        get_bins += self.dir_obj.cct_dir_bins
+
         make_marker = "touch" + " " + marker_path
 
-        return [run_concoct + " && " + make_marker]
+        return [run_concoct + " && " + merge_cutup + " && " + get_bins + " && " + make_marker]
+
+    def checkm_command(self, marker_path):
+        run_checkm = self.path_obj.checkm_path + " "
+        run_checkm += "lineage_wf" + " "
+        run_checkm += self.dir_obj.cct_dir_bins + " "
+        run_checkm += "-x" + " " + ".fa" + " " + "-t" + " " + str(os.cpu_count()) + " "
+        run_checkm += self.dir_obj.cct_dir_checkm
+
+        make_marker = "touch" + " " + marker_path
+
+        return [run_checkm + " && " +  make_marker]

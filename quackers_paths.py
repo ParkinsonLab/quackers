@@ -59,16 +59,25 @@ class dir_structure:
 
         self.cct_dir_top            = os.path.join(self.output_dir, path_obj.binning_dir)
         self.cct_dir_data           = os.path.join(self.cct_dir_top, "data")
+        self.cct_dir_checkm     = os.path.join(self.cct_dir_top, "checkm_data")
+        self.cct_dir_bins       = os.path.join(self.cct_dir_top, "bins")
+        self.cct_dir_export     = os.path.join(self.cct_dir_top, "export")
         self.cct_bed            = os.path.join(self.cct_dir_data, "contigs.bed")
         self.cct_cut_contig     = os.path.join(self.cct_dir_data, "cut_contgs.fa")
         self.cct_cov_table      = os.path.join(self.cct_dir_data, "coverage_table.tsv")
         self.contig_h_fixed     = os.path.join(self.cct_dir_data, "assembled_contigs_header_patch.fa")
+        self.cct_clust          = os.path.join(self.cct_dir_data, "concoct_run_clustering_gt1000.csv")
+        self.cct_clust_merge    = os.path.join(self.cct_dir_data, "concoct_merged_cluster.csv")
         
         self.cct_prep_mkr       = os.path.join(self.cct_dir_top, "concoct_prep")
         self.cct_mkr            = os.path.join(self.cct_dir_top, "concoct_binning")
+        self.cct_checkm_mkr     = os.path.join(self.cct_dir_top, "checkm")
 
         self.cct_prep_job_path  = os.path.join(self.cct_dir_top, "cct_prep.sh")
         self.cct_job_path  = os.path.join(self.cct_dir_top, "cct.sh")
+        self.cct_checkm_job_path = os.path.join(self.cct_dir_top, "cct_checkm.sh")
+
+        
 
         make_folder(self.assembly_dir_top)
         make_folder(self.assembly_dir_temp)
@@ -76,6 +85,9 @@ class dir_structure:
 
         make_folder(self.cct_dir_top)
         make_folder(self.cct_dir_data)
+        make_folder(self.cct_dir_bins)
+        make_folder(self.cct_dir_checkm)
+        make_folder(self.cct_dir_export)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -223,8 +235,8 @@ class path_obj:
         self.BWA_path           = os.path.join(self.tool_install_path, "BWA", "bwa")
         self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
         self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
-        
-
+        self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
+        self.cct_get_bins       = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "extract_fasta_bins.py")
 
         #---------------------------------------------------------------------------
         #Assign paths for scripts

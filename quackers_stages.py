@@ -158,3 +158,12 @@ class q_stage:
             command = self.command_obj.concoct_command(self.dir_obj.cct_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_job_path, command)
             self.job_control.wait_for_mp_store()
+
+        if(not os.path.exists(self.dir_obj.cct_checkm_mkr)):
+            print(dt.today(), "running checkm")
+            command = self.command_obj.checkm_command(self.dir_obj.cct_checkm_mkr)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_checkm_job_path, command)
+            self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "bypassing checkm")
+            print(self.dir_obj.cct_checkm_mkr)
