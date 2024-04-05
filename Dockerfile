@@ -152,11 +152,18 @@ RUN wget https://github.com/matsen/pplacer/releases/download/v1.1.alpha17/pplace
 
 
 #for linux-only
-ENV CHECKM_DATA_PATH=/home/billy/storage/checkm_data_path
+WORKDIR /quackers_tools/checkm_data
+RUN wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz \
+&& tar -xzvf checkm_data_2015_01_16.tar.gz \
+&& rm *.tar.gz
+
+ENV CHECKM_DATA_PATH=/quackers_tools/checkm_data
 ENV PATH="${PATH}:/quackers_tools/hmmer/src"
 ENV PATH="${PATH}:/quackers_tools/prodigal"
 ENV PATH="${PATH}:/quackers_tools/pplacer"
 
+WORKDIR /quackers_tools
+RUN apt-get install dos2unix
 
 
 
