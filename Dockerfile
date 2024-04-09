@@ -113,7 +113,7 @@ RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz 
 && tar --remove-files -xzvf bbmap.tar.gz
 
 RUN pip install psutil
-RUN apt install -y default-jre
+RUN apt-get update && apt install -y default-jre
 
 
 WORKDIR /quackers_tools
@@ -164,9 +164,27 @@ ENV PATH="${PATH}:/quackers_tools/pplacer"
 
 WORKDIR /quackers_tools
 RUN apt-get install dos2unix
+RUN apt-get install -y nano
+RUN wget https://github.com/bxlab/metaWRAP/archive/refs/tags/v1.3.tar.gz \
+&& tar -xzvf v1.3.tar.gz \
+&& rm *.tar.gz
 
+ENV PATH="${PATH}:/quackers_tools/metaWRAP-1.3/bin"
 
+RUN apt-get install -y git-all \
+&& git clone https://github.com/lh3/bwa.git \
+&& cd bwa \
+&& make
+ENV PATH="${PATH}:/quackers_tools/bwa"
 
+WORKDIR /quackers_tools
+RUN wget https://bitbucket.org/berkeleylab/metabat/get/37db58fe3fda88f118dfdf18899d953eeac8e852.zip -O metabat.zip \
+&& unzip metabat.zip \
+&& mv berkeleylab-metabat-37db58fe3fda metabat \
+&& cd metabat/src
+
+#RUN git clone https://bitbucket.org/berkeleylab/metabat.git #\
+#&& git checkout v2.12.1
 
 #/CONCOCT-1.1.0
 CMD ["bash"]

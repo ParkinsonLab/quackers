@@ -254,3 +254,43 @@ class command_obj:
         make_marker = "touch" + " " + marker_path
 
         return [run_checkm + " && " +  make_marker]
+    
+    def metawrap_bin_command(self, op_mode, hosts_bypassed, marker_path):
+
+        #metawrap needs specifically-named files for paired
+        change_f_name = "cp" + " "
+        change_r_name = "cp" + " "
+        change_s_name = "cp" + " "
+        
+        if(hosts_bypassed):
+            change_f_name += self.dir_obj.start_f + " " + self.dir_obj.mwrap_prep_f
+            change_r_name += self.dir_obj.start_r + " " + self.dir_obj.mwrap_prep_r
+            change_s_name += self.dir_obj.start_s + " " + self.dir_obj.mwrap_prep_s
+        else:
+            change_f_name += self.dir_obj.host_final_f + " " + self.dir_obj.mwrap_prep_f
+            change_r_name += self.dir_obj.host_final_r + " " + self.dir_obj.mwrap_prep_r
+            change_f_name += self.dir_obj.host_final_s + " " + self.dir_obj.mwrap_prep_s
+        
+        
+        metawrap_bin = self.path_obj.mwrap_bin_tool + " "
+        metawrap_bin += "-o" + " " + self.dir_obj.mwrap_bin_dir_mbat + " "
+        metawrap_bin += "-t" + " " + str(os.cpu_count()) + " "
+        metawrap_bin += "-a" + " " + self.dir_obj.assembly_contigs + " "
+        
+        if(op_mode == "single"):
+            metawrap_bin += "--metabat2" + " " + "--single-end" + " "
+            if(hosts_bypassed):
+                metawrap_bin += self.dir_obj.start_s
+            else:
+                metawrap_bin += self.dir_obj.host_final_s
+
+        else:
+            metawrap_bin += "--metabat2" + " "
+            metawrap_bin += self.dir_obj.mwrap_prep_f + " " + self.dir_obj.mwrap_prep_r
+            
+        make_marker = "touch" + " " + marker_path
+
+        if(op_mode == "paired"):
+            return [change_f_name + " && " + change_r_name + " && " + metawrap_bin + " && " + make_marker]
+        else:
+            return [change_s_name + " && "  + metawrap_bin + " && " + make_marker]

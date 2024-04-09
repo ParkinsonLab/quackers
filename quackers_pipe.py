@@ -13,10 +13,11 @@ from argparse import ArgumentParser
 def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
     #step 1: hosts
-    dir_obj = q_path.dir_structure(args_pack["out"], path_obj)
+    dir_obj = q_path.dir_structure(args_pack, path_obj)
     mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
 
+    stage_obj.check_host_bypass()
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
         
@@ -25,9 +26,11 @@ def run_pipe(path_obj, args_pack):
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.megahit_assembly()
 
-    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.binning_dir)):
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
         stage_obj.concoct_binning()    
 
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_dir)):
+        stage_obj.metawrap_binning()
     print(dt.today(), "DONE!")
 
 def parse_inputs():
@@ -83,10 +86,17 @@ def parse_inputs():
     args_pack = dict()
     args_pack["out"] = output_dir
     args_pack["config"] = config_path
-    args_pack["p1_path"] = p1_path
+    args_pack["p1_path"] = p1_path 
     args_pack["p2_path"] = p2_path
     args_pack["s_path"] = s_path
     args_pack["op_mode"] = operating_mode
+
+    if(args_pack["s_path"] is None):
+        args_pack["s_path"] = "empty"
+    if(args_pack["p1_path"] is None):
+        args_pack["p1_path"] = "empty"
+    if(args_pack["p2_path"] is None):
+        args_pack["p2_path"] = "empty"
 
     print("S:", args_pack["s_path"])
     print("P1:", args_pack["p1_path"])

@@ -13,9 +13,13 @@ def make_folder(dir):
         os.makedirs(dir, mode=0o777, exist_ok=False)
 
 class dir_structure:
-    def __init__(self, out_path, path_obj):
+    def __init__(self, args_pack, path_obj):
         os.umask(0)
-        self.output_dir = out_path
+        self.output_dir = args_pack["out"]
+
+        self.start_f = args_pack["p1_path"] 
+        self.start_r = args_pack["p2_path"]
+        self.start_s = args_pack["s_path"]
 
         self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
         self.host_dir_data  = os.path.join(self.host_dir_top, "data")
@@ -57,7 +61,7 @@ class dir_structure:
         self.assembly_sam_convert_mkr   = os.path.join(self.assembly_dir_top, "assembly_sam_convert")
 
 
-        self.cct_dir_top            = os.path.join(self.output_dir, path_obj.binning_dir)
+        self.cct_dir_top            = os.path.join(self.output_dir, path_obj.cct_bin_dir)
         self.cct_dir_data           = os.path.join(self.cct_dir_top, "data")
         self.cct_dir_checkm     = os.path.join(self.cct_dir_top, "checkm_data")
         self.cct_dir_bins       = os.path.join(self.cct_dir_top, "bins")
@@ -77,6 +81,19 @@ class dir_structure:
         self.cct_job_path  = os.path.join(self.cct_dir_top, "cct.sh")
         self.cct_checkm_job_path = os.path.join(self.cct_dir_top, "cct_checkm.sh")
 
+        self.mwrap_bin_dir_top = os.path.join(self.output_dir, path_obj.mwrap_bin_dir)
+        self.mwrap_bin_dir_data = os.path.join(self.mwrap_bin_dir_top, "data")
+        self.mwrap_bin_dir_prep = os.path.join(self.mwrap_bin_dir_top, "prep")
+        self.mwrap_bin_dir_mbat = os.path.join(self.mwrap_bin_dir_top, "metabat")
+        self.mwrap_bin_dir_export = os.path.join(self.mwrap_bin_dir_top, "export")
+        self.mwrap_fastq = os.path.join(self.mwrap_bin_dir_export, "mwrap_mbat_bin_contigs.fastq")
+        self.mwrap_prep_f = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_1.fastq")
+        self.mwrap_prep_r = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_2.fastq")
+        self.mwrap_prep_s = os.path.join(self.mwrap_bin_dir_prep, "single_1.fastq")
+
+        self.mwrap_mkr = os.path.join(self.mwrap_bin_dir_top, "mwrap_mbat")
+        self.mwrap_job = os.path.join(self.mwrap_bin_dir_top, "mwrap.sh")
+
         
 
         make_folder(self.assembly_dir_top)
@@ -88,6 +105,12 @@ class dir_structure:
         make_folder(self.cct_dir_bins)
         make_folder(self.cct_dir_checkm)
         make_folder(self.cct_dir_export)
+
+        make_folder(self.mwrap_bin_dir_top)
+        make_folder(self.mwrap_bin_dir_data)
+        make_folder(self.mwrap_bin_dir_prep)
+        make_folder(self.mwrap_bin_dir_mbat)
+        make_folder(self.mwrap_bin_dir_export)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -221,6 +244,7 @@ class path_obj:
 
         self.tool_install_path = "/quackers_tools"
         self.temp_internal_scripts_path = "/home/billy/storage/quackers"
+        #self.mwrap_temp_path = os.path.join(self.temp_internal_scripts_path, "modded_scripts")
 
         self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
         self.samtools_path      = "samtools"
@@ -233,6 +257,10 @@ class path_obj:
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
         self.py_path            = "python3"
         self.BWA_path           = os.path.join(self.tool_install_path, "BWA", "bwa")
+        #self.mwrap_bin_tool     = os.path.join(self.mwrap_temp_path, "binning.sh")
+        #print("TEST")
+        #time.sleep(10)
+        self.mwrap_bin_tool     = "metawrap binning"
         self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
         self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
         self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
@@ -262,7 +290,8 @@ class path_obj:
 
         self.host_dir       = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assembly_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
-        self.binning_dir    = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
+        self.cct_bin_dir    = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
+        self.mwrap_bin_dir  = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
 
         #-----------------------------------------------------------
         #keep flags

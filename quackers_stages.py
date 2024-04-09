@@ -21,6 +21,22 @@ class q_stage:
         self.start_f_path  = args_pack["p1_path"]
         self.start_r_path  = args_pack["p2_path"]
 
+        self.hosts_bypassed = False
+
+    def check_host_bypass(self):
+        #checks if there are hosts. if not, trigger the bypass
+        list_of_hosts = sorted(self.path_obj.config["hosts"].keys())
+
+        if(len(list_of_hosts) == 0):
+            #skip host-cleaning. move data
+            self.hosts_bypassed = True 
+            print(dt.today(), "no hosts used: bypassing host filter")
+            if(self.op_mode == "single"):
+                self.dir_obj.host_final_s = self.start_s_path
+            elif(self.op_mode == "paired"):
+                self.dir_obj.host_final_f = self.start_f_path
+                self.dir_obj.host_final_r = self.start_r_path
+
 
     def host_filter(self):
         #launch for each new ref path
@@ -28,7 +44,8 @@ class q_stage:
         list_of_hosts = sorted(self.path_obj.config["hosts"].keys())
 
         if(len(list_of_hosts) == 0):
-            #skip host-cleaning. move data 
+            #skip host-cleaning. move data
+            self.hosts_bypassed = True 
             print(dt.today(), "no hosts used: bypassing host filter")
             if(self.op_mode == "single"):
                 self.dir_obj.host_final_s = self.start_s_path
@@ -167,3 +184,10 @@ class q_stage:
         else:
             print(dt.today(), "bypassing checkm")
             print(self.dir_obj.cct_checkm_mkr)
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
+            
+    def metawrap_binning(self):
+        print(dt.today(), "running metawrap-binning")
+        command = self.command_obj.metawrap_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mwrap_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_job, command)
+        self.job_control.wait_for_mp_store()
