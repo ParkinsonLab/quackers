@@ -186,5 +186,26 @@ RUN wget https://bitbucket.org/berkeleylab/metabat/get/37db58fe3fda88f118dfdf188
 #RUN git clone https://bitbucket.org/berkeleylab/metabat.git #\
 #&& git checkout v2.12.1
 
+
+ENV CONDA_DIR="/opt/conda"
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda
+# Put conda in path so we can use conda activate
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+RUN /bin/bash -c "conda config --add channels defaults \
+&& conda config --add channels conda-forge \
+&& conda config --add channels bioconda \
+&& conda config --add channels ursky \
+&& conda create -y --name metawrap-env --channel ursky metawrap-mg=1.3.2 \
+&& conda init"
+
+
+RUN /bin/bash -c "source activate metawrap-env \
+&& conda install -y blas=2.5=mkl \
+&& conda install -y numpy \
+&& conda install -y Cython"
+
+
 #/CONCOCT-1.1.0
 CMD ["bash"]
