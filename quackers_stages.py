@@ -137,11 +137,11 @@ class q_stage:
                 self.job_control.wait_for_mp_store()
 
                 if(self.op_mode == "paired"):
-                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_f, self.dir_obj.host_final_r)
+                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_pp_mkr)
                     
 
                 elif(self.op_mode == "single"):
-                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_s)
+                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_s, self.dir_obj.assembly_pp_mkr)
                 self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_bwa_job, command)
                 self.job_control.wait_for_mp_store()
 
@@ -191,3 +191,18 @@ class q_stage:
         command = self.command_obj.metawrap_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mwrap_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_job, command)
         self.job_control.wait_for_mp_store()
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_dir)
+
+    def metawrap_bin_refine(self):
+        print("running metawrap bin_refinement")
+        command = self.command_obj.metawrap_bin_refinement_command(self.dir_obj.mwrap_bin_r_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_bin_r_job, command)
+        self.job_control.wait_for_mp_store()
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_r_dir)
+
+    def gtdbtk_classify(self):
+        print("running GTDB-tk classify")
+        command = self.command_obj.gtdbtk_command(self.dir_obj.gtdbtk_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.gtdbtk_job, command)
+        self.job_control.wait_for_mp_store()
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)

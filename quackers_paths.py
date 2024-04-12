@@ -90,9 +90,22 @@ class dir_structure:
         self.mwrap_prep_f = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_1.fastq")
         self.mwrap_prep_r = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_2.fastq")
         self.mwrap_prep_s = os.path.join(self.mwrap_bin_dir_prep, "single_1.fastq")
-
+        self.mwrap_bins_dir = os.path.join(self.mwrap_bin_dir_mbat, "metabat2_bins")
         self.mwrap_mkr = os.path.join(self.mwrap_bin_dir_top, "mwrap_mbat")
         self.mwrap_job = os.path.join(self.mwrap_bin_dir_top, "mwrap.sh")
+
+        self.mwrap_bin_r_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_bin_r_dir)
+        self.mwrap_bin_r_dir_data   = os.path.join(self.mwrap_bin_r_dir_top, "data")
+        
+
+        self.mwrap_bin_r_job = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r.sh")
+        self.mwrap_bin_r_mkr = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r")
+
+        self.gtdbtk_dir_top = os.path.join(self.output_dir, path_obj.gtdbtk_class_dir)
+        self.gtdbtk_dir_data = os.path.join(self.gtdbtk_dir_top, "data")
+        self.gtdbtk_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify.sh")
+        self.gtdbtk_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_run")
+
 
         
 
@@ -111,6 +124,9 @@ class dir_structure:
         make_folder(self.mwrap_bin_dir_prep)
         make_folder(self.mwrap_bin_dir_mbat)
         make_folder(self.mwrap_bin_dir_export)
+
+        make_folder(self.mwrap_bin_r_dir_top)
+        make_folder(self.mwrap_bin_r_dir_data)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -256,15 +272,18 @@ class path_obj:
         self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
         self.py_path            = "python3"
-        self.BWA_path           = os.path.join(self.tool_install_path, "BWA", "bwa")
+        self.BWA_path           = "bwa"
         #self.mwrap_bin_tool     = os.path.join(self.mwrap_temp_path, "binning.sh")
         #print("TEST")
         #time.sleep(10)
+        self.gtdbtk_path        = "gtdbtk"
         self.mwrap_bin_tool     = "metawrap binning"
+        self.mwrap_bin_r_tool   = "metawrap bin_refinement"
         self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
         self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
         self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
         self.cct_get_bins       = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "extract_fasta_bins.py")
+
 
         #---------------------------------------------------------------------------
         #Assign paths for scripts
@@ -288,10 +307,12 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
-        self.host_dir       = self.assign_value("directory", "host_filter", "str", "1_host_filter")
-        self.assembly_dir   = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
-        self.cct_bin_dir    = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
-        self.mwrap_bin_dir  = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
+        self.host_dir           = self.assign_value("directory", "host_filter", "str", "1_host_filter")
+        self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
+        self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
+        self.mwrap_bin_dir      = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
+        self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "5_mwrap_bin_r")
+        self.gtdbtk_class_dir   = self.assign_value("directory", "gtdbtk_classify", "str", "6_gtdbtk_classify")
 
         #-----------------------------------------------------------
         #keep flags

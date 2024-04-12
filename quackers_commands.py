@@ -131,7 +131,7 @@ class command_obj:
         command += "--tmp-dir" + " " + temp_path
 
         make_marker = "touch"  + " "
-        make_marker += self.dir_obj.megahit_mkr
+        make_marker += self.dir_obj.assembly_mkr
         
         return [command + " && " + make_marker]
 
@@ -146,7 +146,7 @@ class command_obj:
         command += "--tmp-dir" + " " + temp_path
 
         make_marker = "touch"  + " "
-        make_marker += self.dir_obj.megahit_mkr
+        make_marker += self.dir_obj.assembly_mkr
         
         return [command + " && " + make_marker]
     
@@ -294,3 +294,27 @@ class command_obj:
             return [change_f_name + " && " + change_r_name + " && " + metawrap_bin + " && " + make_marker]
         else:
             return [change_s_name + " && "  + metawrap_bin + " && " + make_marker]
+        
+    def metawrap_bin_refinement_command(self, marker_path):
+        refine = self.path_obj.mwrap_bin_r_tool + " "
+        refine += "-o" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
+        refine += "-t" + " " + str(os.cpu_count()) + " "
+        refine += "-A" + " " + self.dir_obj.mwrap_bins_dir + " "
+        refine += "-c" + " " + str(50) + " "
+        refine += "-x" + " " + str(10)
+
+        make_marker = "touch" + " " + marker_path
+
+        return [refine + " && " + marker_path]
+    
+    def gtdbtk_command(self, marker_path):
+        classify = self.path_obj.gtdbtk_path + " " + "classify_wf" + " "
+        classify += "--skip_ani_screen" + " "
+        classify += "--genome_dir" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
+        classify += "--extension" + " " + "fa" + " "
+        classify += "--out_dir" + " " + self.dir_obj.gtdbtk_dir_data + " "
+        classify += "--cpus" + " " + str(os.cpu_count())
+
+        make_marker = "touch" + " " + marker_path
+
+        return [classify + " && " + make_marker]

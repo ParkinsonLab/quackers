@@ -31,6 +31,13 @@ def run_pipe(path_obj, args_pack):
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_dir)):
         stage_obj.metawrap_binning()
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_r_dir)):
+        stage_obj.metawrap_bin_refine()
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.gtdbtk_class_dir)):
+        stage_obj.gtdbtk_classify()
+    
     print(dt.today(), "DONE!")
 
 def parse_inputs():
@@ -101,6 +108,7 @@ def parse_inputs():
     print("S:", args_pack["s_path"])
     print("P1:", args_pack["p1_path"])
     print("P2:", args_pack["p2_path"])
+
     
 
     return args_pack

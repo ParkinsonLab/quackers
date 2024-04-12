@@ -193,18 +193,23 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 # Put conda in path so we can use conda activate
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-RUN /bin/bash -c "conda config --add channels defaults \
+RUN conda config --add channels defaults \
 && conda config --add channels conda-forge \
 && conda config --add channels bioconda \
-&& conda config --add channels ursky \
-&& conda create -y --name metawrap-env --channel ursky metawrap-mg=1.3.2 \
-&& conda init"
+&& conda config --add channels ursky
+
+RUN conda install -y metabat2 \
+&& conda install -y psutil \
+&& conda install -y biopython
+
+RUN conda install -y pandas
+ENV PATH="${PATH}:/quackers_tools/bowtie2"
 
 
-RUN /bin/bash -c "source activate metawrap-env \
-&& conda install -y blas=2.5=mkl \
-&& conda install -y numpy \
-&& conda install -y Cython"
+WORKDIR /quackers_tools/gtdbtk
+RUN python3 setup.py install
+
+
 
 
 #/CONCOCT-1.1.0
