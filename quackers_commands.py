@@ -304,8 +304,7 @@ class command_obj:
         refine += "-x" + " " + str(10)
 
         make_marker = "touch" + " " + marker_path
-
-        return [refine + " && " + marker_path]
+        return [refine + " && " + make_marker]
     
     def gtdbtk_command(self, marker_path):
         classify = self.path_obj.gtdbtk_path + " " + "classify_wf" + " "
@@ -318,3 +317,13 @@ class command_obj:
         make_marker = "touch" + " " + marker_path
 
         return [classify + " && " + make_marker]
+    
+    def metawrap_quantify_command(self, marker_path):
+        quant = self.path_obj.mwrap_quant_tool + " "
+        quant += "-b" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
+        quant += "-o" + " " + self.dir_obj.mwrap_quant_dir_data + " "
+        quant += "-a" + " " + self.dir_obj.assemble_contigs + " "
+        quant += "-t" + " " + str(os.cpu_count()) 
+        make_marker = "touch" + " " + marker_path
+
+        return [quant + " && " + make_marker]

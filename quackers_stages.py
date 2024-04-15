@@ -204,5 +204,10 @@ class q_stage:
         print("running GTDB-tk classify")
         command = self.command_obj.gtdbtk_command(self.dir_obj.gtdbtk_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.gtdbtk_job, command)
-        self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+        #self.job_control.wait_for_mp_store()
+        #self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+
+    def metawrap_quant(self):
+        print(dt.today(), "running metawrap quant bin")
+        command = self.command_obj.metawrap_quantify_command(self.dir_obj.mwrap_quant_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_quant_job, command)

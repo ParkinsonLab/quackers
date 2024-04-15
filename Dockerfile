@@ -209,6 +209,36 @@ ENV PATH="${PATH}:/quackers_tools/bowtie2"
 WORKDIR /quackers_tools/gtdbtk
 RUN python3 setup.py install
 
+#WORKDIR /quackers_tools/gtdbtk_data
+#RUN wget https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_data.tar.gz \
+#&& tar -xzvf gtdbtk_data.tar.gz
+ENV GTDBTK_DATA_PATH="/quackers_tools/gtdbtk_data/release214"
+
+WORKDIR /quackers_tools/fastANI
+RUN wget https://github.com/ParBLiSS/FastANI/releases/download/v1.34/fastANI-linux64-v1.34.zip \
+&& unzip fastANI-linux64-v1.34.zip \
+&& rm *.zip
+
+WORKDIR /quackers_tools/fasttree
+RUN wget http://www.microbesonline.org/fasttree/FastTree \
+&& chmod 777 FastTree
+
+WORKDIR /quackers_tools/mash
+RUN wget https://github.com/marbl/Mash/releases/download/v2.3/mash-Linux64-v2.3.tar \
+&& tar -xvf mash-Linux64-v2.3.tar \
+&& mv mash-Linux64-v2.3/* . \
+&& rm *.tar
+
+ENV PATH="${PATH}:/quackers_tools/fastANI"
+ENV PATH="${PATH}:/quackers_tools/fasttree"
+ENV PATH="${PATH}:/quackers_tools/mash"
+
+
+
+
+
+#RUN rm *.tar.gz
+
 
 
 

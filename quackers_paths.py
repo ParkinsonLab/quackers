@@ -96,8 +96,6 @@ class dir_structure:
 
         self.mwrap_bin_r_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_bin_r_dir)
         self.mwrap_bin_r_dir_data   = os.path.join(self.mwrap_bin_r_dir_top, "data")
-        
-
         self.mwrap_bin_r_job = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r.sh")
         self.mwrap_bin_r_mkr = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r")
 
@@ -105,6 +103,11 @@ class dir_structure:
         self.gtdbtk_dir_data = os.path.join(self.gtdbtk_dir_top, "data")
         self.gtdbtk_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify.sh")
         self.gtdbtk_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_run")
+
+        self.mwrap_quant_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_quant_dir)
+        self.mwrap_quant_dir_data   = os.path.join(self.mwrap_quant_dir_top, "data")
+        self.mwrap_quant_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant.sh")
+        self.mwrap_quant_mkr = os.path.join(self.mwrap_quant_dir_top, "")
 
 
         
@@ -127,6 +130,12 @@ class dir_structure:
 
         make_folder(self.mwrap_bin_r_dir_top)
         make_folder(self.mwrap_bin_r_dir_data)
+
+        make_folder(self.gtdbtk_dir_top)
+        make_folder(self.gtdbtk_dir_data)
+
+        make_folder(self.mwrap_quant_dir_top)
+        make_folder(self.mwrap_quant_dir_data)
 
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
@@ -279,6 +288,7 @@ class path_obj:
         self.gtdbtk_path        = "gtdbtk"
         self.mwrap_bin_tool     = "metawrap binning"
         self.mwrap_bin_r_tool   = "metawrap bin_refinement"
+        self.mwrap_quant_tool   = "metawrap quant_bins"
         self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
         self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
         self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
@@ -313,6 +323,7 @@ class path_obj:
         self.mwrap_bin_dir      = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
         self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "5_mwrap_bin_r")
         self.gtdbtk_class_dir   = self.assign_value("directory", "gtdbtk_classify", "str", "6_gtdbtk_classify")
+        self.mwrap_quant_dir    = self.assign_value("directory", "metawrap_quant_bin", "str", "7_metawrap_quant_bins")
 
         #-----------------------------------------------------------
         #keep flags
