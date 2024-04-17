@@ -27,6 +27,8 @@ class dir_structure:
         self.host_final_f  = os.path.join(self.host_dir_end, "forward.fastq")
         self.host_final_r  = os.path.join(self.host_dir_end, "reverse.fastq")
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
+        self.host_bwa_sam   = os.path.join(self.host_dir_data, "bwa_sam.out")
+        self.host_new_sam   = os.path.join(self.host_dir_data, "new_sam.out")
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
         self.host_bwa_mkr = os.path.join(self.host_dir_top, "host_filter_bwa")
@@ -42,6 +44,7 @@ class dir_structure:
         self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
         self.assembly_contigs   = os.path.join(self.assembly_dir_data, "assembled.contigs.fa")
         self.assembly_sam       = os.path.join(self.assembly_dir_data, "bwa_out.sam")
+        self.assembly_new_sam   = os.path.join(self.assembly_dir_data, "score_bwa.out")
         self.assembly_bam       = os.path.join(self.assembly_dir_data, "bwa_out.bam")
         self.assembly_s_bam     = os.path.join(self.assembly_dir_data, "bwa_out_sorted.bam") 
         self.assembly_final_c   = os.path.join(self.assembly_dir_data, "assembled_contigs.fa")

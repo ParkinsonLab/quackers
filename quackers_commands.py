@@ -22,53 +22,53 @@ class command_obj:
         command += " index " + ref_path
         return [command]
 
-    def clean_reads_bwa_command_s(self, ref_path, in_path, out_path, marker_path):
+    def clean_reads_bwa_command_s(self, ref_path, in_path, marker_path):
         command = self.path_obj.BWA_path 
         command += " mem "
         command += ref_path + " "
         command += in_path + " "
-        command += ">" + " " + out_path
+        command += ">" + " " + self.dir_obj.assembly_bwa_sam
 
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += out_path + " "
-        sifting_command += out_path
+        sifting_command += self.dir_obj.assembly_bwa_sam + " "
+        sifting_command += self.dir_obj.assembly_new_sam
 
         make_marker = "touch" + " " + marker_path
 
         return [command + " && " + sifting_command + " && " + make_marker]
 
 
-    def clean_reads_command_s(self, ref_path, in_path, out_path, marker_path):
+    def clean_reads_command_s(self, ref_path, in_path, marker_path):
         #to be called on for each host/adapter cluster
         command = self.path_obj.bowtie2_path
         command += " -x " + ref_path
         command += " -q "
         command += " -U " + in_path 
-        command += " -S " + out_path
+        command += " -S " + self.dir_obj.assembly_bwa_sam
         
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += out_path + " "
-        sifting_command += out_path
+        sifting_command += self.dir_obj.assembly_bwa_sam + " "
+        sifting_command += self.dir_obj.assembly_new_sam
 
         make_marker = "touch"  + " " + marker_path
         return [command + " && " + sifting_command + " && " +  make_marker]
     
-    def clean_reads_bwa_command_p(self, ref_path, export_path, in1_path, in2_path, marker_path):
+    def clean_reads_bwa_command_p(self, ref_path, in1_path, in2_path, marker_path):
         command = self.path_obj.BWA_path
         command += " mem "
         command += ref_path + " "
         command += in1_path + " "
         command += in2_path + " "
-        command += ">" + " " + export_path
+        command += ">" + " " + self.dir_obj.assembly_bwa_sam
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += export_path + " "#bowtie2_out_path + " "
-        sifting_command += export_path #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
+        sifting_command += self.dir_obj.assembly_bwa_sam + " "#bowtie2_out_path + " "
+        sifting_command += self.dir_obj.assembly_new_sam #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
 
         make_marker = "touch" + " " + marker_path
 

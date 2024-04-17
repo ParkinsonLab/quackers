@@ -83,10 +83,10 @@ class q_stage:
                     if(self.operating_mode == "single"):
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
-                        command = self.command_obj.clean_reads_bwa_command_s(host_ref_path, self.start_s_path, s_host_export_path, self.host_pp_)
+                        command = self.command_obj.clean_reads_bwa_command_s(host_ref_path, self.start_s_path, self.host_pp_)
                     else:
                         #command = self.command_obj.clean_reads_command_p(host_ref_path, p_host_export_path, self.start_f_path, self.start_r_path)
-                        command = self.command_obj.clean_reads_bwa_command_p(host_ref_path, p_host_export_path, self.start_f_path, self.start_r_path)
+                        command = self.command_obj.clean_reads_bwa_command_p(host_ref_path, self.start_f_path, self.start_r_path)
 
                     script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
                     self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
@@ -137,11 +137,11 @@ class q_stage:
                 self.job_control.wait_for_mp_store()
 
                 if(self.op_mode == "paired"):
-                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_pp_mkr)
+                    command = self.command_obj.clean_reads_bwa_command_p(self.dir_obj.assembly_contigs, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_pp_mkr)
                     
 
                 elif(self.op_mode == "single"):
-                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.assembly_sam, self.dir_obj.host_final_s, self.dir_obj.assembly_pp_mkr)
+                    command = self.command_obj.clean_reads_bwa_command_s(self.dir_obj.assembly_contigs, self.dir_obj.host_final_s, self.dir_obj.assembly_pp_mkr)
                 self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_bwa_job, command)
                 self.job_control.wait_for_mp_store()
 
