@@ -17,6 +17,33 @@ class command_obj:
         self.dir_obj = dir_obj
         self.op_mode = self.path_obj.operating_mode
 
+    def adapterremoval_command(self, quality_encoding, marker_path):
+        remove_lq = self.path_obj.ar_path + " "
+        if(self.op_mode == "single"):
+            remove_lq += "--file1" + " " + self.dir_obj.start_s + " '"
+        elif(self.op_mode == "paired"):
+            remove_lq += "--file1" + " " + self.dir_obj.start_f + " "
+            remove_lq += "--file2" + " " + self.dir_obj.start_r + " "
+        
+        remove_lq += "--qualitybase" + " " + str(quality_encoding) + " "
+        if(quality_encoding == 33):
+            remove_lq += "--qualitymax" + " " + "75" + " "
+        remove_lq += "--threads" + " " + str(os.cpu_count()) + " "
+        remove_lq += "--minlength" + " " +
+        remove_lq += "--basename" + " "
+        remove_lq += "--trimqualities" + " "
+        
+        if(self.op_mode == "single"):
+            remove_lq += "--output1" + " " + 
+        else:
+            remove_lq += "--output1" + " " + 
+            remove_lq += "--output2" + " " + 
+            remove_lq += "--singleton" + " " + 
+        
+        
+        make_marker = "touch" + " " + marker_path
+        return [make_marker]
+
     def bwa_index_ref(self, ref_path):
         command = self.path_obj.BWA_path
         command += " index " + ref_path
@@ -27,12 +54,12 @@ class command_obj:
         command += " mem "
         command += ref_path + " "
         command += in_path + " "
-        command += ">" + " " + self.dir_obj.assembly_bwa_sam
+        command += ">" + " " + self.dir_obj.assembly_sam
 
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_bwa_sam + " "
+        sifting_command += self.dir_obj.assembly_sam + " "
         sifting_command += self.dir_obj.assembly_new_sam
 
         make_marker = "touch" + " " + marker_path
@@ -46,12 +73,12 @@ class command_obj:
         command += " -x " + ref_path
         command += " -q "
         command += " -U " + in_path 
-        command += " -S " + self.dir_obj.assembly_bwa_sam
+        command += " -S " + self.dir_obj.assembly_sam
         
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_bwa_sam + " "
+        sifting_command += self.dir_obj.assembly_sam + " "
         sifting_command += self.dir_obj.assembly_new_sam
 
         make_marker = "touch"  + " " + marker_path
@@ -63,11 +90,11 @@ class command_obj:
         command += ref_path + " "
         command += in1_path + " "
         command += in2_path + " "
-        command += ">" + " " + self.dir_obj.assembly_bwa_sam
+        command += ">" + " " + self.dir_obj.assembly_sam
 
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_bwa_sam + " "#bowtie2_out_path + " "
+        sifting_command += self.dir_obj.assembly_sam + " "#bowtie2_out_path + " "
         sifting_command += self.dir_obj.assembly_new_sam #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
 
         make_marker = "touch" + " " + marker_path

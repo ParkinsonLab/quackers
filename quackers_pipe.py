@@ -17,6 +17,13 @@ def run_pipe(path_obj, args_pack):
     mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
 
+    read_encoding = "64"
+    if(args_pack["s_path"] == "empty"):
+        read_encoding = mp_obj.determine_encoding(args_pack["p1_path"])
+    else:
+        read_encoding = mp_obj.determine_encoding(args_pack["s_path"])
+
+
     stage_obj.check_host_bypass()
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):

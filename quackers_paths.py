@@ -21,6 +21,10 @@ class dir_structure:
         self.start_r = args_pack["p2_path"]
         self.start_s = args_pack["s_path"]
 
+        self.lq_dir_top = os.path.join(self.output_dir, path_obj.lq_dir)
+        self.lq_dir_data = os.path.join(self.lq_dir_top, "data")
+        
+
         self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
         self.host_dir_data  = os.path.join(self.host_dir_top, "data")
         self.host_dir_end   = os.path.join(self.host_dir_top, "export")
@@ -276,12 +280,12 @@ class path_obj:
 
         self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
         self.samtools_path      = "samtools"
-        self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
-        self.bowtie2_index      = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
+        self.bowtie2_path       = "bowtie2"
+        self.bowtie2_index      = "bowtie2-build"
         self.concoct_path       = "concoct"
         self.checkm_path        = "checkm"
-        self.ar_path            = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
-        self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
+        self.ar_path            = "AdapterRemoval"
+        self.cdhit_path         = "cd-hit-dup"
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
         self.py_path            = "python3"
         self.BWA_path           = "bwa"
@@ -320,6 +324,7 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
+        self.lq_dir             = self.assign_value("directory", "clean_reads", "str", "0_low_quality_filter")
         self.host_dir           = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
         self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")

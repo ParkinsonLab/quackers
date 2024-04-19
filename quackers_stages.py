@@ -13,13 +13,20 @@ class q_stage:
         self.dir_obj = dir_obj
         self.command_obj = q_com.command_obj(path_obj, dir_obj)
         self.job_control = mp_util.mp_util(out_path)#, self.path_obj.bypass_log_name)
-        self.operating_mode = self.path_obj.operating_mode
         
-        self.op_mode = args_pack["op_mode"]
-
         self.start_s_path   = args_pack["s_path"]
         self.start_f_path  = args_pack["p1_path"]
         self.start_r_path  = args_pack["p2_path"]
+        
+        self.op_mode = args_pack["op_mode"]
+        self.quality_encoding = "64"
+        if(self.op_mode == "single"):
+            self.quality_encoding = self.job_control.determine_encoding(self.start_s_path)
+        else:
+            self.quality_encoding = self.job_control.determine_encoding(self.start_f_path)
+
+
+        
 
         self.hosts_bypassed = False
 
@@ -36,6 +43,9 @@ class q_stage:
             elif(self.op_mode == "paired"):
                 self.dir_obj.host_final_f = self.start_f_path
                 self.dir_obj.host_final_r = self.start_r_path
+    
+    def low_quality_filter(self):
+
 
 
     def host_filter(self):
@@ -80,7 +90,7 @@ class q_stage:
                     ref_basename = os.path.basename(host_ref_path)
                     ref_basename = ref_basename.split(".")[0]
                     command = ""
-                    if(self.operating_mode == "single"):
+                    if(self.op_mode == "single"):
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
                         #command = self.command_obj.clean_reads_command_s(host_ref_path, self.start_s_path, s_host_export_path)
                         command = self.command_obj.clean_reads_bwa_command_s(host_ref_path, self.start_s_path, self.host_pp_)

@@ -232,6 +232,11 @@ RUN wget https://github.com/marbl/Mash/releases/download/v2.3/mash-Linux64-v2.3.
 ENV PATH="${PATH}:/quackers_tools/fastANI"
 ENV PATH="${PATH}:/quackers_tools/fasttree"
 ENV PATH="${PATH}:/quackers_tools/mash"
+ENV PATH="${PATH}:/quackers_tools/adapterremoval"
+ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
+
+
+
 
 
 
