@@ -239,8 +239,29 @@ ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
 
 
 
+WORKDIR /quackers_tools
 
+RUN wget https://github.com/ablab/spades/releases/download/v3.15.5/SPAdes-3.15.5.tar.gz \
+&& tar -xzf SPAdes-3.15.5.tar.gz \
+&& mv SPAdes-3.15.5 SPAdes 
 
+RUN apt-get update \
+&& apt-get install -y cmake \
+&& apt-get install -y zlib1g-dev \
+&& apt-get install -y libbz2-dev
+WORKDIR SPAdes
+
+RUN sh spades_compile.sh
+#RUN sh "PREFIX=/quackers_tools/SPAdes" spades_compile.sh
+
+#RUN conda install -y spades
+#RUN wget https://github.com/ablab/spades/releases/download/v3.15.5/SPAdes-3.15.5-Linux.tar.gz \
+#&& tar -xzf SPAdes-3.15.5-Linux.tar.gz \
+#&& mv SPAdes-3.15.5-Linux SPAdes \
+#&& rm *.tar.gz
+ENV PATH="${PATH}:/quackers_tools/SPAdes/bin"
+WORKDIR /quackers_tools
+RUN chmod -R 777 /quackers_tools/SPAdes
 
 #RUN rm *.tar.gz
 
