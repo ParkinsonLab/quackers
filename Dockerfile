@@ -171,11 +171,13 @@ RUN wget https://github.com/bxlab/metaWRAP/archive/refs/tags/v1.3.tar.gz \
 
 ENV PATH="${PATH}:/quackers_tools/metaWRAP-1.3/bin"
 
-RUN apt-get install -y git-all \
-&& git clone https://github.com/lh3/bwa.git \
-&& cd bwa \
-&& make
-ENV PATH="${PATH}:/quackers_tools/bwa"
+#RUN apt-get install -y git-all \
+#&& git clone https://github.com/lh3/bwa.git \
+#&& cd bwa \
+#&& make
+#ENV PATH="${PATH}:/quackers_tools/bwa"
+
+
 
 WORKDIR /quackers_tools
 RUN wget https://bitbucket.org/berkeleylab/metabat/get/37db58fe3fda88f118dfdf18899d953eeac8e852.zip -O metabat.zip \
@@ -236,6 +238,9 @@ ENV PATH="${PATH}:/quackers_tools/adapterremoval"
 ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
 
 
+WORKDIR /quackers_tools
+RUN wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-2.2.1_x64-linux.tar.bz2 \
+&& tar -xf bwa-mem2-2.2.1_x64-linux.tar.bz2 
 
 
 

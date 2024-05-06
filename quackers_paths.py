@@ -23,6 +23,14 @@ class dir_structure:
 
         self.lq_dir_top = os.path.join(self.output_dir, path_obj.lq_dir)
         self.lq_dir_data = os.path.join(self.lq_dir_top, "data")
+        self.lq_ar_s = os.path.join(self.lq_dir_data, "AR_free_s.fastq")
+        self.lq_ar_f = os.path.join(self.lq_dir_data, "AR_free_f.fastq")
+        self.lq_ar_r = os.path.join(self.lq_dir_data, "AR_free_r.fastq")
+        
+        self.lq_dir_export = os.path.join(self.lq_dir_top, "export")
+        self.lq_s = os.path.join(self.lq_dir_export, "clean_s.fastq")
+        self.lq_f = os.path.join(self.lq_dir_export, "clean_f.fastq")
+        self.lq_r = os.path.join(self.lq_dir_export, "clean_r.fastq")
         
 
         self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
@@ -319,6 +327,7 @@ class path_obj:
 
         self.megahit_contig_len = self.assign_value("MEGAHIT_settings", "contig_len", "int", 1000)
         self.megehit_threads    = self.assign_value("settings", "threads", "int", 64)
+        self.AR_minlength   = self.assign_value("settings", "adapterremoval_minlength", "int", 30)
         
 
         #--------------------------------------------------------------
