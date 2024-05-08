@@ -268,6 +268,11 @@ ENV PATH="${PATH}:/quackers_tools/SPAdes/bin"
 WORKDIR /quackers_tools
 RUN chmod -R 777 /quackers_tools/SPAdes
 
+
+
+RUN apt-get update \
+&& apt-get install -y -qq build-essential libgsl0-dev bedtools mummer samtools
+
 #RUN rm *.tar.gz
 
 
