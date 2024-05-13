@@ -9,6 +9,14 @@ import quackers_commands as q_comm
 import quackers_stages as q_stage
 from argparse import ArgumentParser
 
+def run_debug(path_obj, args_pack):
+    #-------------------------------------------------------
+    #step 1: hosts
+    dir_obj = q_path.dir_structure(args_pack, path_obj)
+    mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
+    stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
+
+    stage_obj.megahit_assembly()
 
 def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
@@ -16,14 +24,10 @@ def run_pipe(path_obj, args_pack):
     dir_obj = q_path.dir_structure(args_pack, path_obj)
     mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
-
-    read_encoding = "64"
-    if(args_pack["s_path"] == "empty"):
-        read_encoding = mp_obj.determine_encoding(args_pack["p1_path"])
-    else:
-        read_encoding = mp_obj.determine_encoding(args_pack["s_path"])
-
-
+    
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):
+        stage_obj.low_quality_filter()
+    
     stage_obj.check_host_bypass()
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
@@ -31,8 +35,9 @@ def run_pipe(path_obj, args_pack):
         stage_obj.host_filter()
     
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
-        stage_obj.megahit_assembly()
+        stage_obj.assembly()
 
+    sys.exit("stop here")
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
         stage_obj.concoct_binning()    
 
@@ -55,7 +60,7 @@ def parse_inputs():
     parser.add_argument("-1", "--forward", "--f", type=str, help="Used only for paired-end reads: Path to the forward-end data")
     parser.add_argument("-2", "--reverse", "--r", type=str, help="Used only for paired-end reads: Path to the reverse-end data")
     parser.add_argument("-s", "-S", "--single", type=str, help="For single-ended reads:, Path to the single-end data")
-
+    parser.add_argument("-debug", "--debug", "--Debug", action='store_true', help="DEBUG MODE")
     args = parser.parse_args()
 
     output_dir  = args.output_dir
@@ -63,6 +68,7 @@ def parse_inputs():
     p1_path     = args.forward
     p2_path     = args.reverse
     s_path      = args.single
+    debug_mode = args.debug
 
     operating_mode = ""
 
@@ -104,6 +110,7 @@ def parse_inputs():
     args_pack["p2_path"] = p2_path
     args_pack["s_path"] = s_path
     args_pack["op_mode"] = operating_mode
+    args_pack["debug_mode"] = debug_mode
 
     if(args_pack["s_path"] is None):
         args_pack["s_path"] = "empty"
@@ -133,7 +140,14 @@ if __name__ == "__main__":
     
     #mp_util = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
 
-    run_pipe(path_obj, args_pack)
+    if(args_pack["debug_mode"]):
+        print("in debug mode")
+        run_debug(path_obj, args_pack)
+
+
+
+    else:
+        run_pipe(path_obj, args_pack)
 
 
 

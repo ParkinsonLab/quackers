@@ -29,101 +29,164 @@ class command_obj:
         if(quality_encoding == 33):
             remove_lq += "--qualitymax" + " " + "75" + " "
         remove_lq += "--threads" + " " + str(os.cpu_count()) + " "
-        remove_lq += "--minlength" + " " +
-        remove_lq += "--basename" + " "
+        remove_lq += "--minlength" + " " + str(self.path_obj.AR_minlength) + " "
+        #remove_lq += "--basename" + " " + self.dir_obj.clean_dir_data + "_AR" + " "
         remove_lq += "--trimqualities" + " "
         
         if(self.op_mode == "single"):
-            remove_lq += "--output1" + " " + 
+            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_s
         else:
-            remove_lq += "--output1" + " " + 
-            remove_lq += "--output2" + " " + 
-            remove_lq += "--singleton" + " " + 
+            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_f + " " 
+            remove_lq += "--output2" + " " + self.dir_obj.clean_dir_final_r + " "
+            remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_AR_s0
+
+        
+        AR_reconcile = self.path_obj.py_path + " "
+        AR_reconcile += self.path_obj.AR_reconcile + " "
+        AR_reconcile += self.dir_obj.clean_dir_final_f + " "
+        AR_reconcile += self.dir_obj.clean_dir_final_r + " "
+        AR_reconcile += self.dir_obj.clean_dir_AR_sf + " "
+        AR_reconcile += self.dir_obj.clean_dir_AR_sr + " "
+        AR_reconcile += self.dir_obj.clean_dir_final_f + " "
+        AR_reconcile += self.dir_obj.clean_dir_final_r
+
+        combine_singles = "cat" + " "
+        combine_singles += self.dir_obj.clean_dir_AR_s0 + " "
+        combine_singles += self.dir_obj.clean_dir_AR_sf + " "
+        combine_singles += self.dir_obj.clean_dir_AR_sr + " "
+        combine_singles += ">>" + " "
+        combine_singles += self.dir_obj.clean_dir_final_s
+        
         
         
         make_marker = "touch" + " " + marker_path
-        return [make_marker]
 
-    def bwa_index_ref(self, ref_path):
+        #if(self.op_mode == "single"):
+        return [remove_lq +  " && " + make_marker]
+        #else:
+        #    return [remove_lq + " && " + AR_reconcile + " && " + combine_singles + " && " + make_marker ]
+
+    def bwa_index_ref_command(self, ref_path, marker_path):
         command = self.path_obj.BWA_path
         command += " index " + ref_path
-        return [command]
 
-    def clean_reads_bwa_command_s(self, ref_path, in_path, marker_path):
-        command = self.path_obj.BWA_path 
-        command += " mem "
+        make_marker = "touch" + " " + marker_path 
+        return [command + " && " + make_marker]
+    
+    def bowtie2_index_ref_command(self, ref_path, out_path, marker_path):
+        command = self.path_obj.bowtie2_idx_path + " "
+        command += ref_path  + " "
+        command + out_path
+
+        make_marker = "touch " + marker_path
+
+        return [command + " && " + make_marker]
+    
+
+    def clean_reads_bwa_simple_s(self, ref_path, sam_name, in_path, marker_path):
+        #for a single host.
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s_score_bwa.out")
+        command = self.path_obj.BWA_path + " mem "
         command += ref_path + " "
-        command += in_path + " "
-        command += ">" + " " + self.dir_obj.assembly_sam
-
+        command += in_path + " | " 
+        command += self.path_obj.samtools_path + " view -F 4 > " + sam_path
 
         sifting_command = self.path_obj.py_path + " "
-        sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_sam + " "
-        sifting_command += self.dir_obj.assembly_new_sam
+        sifting_command += self.path_obj.sam_sift + " "
+        sifting_command += sam_path + " "
+        sifting_command += score_out_path
 
-        make_marker = "touch" + " " + marker_path
+        make_marker = "touch " + marker_path
+
+        return [command + " && " + sifting_command + " && " + make_marker]
+
+    def clean_reads_bwa_simple_p(self, ref_path, sam_name, f_path, r_path, marker_path):
+        #for a single host. expected to be called per-host
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p_score_bwa.out")
+        command = self.path_obj.BWA_path + " mem "
+        command += ref_path + " "
+        command += f_path + " "
+        command += r_path + " "
+        command += "|" + " " + self.path_obj.samtools_path + " view -F 4 > " + sam_path
+
+        sifting_command = self.path_obj.py_path + " "
+        sifting_command += self.path_obj.sam_sift + " "
+        sifting_command += sam_path + " "
+        sifting_command += score_out_path
+
+        make_marker = "touch " + marker_path
 
         return [command + " && " + sifting_command + " && " + make_marker]
 
 
-    def clean_reads_command_s(self, ref_path, in_path, marker_path):
-        #to be called on for each host/adapter cluster
-        command = self.path_obj.bowtie2_path
-        command += " -x " + ref_path
-        command += " -q "
-        command += " -U " + in_path 
-        command += " -S " + self.dir_obj.assembly_sam
-        
+    def clean_reads_bowtie2_command_s(self, ref_path, in_path, marker_path):
+        #used for contigs only
+        command = self.path_obj.bowtie2_path 
+        command += " -x "
+        command += ref_path + " "
+        command += in_path + " " 
+        command += ">" + " " + self.dir_obj.assembly_sam
 
-        sifting_command = self.path_obj.py_path + " "
-        sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_sam + " "
-        sifting_command += self.dir_obj.assembly_new_sam
 
-        make_marker = "touch"  + " " + marker_path
-        return [command + " && " + sifting_command + " && " +  make_marker]
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + make_marker]
+
+
     
-    def clean_reads_bwa_command_p(self, ref_path, in1_path, in2_path, marker_path):
-        command = self.path_obj.BWA_path
-        command += " mem "
+    def clean_reads_bowtie2_command_p(self, ref_path, in1_path, in2_path, marker_path):
+        #used for contigs only
+        command = self.path_obj.bowtie2_path
+        command += " -x" + " "
         command += ref_path + " "
         command += in1_path + " "
         command += in2_path + " "
-        command += ">" + " " + self.dir_obj.assembly_sam
-
-        sifting_command = self.path_obj.py_path + " "
-        sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += self.dir_obj.assembly_sam + " "#bowtie2_out_path + " "
-        sifting_command += self.dir_obj.assembly_new_sam #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
+        command += ">" + self.dir_obj.assembly_raw_sam
 
         make_marker = "touch" + " " + marker_path
 
-        return [command + " && " + sifting_command + " && " + make_marker]
+        return [command + " &&  " + make_marker]
+
+    def bt2_scan_sam(self, marker_path):
+
+        convert_sam = self.path_obj.samtools_path + " " + "view -bS " + self.dir_obj.assembly_raw_sam + " > " + self.dir_obj.assembly_raw_bam 
+
+        sort_bam = self.path_obj.samtools_path + " " + "sort" + " " 
+        sort_bam += self.dir_obj.assembly_raw_bam + " " 
+        sort_bam += "-o" + " " + self.dir_obj.assembly_sort_bam
+
+        index_bam = self.path_obj.samtools_path + " " + "index" + " "
+        index_bam += self.dir_obj.assembly_sort_bam
+
+        sifting_command = self.path_obj.py_path + " "
+        sifting_command += self.path_obj.sam_sift + " "
+        sifting_command += self.dir_obj.assembly_raw_sam + " "
+        sifting_command += self.dir_obj.assembly_score_out
+
+        make_marker = "touch" + " " + marker_path
+
+        return [convert_sam + " && " + sort_bam + " && " + index_bam + " && " + sifting_command + " && " + make_marker]
     
-    def clean_reads_command_p(self, ref_path, export_path, in1_path, in2_path, marker_path):
-        #to be called on for each host/adapter cluster
-        ref_basename = os.path.basename(ref_path)
-        #export_path = os.path.dirname(out1_path)
-        #bowtie2_out_path = os.path.join(export_path, ref_basename + "_paired_out.sam")
-        command = self.path_obj.bowtie2_path
-        command += " -x " + ref_path
-        command += " -q "
-        command += " -1 " + in1_path
-        command += " -2 " + in2_path
-        command += " -S " + export_path #bowtie2_out_path
-        
-        sifting_command = self.path_obj.py_path + " "
-        sifting_command += self.path_obj.bowtie2_sift + " "
-        sifting_command += export_path + " "#bowtie2_out_path + " "
-        sifting_command += export_path #bowtie2_out_path #os.path.join(export_path, "host_only_" + ref_basename + "_paired_out.sam")
-        
-        make_marker = "touch" + " " + marker_path
-        return [command + " && " + sifting_command + " && " + make_marker]
+    def contig_reconcile(self, sam_score_file, export_path, s_reads, f_reads, r_reads, marker_path):
 
-    def clean_reads_reconcile(self, sam_path, export_path, s_reads, p1_reads, p2_reads):
         command = self.path_obj.py_path + " "
-        command += self.path_obj.bowtie2_reconcile + " "
+        command += self.path_obj.contig_reconcile + " "
+        command += sam_score_file + " "
+        command += export_path + " "
+        command += s_reads + " "
+        command += f_reads + " "
+        command += r_reads
+
+        make_marker = "touch " + marker_path
+
+        return [command + " && " + make_marker]
+    
+
+    def clean_reads_reconcile(self, sam_path, export_path, s_reads, p1_reads, p2_reads, marker_path):
+        command = self.path_obj.py_path + " "
+        command += self.path_obj.clean_reads_reconcile + " "
         command += sam_path + " "
         command += export_path + " "
         if(not s_reads):
@@ -141,84 +204,38 @@ class command_obj:
         else:
             command += p2_reads
 
-        make_marker = "touch" + " " + self.dir_obj.host_pp_mkr
+        make_marker = "touch" + " " + marker_path
 
         return [command + " && " + make_marker]
-
-
-    def megahit_command_p(self, forward_path, reverse_path, export_path, temp_path):
-        command = self.path_obj.megahit_path + " "
+        
+    def metaspades_command_p(self, forward_path, reverse_path, quality_encoding, export_dir, marker_path):
+        command = self.path_obj.mspades_path + " "
         command += "-1" + " " + forward_path + " "
         command += "-2" + " " + reverse_path + " "
-        command += "-o" + " " + export_path + " "
-        command += "--out-prefix" + " " + "assembled" + " "
-        command += "-t" + " " + str(os.cpu_count()) + " "
-        command += "-m" + " " + str(0.8) + " "
-        command += "--continue" + " "
-        command += "--tmp-dir" + " " + temp_path
-
-        make_marker = "touch"  + " "
-        make_marker += self.dir_obj.assembly_mkr
         
-        return [command + " && " + make_marker]
-
-    def megahit_command_s(self, single_path, export_path, temp_path):
-        command = self.path_obj.megahit_path + " "
-        command += "-r" + " " + single_path + " "
-        command += "-o" + " " + export_path + " "
-        command += "--out-prefix" + " " + "assembled" + " "
+        command += "-o" + " " + export_dir  + " "
         command += "-t" + " " + str(os.cpu_count()) + " "
-        command += "-m" + " " + str(0.8) + " "
-        command += "--continue" + " "
-        command += "--tmp-dir" + " " + temp_path
+        command += "--phred-offset" + " " + str(quality_encoding)
 
-        make_marker = "touch"  + " "
-        make_marker += self.dir_obj.assembly_mkr
-        
+        make_marker = "touch" + " " + marker_path
         return [command + " && " + make_marker]
     
-    def megahit_pp_command_s(self, single_path, export_path):
+    def metaspades_command_s(self, single_path, quality_encoding, export_dir, marker_path):
+        command = self.path_obj.mspades_path + " " 
+        command += "-s" + " " + single_path + " "
+        command += "-t" + " " + str(os.cpu_count()) + " "
+        command += "--phread-offset" + " " + str(quality_encoding) + " " 
+        command += "-o" + " " + export_dir 
 
-        command = self.path_obj.bowtie2_index + " "
-        command += self.dir_obj.assembly_contigs + " "
-        command += "-c" + " "
-        command += "--threads" + " " + str(os.cpu_count())
+        make_marker = "touch" + " " + marker_path
 
-
-        scan_for_hits = self.path_obj.bowtie2_path + " "
-        scan_for_hits += "-x" + " " + self.dir_obj.assembly_contigs + " "
-        scan_for_hits += "-U" + " " + single_path + " "
-        scan_for_hits += "-S" + " " + export_path
-
-
-        return [command + " && " + scan_for_hits]
-
-    def sam_convert_command(self, sam_path, bam_path, sorted_bam_path):
-        sam_convert = self.path_obj.samtools_path + " "
-        sam_convert += "view" + " " + "-F" + " " + "4" + " " + "-bS" + " "
-        sam_convert += sam_path + " "
-        sam_convert += ">" + " " + bam_path
-
-        sam_sort = self.path_obj.samtools_path + " "
-        sam_sort += "sort" + " "
-        sam_sort += bam_path + " "
-        sam_sort += "-o" + " " + sorted_bam_path
-
-        sam_index = self.path_obj.samtools_path + " "
-        sam_index += "index" + " "
-        sam_index += sorted_bam_path
-
-        return [sam_convert + " && "+ sam_sort + " && " + sam_index]
+        return [command + " && " + make_marker]
+    
 
 
-    def bowtie2_index_command(self, ref_path):
 
-        command = self.path_obj.bowtie2_index + " "
-        command += ref_path + " "
-        command += "-c" + " "
-        command += "--threads" + " " + str(os.cpu_count())
-        
-        return [command]
+
+    
     
     def concoct_prep_command(self, marker_path):
 
@@ -232,7 +249,7 @@ class command_obj:
 
         concoct_table_prep  = self.path_obj.cct_cov_table + " "
         concoct_table_prep += self.dir_obj.cct_bed + " "
-        concoct_table_prep += self.dir_obj.assembly_s_bam + " "
+        concoct_table_prep += self.dir_obj.assembly_bam + " "
         concoct_table_prep +=">" + " " + self.dir_obj.cct_cov_table
         #concoct_table_prep += 
 

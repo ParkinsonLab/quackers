@@ -21,60 +21,86 @@ class dir_structure:
         self.start_r = args_pack["p2_path"]
         self.start_s = args_pack["s_path"]
 
-        self.lq_dir_top = os.path.join(self.output_dir, path_obj.lq_dir)
-        self.lq_dir_data = os.path.join(self.lq_dir_top, "data")
-        self.lq_ar_s = os.path.join(self.lq_dir_data, "AR_free_s.fastq")
-        self.lq_ar_f = os.path.join(self.lq_dir_data, "AR_free_f.fastq")
-        self.lq_ar_r = os.path.join(self.lq_dir_data, "AR_free_r.fastq")
+        self.clean_dir_top = os.path.join(self.output_dir, path_obj.clean_dir)
+        self.clean_dir_data = os.path.join(self.clean_dir_top, "data")
+        self.clean_dir_end = os.path.join(self.clean_dir_top, "export")
+
+        self.clean_dir_AR_s0 = os.path.join(self.clean_dir_data, "s0.fastq")
+        self.clean_dir_AR_sf = os.path.join(self.clean_dir_data, "sf.fastq")
+        self.clean_dir_AR_sr = os.path.join(self.clean_dir_data, "sr.fastq")
+        self.clean_dir_final_s = os.path.join(self.clean_dir_end, "single.fastq")
+        self.clean_dir_final_f = os.path.join(self.clean_dir_end, "forward.fastq")
+        self.clean_dir_final_r = os.path.join(self.clean_dir_end, "reverse.fastq")
+        self.clean_dir_job = os.path.join(self.clean_dir_top, "AR.sh")
+        self.clean_dir_mkr = os.path.join(self.clean_dir_top, "clean_AR")
         
-        self.lq_dir_export = os.path.join(self.lq_dir_top, "export")
-        self.lq_s = os.path.join(self.lq_dir_export, "clean_s.fastq")
-        self.lq_f = os.path.join(self.lq_dir_export, "clean_f.fastq")
-        self.lq_r = os.path.join(self.lq_dir_export, "clean_r.fastq")
-        
+        make_folder(self.clean_dir_top)
+        make_folder(self.clean_dir_data)
+        make_folder(self.clean_dir_end)
 
         self.host_dir_top   = os.path.join(self.output_dir, path_obj.host_dir)
         self.host_dir_data  = os.path.join(self.host_dir_top, "data")
+        self.host_dir_sam   = os.path.join(self.host_dir_data, "sam")
         self.host_dir_end   = os.path.join(self.host_dir_top, "export")
+        
         self.host_final_f  = os.path.join(self.host_dir_end, "forward.fastq")
         self.host_final_r  = os.path.join(self.host_dir_end, "reverse.fastq")
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
-        self.host_bwa_sam   = os.path.join(self.host_dir_data, "bwa_sam.out")
-        self.host_new_sam   = os.path.join(self.host_dir_data, "new_sam.out")
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
         self.host_bwa_mkr = os.path.join(self.host_dir_top, "host_filter_bwa")
         self.host_pp_mkr = os.path.join(self.host_dir_top, "host_filter_reconcile")
 
+        self.host_recon_job = os.path.join(self.host_dir_top, "reconcile.sh")
+        self.host_clean_bwa_p_job = os.path.join(self.host_dir_top, "host_clean_bwa_p.sh")
+        self.host_clean_bwa_s_job = os.path.join(self.host_dir_top, "host_clean_bwa_s.sh")
+
         make_folder(self.host_dir_top)
         make_folder(self.host_dir_data)
+        make_folder(self.host_dir_sam)
         make_folder(self.host_dir_end)
         
         self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assembly_dir)
         self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
         self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
         self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
-        self.assembly_contigs   = os.path.join(self.assembly_dir_data, "assembled.contigs.fa")
-        self.assembly_sam       = os.path.join(self.assembly_dir_data, "bwa_out.sam")
-        self.assembly_new_sam   = os.path.join(self.assembly_dir_data, "score_bwa.out")
-        self.assembly_bam       = os.path.join(self.assembly_dir_data, "bwa_out.bam")
-        self.assembly_s_bam     = os.path.join(self.assembly_dir_data, "bwa_out_sorted.bam") 
-        self.assembly_final_c   = os.path.join(self.assembly_dir_data, "assembled_contigs.fa")
+        self.assembly_contigs   = os.path.join(self.assembly_dir_data, "contigs.fasta")
+        self.assembly_dir_bt2_idx   = os.path.join(self.assembly_dir_data, "bt2_idx")
+        self.assembly_bt2_idx   = os.path.join(self.assembly_dir_bt2_idx, "contigs")
+        self.assembly_raw_sam   = os.path.join(self.assembly_dir_data, "raw_bt2_out.sam")
+        self.assembly_raw_bam   = os.path.join(self.assembly_dir_data, "raw_bt2_out.bam")
+        self.assembly_sort_bam  = os.path.join(self.assembly_dir_data, "bt2_sort.bam")
+        
+        self.assembly_score_out = os.path.join(self.assembly_dir_data, "score_bt2.out") 
+        self.assembly_final_c   = os.path.join(self.assembly_dir_data, "contigs.fasta")
         self.assembly_final_s   = os.path.join(self.assembly_dir_end, "single.fastq")
         self.assembly_final_f   = os.path.join(self.assembly_dir_end, "forward.fastq")
         self.assembly_final_r   = os.path.join(self.assembly_dir_end, "reverse.fastq")
 
-        self.assembly_megahit_s_job = os.path.join(self.assembly_dir_top, "assemble_s.sh")
-        self.assembly_megahit_p_job = os.path.join(self.assembly_dir_top, "assemble_p.sh")
+        self.assembly_mspades_s_job = os.path.join(self.assembly_dir_top, "assemble_s.sh")
+        self.assembly_mspades_p_job = os.path.join(self.assembly_dir_top, "assemble_p.sh")
         self.assembly_bwa_idx_job = os.path.join(self.assembly_dir_top, "index_contigs.sh")
-        self.assembly_bwa_job = os.path.join(self.assembly_dir_top, "clean_reads.sh")
+        self.assembly_pp_job = os.path.join(self.assembly_dir_top, "clean_reads.sh")
+        self.assembly_recon_job = os.path.join(self.assembly_dir_top, "clean_reads_reconcile.sh")
+        self.assembly_scan_sam_job = os.path.join(self.assembly_dir_top, "scan_sam.sh")
+
         self.assembly_sam_convert_job = os.path.join(self.assembly_dir_top, "sam_convert.sh")
 
-        self.assembly_mkr                       = os.path.join(self.assembly_dir_top, "assembly_megahit")
+        self.assembly_mkr                       = os.path.join(self.assembly_dir_top, "assembly_mspades")
+        self.assembly_bt2_idx_mkr               = os.path.join(self.assembly_dir_top, "assembly_bt2_idx")
+        self.assembly_bwa_idx_mkr               = os.path.join(self.assembly_dir_top, "assembly_bwa_idx")
+        self.assembly_scan_sam_mkr              = os.path.join(self.assembly_dir_top, "assembly_scan_sam")
+
         self.assembly_pp_mkr                    = os.path.join(self.assembly_dir_top, "assembly_bwa_pp")
+
         self.assembly_reconcile_mkr             = os.path.join(self.assembly_dir_top, "assembly_reconcile")
         self.assembly_sam_convert_mkr   = os.path.join(self.assembly_dir_top, "assembly_sam_convert")
 
+        make_folder(self.assembly_dir_top)
+        make_folder(self.assembly_dir_temp)
+        make_folder(self.assembly_dir_data)
+        make_folder(self.assembly_dir_end)
+        make_folder(self.assembly_dir_bt2_idx)
 
         self.cct_dir_top            = os.path.join(self.output_dir, path_obj.cct_bin_dir)
         self.cct_dir_data           = os.path.join(self.cct_dir_top, "data")
@@ -127,9 +153,6 @@ class dir_structure:
 
         
 
-        make_folder(self.assembly_dir_top)
-        make_folder(self.assembly_dir_temp)
-        make_folder(self.assembly_dir_end)
 
         make_folder(self.cct_dir_top)
         make_folder(self.cct_dir_data)
@@ -288,15 +311,16 @@ class path_obj:
 
         self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
         self.samtools_path      = "samtools"
-        self.bowtie2_path       = "bowtie2"
-        self.bowtie2_index      = "bowtie2-build"
+        self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
+        self.bowtie2_idx_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
         self.concoct_path       = "concoct"
         self.checkm_path        = "checkm"
-        self.ar_path            = "AdapterRemoval"
-        self.cdhit_path         = "cd-hit-dup"
+        self.ar_path            = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
+        self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
         self.py_path            = "python3"
         self.BWA_path           = "bwa"
+        self.mspades_path       = "metaspades.py"
         #self.mwrap_bin_tool     = os.path.join(self.mwrap_temp_path, "binning.sh")
         #print("TEST")
         #time.sleep(10)
@@ -310,10 +334,13 @@ class path_obj:
         self.cct_get_bins       = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "extract_fasta_bins.py")
 
 
+
         #---------------------------------------------------------------------------
         #Assign paths for scripts
-        self.bowtie2_sift       = self.assign_value("scripts", "bowtie2_sift", "str", "scripts/bowtie2_sift.py")
-        self.bowtie2_reconcile  = self.assign_value("scripts", "bowtie2_reconcile", "str", "scripts/clean_reads_reconcile.py")
+        self.sam_sift               = self.assign_value("scripts", "sam_sift", "str", "scripts/sam_sift.py")
+        self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "scripts/clean_reads_reconcile.py")
+        self.AR_reconcile           = self.assign_value("scripts", "AR_reconcile", "str", "scripts/AR_reconcile.py")
+        self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "scripts/contig_reconcile.py")
 
         #------------------------------------------------------------------
         #Assign singular values for settings
@@ -327,15 +354,15 @@ class path_obj:
 
         self.megahit_contig_len = self.assign_value("MEGAHIT_settings", "contig_len", "int", 1000)
         self.megehit_threads    = self.assign_value("settings", "threads", "int", 64)
-        self.AR_minlength   = self.assign_value("settings", "adapterremoval_minlength", "int", 30)
+        self.AR_minlength       = self.assign_value("settings", "AdapterRemoval_minlength", "int", 30)
         
 
         #--------------------------------------------------------------
         #directory structure
 
-        self.lq_dir             = self.assign_value("directory", "clean_reads", "str", "0_low_quality_filter")
+        self.clean_dir          = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
         self.host_dir           = self.assign_value("directory", "host_filter", "str", "1_host_filter")
-        self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_megahit_assemble")
+        self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
         self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
         self.mwrap_bin_dir      = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
         self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "5_mwrap_bin_r")

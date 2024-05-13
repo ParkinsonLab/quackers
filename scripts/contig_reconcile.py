@@ -5,6 +5,7 @@
 
 #note: redo this part. just walk through each SAM, and have a running top-hit.  no need for double-for-loop.
 #note2: too slow. use multithreading to finish this faster
+#note3: reconstituted to be just-for-contigs.  Just for 1 file.
 
 #weak, 
 import os
@@ -72,37 +73,32 @@ def export_hosts(sam_hits_dict, export_dir):
                 out_line = read + "\n"
                 host_out.write(out_line)
 
-def sort_samfiles(sam_dir):
-    list_of_samfiles = os.listdir(sam_dir)
+def sort_samfiles(sam_path):
+    #opening one score_bt2/bwa.out
     unique_hosts = set()
     sam_hits_dict = dict()
     list_of_reads = list()
-    for samfile in list_of_samfiles:
+    
+    print("sam path:", sam_path)
+    with open(sam_path, "r") as sam_in:
         
-        
-        if(samfile.endswith("score_bwa.out")):
-            unique_hosts.add(samfile)
-            sam_path = os.path.join(sam_dir, samfile)
-            print("sam path:", sam_path)
-            with open(sam_path, "r") as sam_in:
-                
-                for line in sam_in:
-                    line_split = line.strip("\n").split("\t")
-                    read_ID = line_split[0]
-                    #print("whole line:", line)
-                    
-                    list_of_reads.append(read_ID)
-                    score = float(line_split[1])
-                    
-                    #note: paired-hits will get a double-chance to act.
-                    if(read_ID in sam_hits_dict):
-                        old_hit = sam_hits_dict[read_ID]
-                        #print("old hit:", old_hit)
-                        old_score = float(old_hit.split("|")[1])
-                        if(old_score < score):
-                            sam_hits_dict[read_ID] = samfile + "|" + str(score)
-                    else:
-                        sam_hits_dict[read_ID] = samfile + "|" + str(score)
+        for line in sam_in:
+            line_split = line.strip("\n").split("\t")
+            read_ID = line_split[0]
+            #print("whole line:", line)
+            
+            list_of_reads.append(read_ID)
+            score = float(line_split[1])
+            
+            #note: paired-hits will get a double-chance to act.
+            if(read_ID in sam_hits_dict):
+                old_hit = sam_hits_dict[read_ID]
+                #print("old hit:", old_hit)
+                old_score = float(old_hit.split("|")[1])
+                if(old_score < score):
+                    sam_hits_dict[read_ID] = score
+            else:
+                sam_hits_dict[read_ID] = score
 
     return sam_hits_dict, unique_hosts
 
@@ -163,7 +159,7 @@ def export_host_list(export_dir, host_bins_dict, host_name):
 
 
 if __name__ == "__main__":
-    sam_dir = sys.argv[1]
+    sam_score_file = sys.argv[1]
     export_dir = sys.argv[2]
     raw_s_read = sys.argv[3]
     raw_p1_read = sys.argv[4]
@@ -180,7 +176,7 @@ if __name__ == "__main__":
 
     
     print(dt.today(), "starting samfile sort+merge")
-    sam_hits_dict, unique_hosts = sort_samfiles(sam_dir)
+    sam_hits_dict, unique_hosts = sort_samfiles(sam_score_file)
 
     
     print(dt.today(), "exporting host lists")

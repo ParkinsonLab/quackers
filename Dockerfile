@@ -70,11 +70,11 @@ RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.5.3/bowtie2
 && unzip bowtie2.zip \
 && mv bowtie2-2.5.3-linux-x86_64 bowtie2
 
-RUN wget https://github.com/samtools/samtools/releases/download/1.19.2/samtools-1.19.2.tar.bz2 -O samtools.tar.bz2 \
+RUN wget https://github.com/samtools/samtools/releases/download/1.20/samtools-1.20.tar.bz2 -O samtools.tar.bz2 \
 && tar -xvf samtools.tar.bz2 
 
 
-WORKDIR samtools-1.19.2
+WORKDIR samtools-1.20
 RUN sh configure \
 && make \
 && make install
@@ -105,7 +105,7 @@ RUN mv CONCOCT-1.1.0 concoct \
 && mv hmmer-3.4 hmmer \
 && mv Prodigal-2.6.3 prodigal \
 && mv MEGAHIT-1.2.9-Linux-x86_64-static megahit \
-&& mv samtools-1.19.2 samtools \
+&& mv samtools-1.20 samtools \
 && mv GTDBTk-2.3.2 gtdbtk 
 
 WORKDIR /quackers_tools
@@ -171,11 +171,11 @@ RUN wget https://github.com/bxlab/metaWRAP/archive/refs/tags/v1.3.tar.gz \
 
 ENV PATH="${PATH}:/quackers_tools/metaWRAP-1.3/bin"
 
-#RUN apt-get install -y git-all \
-#&& git clone https://github.com/lh3/bwa.git \
-#&& cd bwa \
-#&& make
-#ENV PATH="${PATH}:/quackers_tools/bwa"
+RUN apt-get install -y git-all \
+&& git clone https://github.com/lh3/bwa.git \
+&& cd bwa \
+&& make
+ENV PATH="${PATH}:/quackers_tools/bwa"
 
 
 
