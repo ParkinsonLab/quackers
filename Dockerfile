@@ -274,8 +274,29 @@ RUN apt-get update \
 && apt-get install -y -qq build-essential libgsl0-dev bedtools mummer samtools
 
 #RUN rm *.tar.gz
+#RUN pip uninstall pandas
+#RUN pip install --force-reinstall -v pandas==1.0.0 
+#RUN pip install --force-reinstall -v 'pandas==0.13.0'
+
+#RUN conda install -y bioconda::maxbin2
+#RUN wget http://compsysbio.org/quackers_deps/MaxBin-2.2.7.tar.gz \
+#&& tar -xzvf MaxBin-2.2.7.tar.gz \
+#&& rm *.gz \
+#&& mv MaxBin-2.2.7 maxbin
+
+RUN wget https://github.com/edgraham/BinSanity/archive/refs/tags/v0.5.3.zip \
+&& unzip v0.5.3.zip \
+&& mv BinSanity-0.5.3 binsanity
+RUN pip install scikit-learn
+ENV PATH="${PATH}:/quackers_tools/binsanity/bin"
 
 
+RUN wget http://compsysbio.org/quackers_deps/subread-2.0.6-Linux-x86_64.tar.gz -O subread.tar.gz \
+&& tar -xzvf subread.tar.gz \
+&& mv subread-2.0.6-Linux-x86_64 subread \
+&& rm *.gz 
+
+ENV PATH="${PATH}:/quackers_tools/subread/bin"
 
 
 #/CONCOCT-1.1.0
