@@ -48,11 +48,17 @@ RUN conda config --add channels defaults \
 && conda config --add channels bioconda \
 && conda config --add channels ursky 
 
+RUn pip install --upgrade pip
+RUN pip install cryptography
+RUN apt-get install -y libffi-dev
+RUN pip install pyopenssl --upgrade
 
-RUN conda install -y pandas \
-&& conda install -y numpy \
-&& conda install -y scipy \
-&& conda install -y cython \
-&& conda install -y scikit-learn
+RUN conda install -y concoct
+RUN conda install -y pandas
+
+RUN conda install -y numpy 
+#&& conda install -y scipy \
+#&& conda install -y cython \
+#&& conda install -y scikit-learn
 
 
