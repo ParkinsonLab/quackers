@@ -306,6 +306,24 @@ RUN apt-get clean && apt-get update && apt-get install -y locales
 RUN locale-gen en_US.UTF-8
 
 RUN conda install -y bioconda::maxbin2
+RUN wget http://biopython.org/DIST/biopython-1.76.tar.gz \
+&& tar -xzvf biopython-1.76.tar.gz \
+&& rm *.tar.* 
+
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py \
+&& python2 get-pip.py
+
+RUN apt-get install -y python2-dev
+RUN pip2 install numpy
+RUN pip2 install --force-reinstall biopython==1.63
+
+RUN pip2 install matplotlib
+
+RUN apt-get install -y python-tk
+
+#RUN cd biopython-1.76 \
+#&& python2 setup.py install
+
 
 
 #/CONCOCT-1.1.0
