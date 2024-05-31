@@ -284,19 +284,28 @@ RUN apt-get update \
 #&& rm *.gz \
 #&& mv MaxBin-2.2.7 maxbin
 
-RUN wget https://github.com/edgraham/BinSanity/archive/refs/tags/v0.5.3.zip \
-&& unzip v0.5.3.zip \
-&& mv BinSanity-0.5.3 binsanity
-RUN pip install scikit-learn
-ENV PATH="${PATH}:/quackers_tools/binsanity/bin"
+#RUN wget https://github.com/edgraham/BinSanity/archive/refs/tags/v0.5.3.zip \
+#&& unzip v0.5.3.zip \
+#&& mv BinSanity-0.5.3 binsanity
+#RUN pip install scikit-learn
+#ENV PATH="${PATH}:/quackers_tools/binsanity/bin"
 
 
-RUN wget http://compsysbio.org/quackers_deps/subread-2.0.6-Linux-x86_64.tar.gz -O subread.tar.gz \
-&& tar -xzvf subread.tar.gz \
-&& mv subread-2.0.6-Linux-x86_64 subread \
-&& rm *.gz 
+#RUN wget http://compsysbio.org/quackers_deps/subread-2.0.6-Linux-x86_64.tar.gz -O subread.tar.gz \
+#&& tar -xzvf subread.tar.gz \
+#&& mv subread-2.0.6-Linux-x86_64 subread \
+#&& rm *.gz 
 
-ENV PATH="${PATH}:/quackers_tools/subread/bin"
+#ENV PATH="${PATH}:/quackers_tools/subread/bin"
+
+RUN apt-get update \
+&& apt-get install perl
+RUN export LC_ALL=en_US.UTF-8
+RUN export LANG=en_US.UTF-8
+RUN apt-get clean && apt-get update && apt-get install -y locales
+RUN locale-gen en_US.UTF-8
+
+RUN conda install -y bioconda::maxbin2
 
 
 #/CONCOCT-1.1.0

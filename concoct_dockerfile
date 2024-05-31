@@ -53,12 +53,20 @@ RUN pip install cryptography
 RUN apt-get install -y libffi-dev
 RUN pip install pyopenssl --upgrade
 
-RUN conda install -y concoct
+#RUN conda install -y concoct
 RUN conda install -y pandas
+RUN conda update -n base -c conda-forge conda
+RUN conda install -y numpy
+RUN conda install -y scipy 
+RUN conda install -y cython 
+RUN conda install -y scikit-learn
+RUN conda install -y biopython
 
-RUN conda install -y numpy 
-#&& conda install -y scipy \
-#&& conda install -y cython \
-#&& conda install -y scikit-learn
 
+WORKDIR /quackers_tools
+RUN wget https://github.com/BinPro/CONCOCT/archive/refs/tags/1.1.0.zip \
+&& unzip 1.1.0.zip 
+#&& python CONCOCT-1.1.0/setup.py install
 
+WORKDIR CONCOCT-1.1.0
+RUN python setup.py install
