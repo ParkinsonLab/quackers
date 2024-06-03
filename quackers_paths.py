@@ -28,9 +28,13 @@ class dir_structure:
         self.clean_dir_AR_s0 = os.path.join(self.clean_dir_data, "s0.fastq")
         self.clean_dir_AR_sf = os.path.join(self.clean_dir_data, "sf.fastq")
         self.clean_dir_AR_sr = os.path.join(self.clean_dir_data, "sr.fastq")
+        self.clean_dir_AR_f = os.path.join(self.clean_dir_data, "AR_f.fastq")
+        self.clean_dir_AR_r = os.path.join(self.clean_dir_data, "AR_r.fastq")
+        self.clean_dir_AR_s = os.path.join(self.clean_dir_data, "AR_s.fastq")
         self.clean_dir_final_s = os.path.join(self.clean_dir_end, "single.fastq")
-        self.clean_dir_final_f = os.path.join(self.clean_dir_end, "forward.fastq")
-        self.clean_dir_final_r = os.path.join(self.clean_dir_end, "reverse.fastq")
+        #specifically-named for metawrap binning.
+        self.clean_dir_final_f = os.path.join(self.clean_dir_end, "pair_1.fastq")
+        self.clean_dir_final_r = os.path.join(self.clean_dir_end, "pair_2.fastq")
         self.clean_dir_job = os.path.join(self.clean_dir_top, "AR.sh")
         self.clean_dir_mkr = os.path.join(self.clean_dir_top, "clean_AR")
         
@@ -43,8 +47,8 @@ class dir_structure:
         self.host_dir_sam   = os.path.join(self.host_dir_data, "sam")
         self.host_dir_end   = os.path.join(self.host_dir_top, "export")
         
-        self.host_final_f  = os.path.join(self.host_dir_end, "forward.fastq")
-        self.host_final_r  = os.path.join(self.host_dir_end, "reverse.fastq")
+        self.host_final_f  = os.path.join(self.host_dir_end, "pair_1.fastq")
+        self.host_final_r  = os.path.join(self.host_dir_end, "pair_2.fastq")
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
@@ -122,18 +126,23 @@ class dir_structure:
         self.cct_job_path  = os.path.join(self.cct_dir_top, "cct.sh")
         self.cct_checkm_job_path = os.path.join(self.cct_dir_top, "cct_checkm.sh")
 
-        self.mwrap_bin_dir_top = os.path.join(self.output_dir, path_obj.mwrap_bin_dir)
-        self.mwrap_bin_dir_data = os.path.join(self.mwrap_bin_dir_top, "data")
-        self.mwrap_bin_dir_prep = os.path.join(self.mwrap_bin_dir_top, "prep")
-        self.mwrap_bin_dir_mbat = os.path.join(self.mwrap_bin_dir_top, "metabat")
-        self.mwrap_bin_dir_export = os.path.join(self.mwrap_bin_dir_top, "export")
-        self.mwrap_fastq = os.path.join(self.mwrap_bin_dir_export, "mwrap_mbat_bin_contigs.fastq")
-        self.mwrap_prep_f = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_1.fastq")
-        self.mwrap_prep_r = os.path.join(self.mwrap_bin_dir_prep, "paired_sample_2.fastq")
-        self.mwrap_prep_s = os.path.join(self.mwrap_bin_dir_prep, "single_1.fastq")
-        self.mwrap_bins_dir = os.path.join(self.mwrap_bin_dir_mbat, "metabat2_bins")
-        self.mwrap_mkr = os.path.join(self.mwrap_bin_dir_top, "mwrap_mbat")
-        self.mwrap_job = os.path.join(self.mwrap_bin_dir_top, "mwrap.sh")
+        self.mbat2_bin_dir_top = os.path.join(self.output_dir, path_obj.mbat2_bin_dir)
+        self.mbat2_bin_dir_data = os.path.join(self.mbat2_bin_dir_top, "data")
+        self.mbat2_bin_dir_work = os.path.join(self.mbat2_bin_dir_top, "metabat2")
+        self.mbat2_fastq = os.path.join(self.mbat2_bin_dir_export, "mwrap_mbat_bin_contigs.fastq")
+        
+        self.mbat2_bins_dir = os.path.join(self.mbat2_bin_dir_mbat, "metabat2_bins")
+        self.mbat2_mkr = os.path.join(self.mbat2_bin_dir_top, "mbat2_bin")
+        self.mbat2_job = os.path.join(self.mbat2_bin_dir_top, "mbat2.sh")
+
+
+
+        self.mbin2_bin_dir_top = os.path.join(self.output_dir, path_obj.mbin2_bin_dir)
+        self.mbin2_bin_dir_work = os.path.join(self.mbin2_bin_dir_top, "maxbin2")
+        self.mbin2_bins_dir     = os.path.join(self.mbin2_bin_dir_work, "maxbin2_bins")
+        self.mbin2_mkr = os.path.join(self.mbin2_bin_dir_top, "mbin2_bin")
+        self.mbin2_job  = os.path.join(self.mbin2_bin_dir_top, "mbin2.sh")
+
 
         self.mwrap_bin_r_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_bin_r_dir)
         self.mwrap_bin_r_dir_data   = os.path.join(self.mwrap_bin_r_dir_top, "data")
@@ -363,11 +372,12 @@ class path_obj:
         self.clean_dir          = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
         self.host_dir           = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
-        self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3_contig_binning")
-        self.mwrap_bin_dir      = self.assign_value("directory", "metawrap_binning", "str", "4_metawrap_binning")
-        self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "5_mwrap_bin_r")
-        self.gtdbtk_class_dir   = self.assign_value("directory", "gtdbtk_classify", "str", "6_gtdbtk_classify")
-        self.mwrap_quant_dir    = self.assign_value("directory", "metawrap_quant_bin", "str", "7_metawrap_quant_bins")
+        self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")
+        self.mbin2_bin_dir       = self.assign_value("directory", "maxbin2_binning", "str", "3b_maxbin2_binning")
+        self.mbat2_bin_dir      = self.assign_value("directory", "metabat2_binning", "str", "3c_metabat2_binning")
+        self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "4_mwrap_bin_r")
+        self.gtdbtk_class_dir   = self.assign_value("directory", "gtdbtk_classify", "str", "5_gtdbtk_classify")
+        self.mwrap_quant_dir    = self.assign_value("directory", "metawrap_quant_bin", "str", "6_metawrap_quant_bins")
 
         #-----------------------------------------------------------
         #keep flags
@@ -404,6 +414,11 @@ class path_obj:
             for artifact_entry in self.config["artifacts"]:
                 self.check_lib_integrity(artifact_entry)
 
+        self.gtdbtk_ref = self.assign_value("databases", "gtdbtk", "str", "databases/gtdbtk_placeholder")
+        if(os.path.getsize(self.gtdbtk_ref) > 0):
+            print("GTDBTK db OK")
+        else:
+            sys.exit("GTDBTK db empty. Exiting.")
         
 
 

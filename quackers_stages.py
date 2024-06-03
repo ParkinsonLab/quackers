@@ -9,21 +9,25 @@ import MetaPro_utilities as mp_util
 
 class q_stage:
     def __init__(self, out_path, path_obj, dir_obj, args_pack):
-        self.path_obj = path_obj
-        self.dir_obj = dir_obj
-        self.command_obj = q_com.command_obj(path_obj, dir_obj)
-        self.job_control = mp_util.mp_util(out_path)#, self.path_obj.bypass_log_name)
-        
         self.start_s_path   = args_pack["s_path"]
         self.start_f_path  = args_pack["p1_path"]
         self.start_r_path  = args_pack["p2_path"]
-        
+        self.job_control = mp_util.mp_util(out_path)#, self.path_obj.bypass_log_name)
         self.op_mode = args_pack["op_mode"]
         self.quality_encoding = "64"
         if(self.op_mode == "single"):
             self.quality_encoding = self.job_control.determine_encoding(self.start_s_path)
         else:
             self.quality_encoding = self.job_control.determine_encoding(self.start_f_path)
+
+        self.path_obj = path_obj
+        self.dir_obj = dir_obj
+        self.command_obj = q_com.command_obj(path_obj, dir_obj, self.quality_encoding)
+        
+        
+        
+        
+        
 
 
         
@@ -128,9 +132,13 @@ class q_stage:
 
 
         if(not os.path.exists(self.dir_obj.assembly_bt2_idx_mkr)):
+            print(dt.today(), "indexing contigs for BT2")
+            print("using:", self.dir_obj.assembly_bt2_idx)
             command = self.command_obj.bowtie2_index_ref_command(self.dir_obj.assembly_contigs, self.dir_obj.assembly_bt2_idx, self.dir_obj.assembly_bt2_idx_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_bwa_idx_job, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping BT2 contig indexing")
         
         if(not os.path.exists(self.dir_obj.assembly_pp_mkr)):
             command = ""
@@ -140,11 +148,15 @@ class q_stage:
                 command = self.command_obj.clean_reads_bowtie2_command_p(self.dir_obj.assembly_bt2_idx, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_pp_mkr) 
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_pp_job, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping BT2 align contigs")
 
         if(not os.path.exists(self.dir_obj.assembly_scan_sam_mkr)):
             command = self.command_obj.bt2_scan_sam(self.dir_obj.assembly_scan_sam_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_scan_sam_job, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping BT2 sam/bam business")
                         
 
 
@@ -153,6 +165,9 @@ class q_stage:
             command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping contig-read reconciliation")
+        
         self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
 
     
@@ -164,11 +179,15 @@ class q_stage:
             command = self.command_obj.concoct_prep_command(self.dir_obj.cct_prep_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_prep_job_path, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping concoct prep")
 
         if(not os.path.exists(self.dir_obj.cct_mkr)):
             command = self.command_obj.concoct_command(self.dir_obj.cct_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_job_path, command)
             self.job_control.wait_for_mp_store()
+        else:
+            print(dt.today(), "skipping concoct binning")
 
         if(not os.path.exists(self.dir_obj.cct_checkm_mkr)):
             print(dt.today(), "running checkm")
@@ -176,7 +195,7 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_checkm_job_path, command)
             self.job_control.wait_for_mp_store()
         else:
-            print(dt.today(), "bypassing checkm")
+            print(dt.today(), "skipping checkm")
             print(self.dir_obj.cct_checkm_mkr)
         self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
             

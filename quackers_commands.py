@@ -11,11 +11,12 @@ class command_obj:
             os.mkdir(folder_path)
 
 
-    def __init__(self, path_obj, dir_obj):
+    def __init__(self, path_obj, dir_obj, encoding):
         #self.path_obj = q_path.path_obj(output_path)
         self.path_obj = path_obj
         self.dir_obj = dir_obj
         self.op_mode = self.path_obj.operating_mode
+        self.phred_encoding = encoding
 
     def adapterremoval_command(self, quality_encoding, marker_path):
         remove_lq = self.path_obj.ar_path + " "
@@ -76,7 +77,7 @@ class command_obj:
     def bowtie2_index_ref_command(self, ref_path, out_path, marker_path):
         command = self.path_obj.bowtie2_idx_path + " "
         command += ref_path  + " "
-        command + out_path
+        command += out_path
 
         make_marker = "touch " + marker_path
 
@@ -126,8 +127,9 @@ class command_obj:
         command = self.path_obj.bowtie2_path 
         command += " -x "
         command += ref_path + " "
-        command += in_path + " " 
-        command += ">" + " " + self.dir_obj.assembly_sam
+        command += "-U" + " " + in_path + " " 
+        #command += "--phred" + str(self.phred_encoding) + " "
+        command += "-S " + " " + self.dir_obj.assembly_raw_sam
 
 
         make_marker = "touch" + " " + marker_path
@@ -138,12 +140,15 @@ class command_obj:
     
     def clean_reads_bowtie2_command_p(self, ref_path, in1_path, in2_path, marker_path):
         #used for contigs only
-        command = self.path_obj.bowtie2_path
-        command += " -x" + " "
+        command = self.path_obj.bowtie2_path + " "
+        command += "-p " + str(os.cpu_count()) + " "
+        command += "-q" + " "
+        command += "-x" + " "
         command += ref_path + " "
-        command += in1_path + " "
-        command += in2_path + " "
-        command += ">" + self.dir_obj.assembly_raw_sam
+        command += "-1" + " " + in1_path + " "
+        command += "-2" + " " + in2_path + " "
+        #command += "--phred" + str(self.phred_encoding) + " "
+        command += "-S " + self.dir_obj.assembly_raw_sam
 
         make_marker = "touch" + " " + marker_path
 
@@ -249,7 +254,7 @@ class command_obj:
 
         concoct_table_prep  = self.path_obj.cct_cov_table + " "
         concoct_table_prep += self.dir_obj.cct_bed + " "
-        concoct_table_prep += self.dir_obj.assembly_bam + " "
+        concoct_table_prep += self.dir_obj.assembly_sort_bam + " "
         concoct_table_prep +=">" + " " + self.dir_obj.cct_cov_table
         #concoct_table_prep += 
 
@@ -299,51 +304,63 @@ class command_obj:
 
         return [run_checkm + " && " +  make_marker]
     
-    def metawrap_bin_command(self, op_mode, hosts_bypassed, marker_path):
+    def metabat2_bin_command(self, op_mode, hosts_bypassed, marker_path):
 
         #metawrap needs specifically-named files for paired
-        change_f_name = "cp" + " "
-        change_r_name = "cp" + " "
-        change_s_name = "cp" + " "
-        
-        if(hosts_bypassed):
-            change_f_name += self.dir_obj.start_f + " " + self.dir_obj.mwrap_prep_f
-            change_r_name += self.dir_obj.start_r + " " + self.dir_obj.mwrap_prep_r
-            change_s_name += self.dir_obj.start_s + " " + self.dir_obj.mwrap_prep_s
-        else:
-            change_f_name += self.dir_obj.host_final_f + " " + self.dir_obj.mwrap_prep_f
-            change_r_name += self.dir_obj.host_final_r + " " + self.dir_obj.mwrap_prep_r
-            change_f_name += self.dir_obj.host_final_s + " " + self.dir_obj.mwrap_prep_s
-        
-        
-        metawrap_bin = self.path_obj.mwrap_bin_tool + " "
-        metawrap_bin += "-o" + " " + self.dir_obj.mwrap_bin_dir_mbat + " "
-        metawrap_bin += "-t" + " " + str(os.cpu_count()) + " "
-        metawrap_bin += "-a" + " " + self.dir_obj.assembly_contigs + " "
+        metabat2_bin = self.path_obj.mwrap_bin_tool + " "
+        metabat2_bin += "-o" + " " + self.dir_obj.mbat2_bin_dir_work + " "
+        metabat2_bin += "-t" + " " + str(os.cpu_count()) + " "
+        metabat2_bin += "-a" + " " + self.dir_obj.assembly_contigs + " "
         
         if(op_mode == "single"):
-            metawrap_bin += "--metabat2" + " " + "--single-end" + " "
+            metabat2_bin += "--metabat2" + " " + "--single-end" + " "
             if(hosts_bypassed):
-                metawrap_bin += self.dir_obj.start_s
+                metabat2_bin += self.dir_obj.start_s
             else:
-                metawrap_bin += self.dir_obj.host_final_s
+                metabat2_bin += self.dir_obj.host_final_s
 
         else:
-            metawrap_bin += "--metabat2" + " "
-            metawrap_bin += self.dir_obj.mwrap_prep_f + " " + self.dir_obj.mwrap_prep_r
-            
+            metabat2_bin += "--metabat2" + " "
+            if(hosts_bypassed):
+                metabat2_bin += self.dir_obj.start_f + " " + self.dir_obj.start_r
+            else:
+                metabat2_bin += self.dir_obj.host_final_f + " " + self.dir_obj.host_final_r
         make_marker = "touch" + " " + marker_path
 
-        if(op_mode == "paired"):
-            return [change_f_name + " && " + change_r_name + " && " + metawrap_bin + " && " + make_marker]
+        return [metabat2_bin + " && " + make_marker]
+        
+
+    def metawrap_maxbin2_bin_command(self, op_mode, hosts_bypassed, marker_path):
+        maxbin2_command = self.path_obj.mwrap_bin_tool + " "
+        maxbin2_command += "-o" + " " + self.dir_obj.mbin2_bin_dir_work + " "
+        maxbin2_command += "-t" + " " + str(os.cpu_count()) + " "
+        maxbin2_command += "-a" + " " + self.dir_obj.assembly_contigs + " "
+        if(op_mode == "single"):
+            maxbin2_command += "--maxbin2" + " " + "--single-end" + " "
+            if(hosts_bypassed):
+                maxbin2_command += self.dir_obj.clean_dir_final_s
+            else:
+                maxbin2_command += self.dir_obj.host_final_s
         else:
-            return [change_s_name + " && "  + metawrap_bin + " && " + make_marker]
+            maxbin2_command += "--maxbin2" + " "
+            if(hosts_bypassed):
+                maxbin2_command += self.dir_obj.clean_dir_final_f + " " + self.dir_obj.clean_dir_final_r
+            else:
+                maxbin2_command += self.dir_obj.host_final_f + " " + self.dir_obj.host_final_r
+
+        make_marker = "touch" + " " + marker_path
+
+        return[maxbin2_command + " && " + make_marker]
+
+
         
     def metawrap_bin_refinement_command(self, marker_path):
         refine = self.path_obj.mwrap_bin_r_tool + " "
         refine += "-o" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
         refine += "-t" + " " + str(os.cpu_count()) + " "
-        refine += "-A" + " " + self.dir_obj.mwrap_bins_dir + " "
+        refine += "-A" + " " + self.dir_obj.cct_dir_bins + " "
+        refine += "-B" + " " + self.dir_obj.mbat2_bins_dir + " "
+        refine += "-C" + " " + self.dir_obj.mbin2_bins_dir + " "
         refine += "-c" + " " + str(50) + " "
         refine += "-x" + " " + str(10)
 

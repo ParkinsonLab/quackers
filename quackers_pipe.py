@@ -37,7 +37,6 @@ def run_pipe(path_obj, args_pack):
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
 
-    sys.exit("stop here")
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
         stage_obj.concoct_binning()    
 
