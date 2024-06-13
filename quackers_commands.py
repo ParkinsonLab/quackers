@@ -395,10 +395,16 @@ class command_obj:
 
         return [set_env, classify + " && " + make_marker]
     
-    def metawrap_quantify_command(self, bin_choice, marker_path):
+    def metawrap_quantify_command(self, bin_choice, forward, reverse, single, marker_path):
 
         bin_select = ""
         out_dir = ""
+        reads_selection = ""
+        if(self.op_mode == "single"):
+            reads_selection = single
+        elif(self.op_mode == "paired"):
+            reads_selection = forward + " " + reverse
+        
         if(bin_choice == "cct"):
             out_dir = self.dir_obj.mwrap_quant_cct_dir 
             bin_select = self.dir_obj.cct_bins_dir
@@ -413,7 +419,8 @@ class command_obj:
         quant = self.path_obj.mwrap_quant_tool + " "
         quant += "-b" + " " + bin_select + " "
         quant += "-o" + " " + out_dir + " "
-        quant += "-a" + " " + self.dir_obj.assemble_contigs + " "
+        quant += "-a" + " " + self.dir_obj.assembly_contigs + " "
+        quant += reads_selection + " "
         quant += "-t" + " " + str(os.cpu_count()) 
         make_marker = "touch" + " " + marker_path
 

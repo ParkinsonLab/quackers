@@ -189,11 +189,11 @@ class dir_structure:
         self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
         self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
 
-        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
-        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+        self.mwrap_quant_mbat2_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbat2_job.sh")
+        self.mwrap_quant_mbat2_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbat2")
         
-        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
-        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+        self.mwrap_quant_mbin2_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbin2_job.sh")
+        self.mwrap_quant_mbin2_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbin2")
         
         make_folder(self.mwrap_bin_r_dir_top)
         make_folder(self.mwrap_bin_r_dir_data)

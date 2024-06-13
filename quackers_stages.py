@@ -243,7 +243,7 @@ class q_stage:
         print(dt.today(), "running metawrap quant bin")
         marker_path = ""
         job_path = ""
-        for bin_choice in self.dir_obj.bin_tools:
+        for bin_choice in self.bin_tools:
             if(bin_choice == "cct"):
                 marker_path = self.dir_obj.mwrap_quant_cct_mkr
                 job_path = self.dir_obj.mwrap_quant_cct_job
@@ -254,9 +254,9 @@ class q_stage:
                 marker_path = self.dir_obj.mwrap_quant_mbin2_mkr
                 job_path = self.dir_obj.mwrap_quant_mbin2_job
 
-            command = self.command_obj.metawrap_quantify_command(bin_choice, marker_path)
+            command = self.command_obj.metawrap_quantify_command(bin_choice, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, marker_path)
             self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         
         self.job_control.wait_for_mp_store()
-        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_quant_job, command)
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
