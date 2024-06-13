@@ -109,14 +109,22 @@ class dir_structure:
         self.cct_dir_top            = os.path.join(self.output_dir, path_obj.cct_bin_dir)
         self.cct_dir_data           = os.path.join(self.cct_dir_top, "data")
         self.cct_dir_checkm     = os.path.join(self.cct_dir_top, "checkm_data")
-        self.cct_dir_bins       = os.path.join(self.cct_dir_top, "bins")
+        self.cct_bins_dir       = os.path.join(self.cct_dir_top, "bins")
         self.cct_dir_export     = os.path.join(self.cct_dir_top, "export")
+        make_folder(self.cct_dir_top)
+        make_folder(self.cct_dir_data)
+        make_folder(self.cct_dir_checkm)
+        make_folder(self.cct_bins_dir)
+        make_folder(self.cct_dir_export)
+
         self.cct_bed            = os.path.join(self.cct_dir_data, "contigs.bed")
         self.cct_cut_contig     = os.path.join(self.cct_dir_data, "cut_contgs.fa")
         self.cct_cov_table      = os.path.join(self.cct_dir_data, "coverage_table.tsv")
         self.contig_h_fixed     = os.path.join(self.cct_dir_data, "assembled_contigs_header_patch.fa")
         self.cct_clust          = os.path.join(self.cct_dir_data, "concoct_run_clustering_gt1000.csv")
         self.cct_clust_merge    = os.path.join(self.cct_dir_data, "concoct_merged_cluster.csv")
+
+
         
         self.cct_prep_mkr       = os.path.join(self.cct_dir_top, "concoct_prep")
         self.cct_mkr            = os.path.join(self.cct_dir_top, "concoct_binning")
@@ -128,10 +136,13 @@ class dir_structure:
 
         self.mbat2_bin_dir_top = os.path.join(self.output_dir, path_obj.mbat2_bin_dir)
         self.mbat2_bin_dir_data = os.path.join(self.mbat2_bin_dir_top, "data")
+        self.mbat2_bin_dir_export = os.path.join(self.mbat2_bin_dir_top, "export")
         self.mbat2_bin_dir_work = os.path.join(self.mbat2_bin_dir_top, "metabat2")
         self.mbat2_fastq = os.path.join(self.mbat2_bin_dir_export, "mwrap_mbat_bin_contigs.fastq")
+
+        make_folder(self.mbat2_bin_dir_top)
         
-        self.mbat2_bins_dir = os.path.join(self.mbat2_bin_dir_mbat, "metabat2_bins")
+        self.mbat2_bins_dir = os.path.join(self.mbat2_bin_dir_work, "metabat2_bins")
         self.mbat2_mkr = os.path.join(self.mbat2_bin_dir_top, "mbat2_bin")
         self.mbat2_job = os.path.join(self.mbat2_bin_dir_top, "mbat2.sh")
 
@@ -143,6 +154,8 @@ class dir_structure:
         self.mbin2_mkr = os.path.join(self.mbin2_bin_dir_top, "mbin2_bin")
         self.mbin2_job  = os.path.join(self.mbin2_bin_dir_top, "mbin2.sh")
 
+        make_folder(self.mbin2_bin_dir_top)
+
 
         self.mwrap_bin_r_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_bin_r_dir)
         self.mwrap_bin_r_dir_data   = os.path.join(self.mwrap_bin_r_dir_top, "data")
@@ -151,35 +164,43 @@ class dir_structure:
 
         self.gtdbtk_dir_top = os.path.join(self.output_dir, path_obj.gtdbtk_class_dir)
         self.gtdbtk_dir_data = os.path.join(self.gtdbtk_dir_top, "data")
-        self.gtdbtk_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify.sh")
-        self.gtdbtk_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_run")
-
-        self.mwrap_quant_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_quant_dir)
-        self.mwrap_quant_dir_data   = os.path.join(self.mwrap_quant_dir_top, "data")
-        self.mwrap_quant_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant.sh")
-        self.mwrap_quant_mkr = os.path.join(self.mwrap_quant_dir_top, "")
-
-
-        
-
-
-        make_folder(self.cct_dir_top)
-        make_folder(self.cct_dir_data)
-        make_folder(self.cct_dir_bins)
-        make_folder(self.cct_dir_checkm)
-        make_folder(self.cct_dir_export)
-
-        make_folder(self.mwrap_bin_dir_top)
-        make_folder(self.mwrap_bin_dir_data)
-        make_folder(self.mwrap_bin_dir_prep)
-        make_folder(self.mwrap_bin_dir_mbat)
-        make_folder(self.mwrap_bin_dir_export)
-
-        make_folder(self.mwrap_bin_r_dir_top)
-        make_folder(self.mwrap_bin_r_dir_data)
+        self.gtdbtk_dir_cct = os.path.join(self.gtdbtk_dir_data, "cct")
+        self.gtdbtk_dir_mbat2 = os.path.join(self.gtdbtk_dir_data, "mbat2")
+        self.gtdbtk_dir_mbin2 = os.path.join(self.gtdbtk_dir_data, "mbin2")
+        self.gtdbtk_cct_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_cct.sh")
+        self.gtdbtk_mbat2_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_mbat2.sh")
+        self.gtdbtk_mbin2_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_mbin2.sh")
+        self.gtdbtk_cct_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_cct")
+        self.gtdbtk_mbin2_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_mbin2")
+        self.gtdbtk_mbat2_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_mbat2")
 
         make_folder(self.gtdbtk_dir_top)
         make_folder(self.gtdbtk_dir_data)
+        make_folder(self.gtdbtk_dir_cct)
+        make_folder(self.gtdbtk_dir_mbat2)
+        make_folder(self.gtdbtk_dir_mbin2)
+
+        self.mwrap_quant_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_quant_dir)
+        self.mwrap_quant_dir_data   = os.path.join(self.mwrap_quant_dir_top, "data")
+        self.mwrap_quant_cct_dir = os.path.join(self.mwrap_quant_dir_data, "cct")
+        self.mwrap_quant_mbat2_dir = os.path.join(self.mwrap_quant_dir_data, "mbat2")
+        self.mwrap_quant_mbin2_dir = os.path.join(self.mwrap_quant_dir_data, "mbin2")
+        
+        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
+        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+
+        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
+        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+        
+        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
+        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+        
+        make_folder(self.mwrap_bin_r_dir_top)
+        make_folder(self.mwrap_bin_r_dir_data)
+        make_folder(self.mwrap_quant_cct_dir)
+        make_folder(self.mwrap_quant_mbat2_dir)
+        make_folder(self.mwrap_quant_mbin2_dir)
+        
 
         make_folder(self.mwrap_quant_dir_top)
         make_folder(self.mwrap_quant_dir_data)

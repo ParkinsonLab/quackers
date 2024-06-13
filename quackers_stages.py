@@ -9,6 +9,7 @@ import MetaPro_utilities as mp_util
 
 class q_stage:
     def __init__(self, out_path, path_obj, dir_obj, args_pack):
+        self.bin_tools = ["cct", "mbat2", "mbin2"]
         self.start_s_path   = args_pack["s_path"]
         self.start_f_path  = args_pack["p1_path"]
         self.start_r_path  = args_pack["p2_path"]
@@ -26,11 +27,6 @@ class q_stage:
         
         
         
-        
-        
-
-
-        
 
         self.hosts_bypassed = False
 
@@ -45,10 +41,10 @@ class q_stage:
             self.hosts_bypassed = True 
             print(dt.today(), "no hosts used: bypassing host filter")
             if(self.op_mode == "single"):
-                self.dir_obj.host_final_s = self.start_s_path
+                self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
             elif(self.op_mode == "paired"):
-                self.dir_obj.host_final_f = self.start_f_path
-                self.dir_obj.host_final_r = self.start_r_path
+                self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
+                self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
     
     def low_quality_filter(self):
         if (os.path.exists(self.dir_obj.clean_dir_mkr)):
@@ -199,12 +195,21 @@ class q_stage:
             print(self.dir_obj.cct_checkm_mkr)
         self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
             
-    def metawrap_binning(self):
-        print(dt.today(), "running metawrap-binning")
-        command = self.command_obj.metawrap_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mwrap_mkr)
-        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_job, command)
+    def metabat2_binning(self):
+        print(dt.today(), "running metawrap-binning: metabat2")
+        command = self.command_obj.metabat2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbat2_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbat2_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_dir)
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbat2_bin_dir)
+
+
+    def maxbin2_binning(self):
+        print(dt.today(), "running metawrap-binning: maxbin2")
+        command = self.command_obj.maxbin2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbin2_mkr)
+        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbin2_job, command)
+        self.job_control.wait_for_mp_store()
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
+        
 
     def metawrap_bin_refine(self):
         print("running metawrap bin_refinement")
@@ -215,12 +220,43 @@ class q_stage:
 
     def gtdbtk_classify(self):
         print("running GTDB-tk classify")
-        command = self.command_obj.gtdbtk_command(self.dir_obj.gtdbtk_mkr)
-        self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.gtdbtk_job, command)
-        #self.job_control.wait_for_mp_store()
-        #self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+        
+        for bin_choice in self.bin_tools:
+            marker_path = ""
+            job_path = ""
+            if(bin_choice == "cct"):
+                marker_path = self.dir_obj.gtdbtk_cct_mkr
+                job_path = self.dir_obj.gtdbtk_cct_job
+            elif(bin_choice == "mbat2"):
+                marker_path = self.dir_obj.gtdbtk_mbat2_mkr
+                job_path = self.dir_obj.gtdbtk_mbat2_job
+            elif(bin_choice == "mbin2"):
+                marker_path = self.dir_obj.gtdbtk_mbin2_mkr
+                job_path = self.dir_obj.gtdbtk_mbin2_job
+            command = self.command_obj.gtdbtk_command(bin_choice, marker_path)
+            self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
+        
+        self.job_control.wait_for_mp_store()
+        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
 
     def metawrap_quant(self):
         print(dt.today(), "running metawrap quant bin")
-        command = self.command_obj.metawrap_quantify_command(self.dir_obj.mwrap_quant_mkr)
+        marker_path = ""
+        job_path = ""
+        for bin_choice in self.dir_obj.bin_tools:
+            if(bin_choice == "cct"):
+                marker_path = self.dir_obj.mwrap_quant_cct_mkr
+                job_path = self.dir_obj.mwrap_quant_cct_job
+            elif(bin_choice == "mbat2"):
+                marker_path = self.dir_obj.mwrap_quant_mbat2_mkr
+                job_path = self.dir_obj.mwrap_quant_mbat2_job
+            elif(bin_choice == "mbin2"):
+                marker_path = self.dir_obj.mwrap_quant_mbin2_mkr
+                job_path = self.dir_obj.mwrap_quant_mbin2_job
+
+            command = self.command_obj.metawrap_quantify_command(bin_choice, marker_path)
+            self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
+        
+        
+        self.job_control.wait_for_mp_store()
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_quant_job, command)

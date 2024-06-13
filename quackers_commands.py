@@ -287,7 +287,7 @@ class command_obj:
         get_bins += self.dir_obj.assembly_contigs + " "
         get_bins += self.dir_obj.cct_clust_merge + " "
         get_bins += "--output_path" + " "
-        get_bins += self.dir_obj.cct_dir_bins
+        get_bins += self.dir_obj.cct_bins_dir
 
         make_marker = "touch" + " " + marker_path
 
@@ -296,7 +296,7 @@ class command_obj:
     def checkm_command(self, marker_path):
         run_checkm = self.path_obj.checkm_path + " "
         run_checkm += "lineage_wf" + " "
-        run_checkm += self.dir_obj.cct_dir_bins + " "
+        run_checkm += self.dir_obj.cct_bins_dir + " "
         run_checkm += "-x" + " " + ".fa" + " " + "-t" + " " + str(os.cpu_count()) + " "
         run_checkm += self.dir_obj.cct_dir_checkm
 
@@ -315,14 +315,14 @@ class command_obj:
         if(op_mode == "single"):
             metabat2_bin += "--metabat2" + " " + "--single-end" + " "
             if(hosts_bypassed):
-                metabat2_bin += self.dir_obj.start_s
+                metabat2_bin += self.dir_obj.clean_dir_final_s
             else:
                 metabat2_bin += self.dir_obj.host_final_s
 
         else:
             metabat2_bin += "--metabat2" + " "
             if(hosts_bypassed):
-                metabat2_bin += self.dir_obj.start_f + " " + self.dir_obj.start_r
+                metabat2_bin += self.dir_obj.clean_dir_final_f + " " + self.dir_obj.clean_dir_final_r
             else:
                 metabat2_bin += self.dir_obj.host_final_f + " " + self.dir_obj.host_final_r
         make_marker = "touch" + " " + marker_path
@@ -330,7 +330,7 @@ class command_obj:
         return [metabat2_bin + " && " + make_marker]
         
 
-    def metawrap_maxbin2_bin_command(self, op_mode, hosts_bypassed, marker_path):
+    def maxbin2_bin_command(self, op_mode, hosts_bypassed, marker_path):
         maxbin2_command = self.path_obj.mwrap_bin_tool + " "
         maxbin2_command += "-o" + " " + self.dir_obj.mbin2_bin_dir_work + " "
         maxbin2_command += "-t" + " " + str(os.cpu_count()) + " "
@@ -358,7 +358,7 @@ class command_obj:
         refine = self.path_obj.mwrap_bin_r_tool + " "
         refine += "-o" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
         refine += "-t" + " " + str(os.cpu_count()) + " "
-        refine += "-A" + " " + self.dir_obj.cct_dir_bins + " "
+        refine += "-A" + " " + self.dir_obj.cct_bins_dir + " "
         refine += "-B" + " " + self.dir_obj.mbat2_bins_dir + " "
         refine += "-C" + " " + self.dir_obj.mbin2_bins_dir + " "
         refine += "-c" + " " + str(50) + " "
@@ -367,22 +367,52 @@ class command_obj:
         make_marker = "touch" + " " + marker_path
         return [refine + " && " + make_marker]
     
-    def gtdbtk_command(self, marker_path):
+    def gtdbtk_command(self, bin_choice, marker_path):
+        bin_select = ""
+        out_dir = ""
+        if(bin_choice == "cct"):
+            bin_select = self.dir_obj.cct_bins_dir
+            out_dir = self.dir_obj.gtdbtk_dir_cct
+        elif(bin_choice == "mbat2"):
+            bin_select = self.dir_obj.mbat2_bins_dir
+            out_dir = self.dir_obj.gtdbtk_dir_mbat2
+        elif(bin_choice == "mbin2"):
+            bin_select = self.dir_obj.mbin2_bins_dir
+            out_dir = self.dir_obj.gtdbtk_dir_mbin2
+
+        set_env = "export" + " "
+        set_env += "GTDBTK_DATA_PATH="
+        set_env += self.path_obj.gtdbtk_ref
+
         classify = self.path_obj.gtdbtk_path + " " + "classify_wf" + " "
         classify += "--skip_ani_screen" + " "
-        classify += "--genome_dir" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
+        classify += "--genome_dir" + " " + bin_select + " "
         classify += "--extension" + " " + "fa" + " "
-        classify += "--out_dir" + " " + self.dir_obj.gtdbtk_dir_data + " "
+        classify += "--out_dir" + " " + out_dir + " "
         classify += "--cpus" + " " + str(os.cpu_count())
 
         make_marker = "touch" + " " + marker_path
 
-        return [classify + " && " + make_marker]
+        return [set_env, classify + " && " + make_marker]
     
-    def metawrap_quantify_command(self, marker_path):
+    def metawrap_quantify_command(self, bin_choice, marker_path):
+
+        bin_select = ""
+        out_dir = ""
+        if(bin_choice == "cct"):
+            out_dir = self.dir_obj.mwrap_quant_cct_dir 
+            bin_select = self.dir_obj.cct_bins_dir
+        elif(bin_choice == "mbat2"):
+            out_dir = self.dir_obj.mwrap_quant_mbat2_dir
+            bin_select = self.dir_obj.mbat2_bins_dir
+        
+        elif(bin_choice == "mbin2"):
+            out_dir = self.dir_obj.mwrap_quant_mbin2_dir
+            bin_select = self.dir_obj.mbin2_bins_dir
+
         quant = self.path_obj.mwrap_quant_tool + " "
-        quant += "-b" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
-        quant += "-o" + " " + self.dir_obj.mwrap_quant_dir_data + " "
+        quant += "-b" + " " + bin_select + " "
+        quant += "-o" + " " + out_dir + " "
         quant += "-a" + " " + self.dir_obj.assemble_contigs + " "
         quant += "-t" + " " + str(os.cpu_count()) 
         make_marker = "touch" + " " + marker_path

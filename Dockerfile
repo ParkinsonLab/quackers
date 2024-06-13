@@ -63,7 +63,7 @@ RUN wget https://compsysbio.org/metawrap_mod/metawrap_scripts.tar.gz \
 && tar -xzvf metawrap_scripts.tar.gz
 
 WORKDIR /quackers_tools
-RUN wget https://github.com/Ecogenomics/GTDBTk/archive/refs/tags/2.3.2.zip -O gtdbtk.zip \
+RUN wget https://github.com/Ecogenomics/GTDBTk/archive/refs/tags/2.4.0.zip -O gtdbtk.zip \
 && unzip gtdbtk.zip 
 
 RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.5.3/bowtie2-2.5.3-linux-x86_64.zip -O bowtie2.zip \
@@ -106,7 +106,7 @@ RUN mv CONCOCT-1.1.0 concoct \
 && mv Prodigal-2.6.3 prodigal \
 && mv MEGAHIT-1.2.9-Linux-x86_64-static megahit \
 && mv samtools-1.20 samtools \
-&& mv GTDBTk-2.3.2 gtdbtk 
+&& mv GTDBTk-2.4.0 gtdbtk 
 
 WORKDIR /quackers_tools
 RUN wget http://compsysbio.org/quackers_deps/BBMap_39.06.tar.gz -O bbmap.tar.gz \
@@ -321,10 +321,42 @@ RUN pip2 install matplotlib
 
 RUN apt-get install -y python-tk
 
+
 #RUN cd biopython-1.76 \
 #&& python2 setup.py install
 
+RUN wget https://github.com/bluenote-1577/skani/releases/download/latest/skani \
+&& chmod 777 skani
 
+ENV PATH="${PATH}:/quackers_tools"
+RUN wget http://www.microbesonline.org/fasttree/FastTreeMP \
+&& chmod 777 FastTreeMP
+ENV PATH="${PATH}:/quackers_tools/FastTreeMP"
+
+
+WORKDIR /quackers_tools
+RUN rm *.zip
+RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-1.10.0_linux_x86_64.tar.gz \
+&& tar -xzvf salmon-1.10.0_linux_x86_64.tar.gz \
+&& rm *.tar.gz
+
+ENV PATH="${PATH}:/quackers_tools/salmon-latest_linux_x86_64/bin"
+
+
+
+#RUN apt-get install -y libboost-all-dev \
+#&& apt-get install curl 
+
+#RUN apt-get update && apt-get -y upgrade && apt-get install -y cereal
+#RUN apt-get install -y libtbb-dev \
+#&& apt-get install -y libgff-dev
+
+#RUN mv salmon-1.10.1 salmon
+#WORKDIR salmon
+#RUN mkdir build \
+#&& cd build \
+#&& cmake . \
+#&& make
 
 #/CONCOCT-1.1.0
 CMD ["bash"]

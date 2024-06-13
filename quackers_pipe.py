@@ -40,16 +40,26 @@ def run_pipe(path_obj, args_pack):
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
         stage_obj.concoct_binning()    
 
-    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_dir)):
-        stage_obj.metawrap_binning()
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mbat2_bin_dir)):
+        stage_obj.metabat2_binning()
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mbin2_bin_dir)):
+        stage_obj.maxbin2_binning()
+
+    
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_r_dir)):
         stage_obj.metawrap_bin_refine()
 
+
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.gtdbtk_class_dir)):
         stage_obj.gtdbtk_classify()
+
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_quant_dir)):
+        stage_obj.metawrap_quant()
     
-    print(dt.today(), "DONE!")
+
+    print(dt.today(), "QUACKERS DONE!")
 
 def parse_inputs():
     parser = ArgumentParser(description="Quackers: a metagenomic processing pipeline <and maybe more>. 2024. "
