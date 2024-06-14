@@ -294,6 +294,10 @@ class command_obj:
         return [run_concoct + " && " + merge_cutup + " && " + get_bins + " && " + make_marker]
 
     def checkm_command(self, marker_path):
+        set_env = "export" + " "
+        set_env += "CHECKM_DATA_PATH="
+        set_env += self.path_obj.checkm_ref
+
         run_checkm = self.path_obj.checkm_path + " "
         run_checkm += "lineage_wf" + " "
         run_checkm += self.dir_obj.cct_bins_dir + " "
@@ -302,7 +306,7 @@ class command_obj:
 
         make_marker = "touch" + " " + marker_path
 
-        return [run_checkm + " && " +  make_marker]
+        return [set_env, run_checkm + " && " +  make_marker]
     
     def metabat2_bin_command(self, op_mode, hosts_bypassed, marker_path):
 

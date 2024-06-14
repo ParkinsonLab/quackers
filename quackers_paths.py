@@ -440,6 +440,12 @@ class path_obj:
             print("GTDBTK db OK")
         else:
             sys.exit("GTDBTK db empty. Exiting.")
+
+        self.checkm_ref = self.assign_value("databases", "checkm", "str", "databases/checkm_placeholder")
+        if(os.path.getsize(self.checkm_ref) > 0):
+            print("checkm DB OK")
+        else:
+            sys.exit("CHECKM DB empty. exiting")
         
 
 

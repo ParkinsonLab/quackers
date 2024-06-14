@@ -1,13 +1,15 @@
 # quackers
-private-by-obscurity
+First release: June 13, 2024
 
-note: to get checkm working in linux-host, you gotta set the checkm_data_path
-eg:
-
-export CHECKM_DATA_PATH=/some/path/you/use
-
-also: download the gtdbtk, and add in an env var:
-GTDBTK_DATA_PATH=/path/to/dl'd/DB
+Parkinson Lab's in-house MG pipeline.
+Setup:
+Need to download a few databases:
+https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
+https://data.ace.uq.edu.au/public/CheckM_databases/
 
 https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_data.tar.gz
 WARNING: it's 84GB, and you need to unzip it yourself.
+
+Also: 
+use the sample config, and assign the 2 databases entries to the paths.
+special note for gtdbtk, use release220, and have the config point to it. 

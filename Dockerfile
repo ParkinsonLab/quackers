@@ -343,20 +343,11 @@ RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-
 ENV PATH="${PATH}:/quackers_tools/salmon-latest_linux_x86_64/bin"
 
 
-
-#RUN apt-get install -y libboost-all-dev \
-#&& apt-get install curl 
-
-#RUN apt-get update && apt-get -y upgrade && apt-get install -y cereal
-#RUN apt-get install -y libtbb-dev \
-#&& apt-get install -y libgff-dev
-
-#RUN mv salmon-1.10.1 salmon
-#WORKDIR salmon
-#RUN mkdir build \
-#&& cd build \
-#&& cmake . \
-#&& make
-
-#/CONCOCT-1.1.0
+WORKDIR /quackers_pipe
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_commands.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/MetaPro_utilities.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_paths.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_pipe.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_stages.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.ini
 CMD ["bash"]
