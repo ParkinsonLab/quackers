@@ -7,7 +7,7 @@ Need to download a few databases:
 https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
 https://data.ace.uq.edu.au/public/CheckM_databases/
 
-https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_data.tar.gz
+[https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_data.tar.gz](https://ecogenomics.github.io/GTDBTk/installing/index.html#installing-gtdbtk-reference-data)
 WARNING: it's 84GB, and you need to unzip it yourself.
 
 Also: 
