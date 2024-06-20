@@ -31,6 +31,7 @@ import shutil
 from datetime import datetime as dt
 import psutil as psu
 import subprocess as sp
+import pandas as pd
 #modified MetaPro utilities to better package the 
 
 
