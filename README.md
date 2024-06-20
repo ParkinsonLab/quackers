@@ -13,3 +13,6 @@ WARNING: it's 84GB, and you need to unzip it yourself.
 Also: 
 use the sample config, and assign the 2 databases entries to the paths.
 special note for gtdbtk, use release220, and have the config point to it. 
+
+Also: 
+your host fastas need to be indexed by BWA before use.  else quackers will complain. 
