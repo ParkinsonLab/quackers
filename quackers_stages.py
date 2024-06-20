@@ -75,8 +75,8 @@ class q_stage:
 
         else:
 
-            if(os.path.exists(self.dir_obj.host_dir_mkr)):
-                print(dt.today(), "skipping host filter")
+            if(os.path.exists(self.dir_obj.host_mkr)):
+                print(dt.today(), "skipping host filter stage")
             else:
                 for host_key in list_of_hosts:
                     
@@ -88,15 +88,15 @@ class q_stage:
 
 
                     if(os.path.exists(marker_path)):
-                        print("skipping Host filter")
+                        print("skipping Host filter:", ref_basename)
                     else:
                         command = ""
                         if(self.op_mode == "single"):
                             command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, marker_path)
-                            self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                            #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
                         else:
-                            command = self.command_obj.clean_reads_bwa_command_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, marker_path)
-                            self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                            command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, marker_path)
+                            #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
                         script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
                         self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
