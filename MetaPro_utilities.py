@@ -166,7 +166,7 @@ class mp_util:
     def determine_encoding(self, fastq):
         #import the first 10k lines, then check the quality scores.
         #if the quality score symbols are below 76, it's phred33.  
-        fastq_df = pd.read_csv(fastq, header=None, names=[None], sep="\n", skip_blank_lines = False, quoting=3, nrows=40000)
+        fastq_df = pd.read_csv(fastq, header=None, names=[None], sep="/n", skip_blank_lines = False, quoting=3, nrows=40000)
         fastq_df = pd.DataFrame(fastq_df.values.reshape(int(len(fastq_df)/4), 4))
         fastq_df.columns = ["ID", "seq", "junk", "quality"]
         quality_encoding = fastq_df["quality"].apply(lambda x: self.check_code(x)).mean() #condense into a single number.
