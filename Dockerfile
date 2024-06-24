@@ -345,14 +345,13 @@ ENV PATH="${PATH}:/quackers_tools/salmon-latest_linux_x86_64/bin"
 
 WORKDIR /quackers_pipe
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_commands.py
 
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_stages.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_paths.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_pipe.py
-
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_commands.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.ini
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/MetaPro_utilities.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_stages.py
 
 WORKDIR /quackers_pipe/scripts
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/AR_reconcile.py

@@ -53,11 +53,11 @@ class dir_structure:
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
         self.host_bwa_mkr = os.path.join(self.host_dir_top, "host_filter_bwa")
-        self.host_pp_mkr = os.path.join(self.host_dir_top, "host_filter_reconcile")
+        self.host_recon_mkr = os.path.join(self.host_dir_top, "host_filter_reconcile")
 
         self.host_recon_job = os.path.join(self.host_dir_top, "reconcile.sh")
-        self.host_clean_bwa_p_job = os.path.join(self.host_dir_top, "host_clean_bwa_p.sh")
-        self.host_clean_bwa_s_job = os.path.join(self.host_dir_top, "host_clean_bwa_s.sh")
+        #self.host_clean_bwa_p_job = os.path.join(self.host_dir_top, "host_clean_bwa_p.sh")
+        #self.host_clean_bwa_s_job = os.path.join(self.host_dir_top, "host_clean_bwa_s.sh")
 
         make_folder(self.host_dir_top)
         make_folder(self.host_dir_data)

@@ -75,65 +75,63 @@ class q_stage:
 
         else:
 
-            if(os.path.exists(self.dir_obj.host_mkr)):
-                print(dt.today(), "skipping host filter stage")
-            else:
-                for host_key in list_of_hosts:
-                    
-                    
-                    host_ref_path = self.path_obj.hosts_path_dict[host_key]
-                    ref_basename = os.path.basename(host_ref_path)
-                    ref_basename = ref_basename.split(".")[0]
-                    host_bwa_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_host_bwa_mkr")
-                    
-                    
-                    if(os.path.exists(host_bwa_marker_path)):
-                        print("skipping Host filter:", ref_basename)
-                    else:
-                        command = ""
-                        if(self.op_mode == "single"):
-                            command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
-                            #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
-                        else:
-                            command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
-                            #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
-
-                        script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
-                        self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+            
+            for host_key in list_of_hosts:
                 
-                self.job_control.wait_for_mp_store()
-
-
                 
-                for host_key in list_of_hosts:
-                    host_ref_path = self.path_obj.hosts_path_dict[host_key]
-                    ref_basename = os.path.basename(host_ref_path)
-                    ref_basename = ref_basename.split(".")[0]
-                    sam_sift_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr")
-                    sam_path = ""
-                    score_out_path = ""
-                    sam_name = ref_basename
-                    sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
-                    
+                host_ref_path = self.path_obj.hosts_path_dict[host_key]
+                ref_basename = os.path.basename(host_ref_path)
+                ref_basename = ref_basename.split(".")[0]
+                host_bwa_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_host_bwa_mkr")
+                
+                
+                if(os.path.exists(host_bwa_marker_path)):
+                    print("skipping Host filter:", ref_basename)
+                else:
+                    command = ""
                     if(self.op_mode == "single"):
-                        score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s_score_bwa.out")
+                        command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
+                        #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
                     else:
-                        score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p_score_bwa.out")
+                        command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
+                        #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
-                    
-                    if(os.path.exists(sam_sift_marker_path)):
-                        print(dt.today(), "skipping sam sift:", ref_basename)
-                    else:
-                        command = self.command_obj.sift_bwa_sam_command(sam_path, score_out_path, sam_sift_marker_path)
-                        script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_" + ref_basename + ".sh")
-
-                self.job_control.wait_for_mp_store()
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
+                    self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+            
+            self.job_control.wait_for_mp_store()
 
 
-                command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r)
+            
+            for host_key in list_of_hosts:
+                host_ref_path = self.path_obj.hosts_path_dict[host_key]
+                ref_basename = os.path.basename(host_ref_path)
+                ref_basename = ref_basename.split(".")[0]
+                sam_sift_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr")
+                sam_path = ""
+                score_out_path = ""
+                sam_name = ref_basename
+                sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
                 
-                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
-                self.job_control.wait_for_mp_store()
+                if(self.op_mode == "single"):
+                    score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s_score_bwa.out")
+                else:
+                    score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p_score_bwa.out")
+
+                
+                if(os.path.exists(sam_sift_marker_path)):
+                    print(dt.today(), "skipping sam sift:", ref_basename)
+                else:
+                    command = self.command_obj.sift_bwa_sam_command(sam_path, score_out_path, sam_sift_marker_path)
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_" + ref_basename + ".sh")
+
+            self.job_control.wait_for_mp_store()
+
+
+            command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr)
+            
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
+            self.job_control.wait_for_mp_store()
 
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
 
