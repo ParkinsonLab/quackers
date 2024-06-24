@@ -93,14 +93,11 @@ class command_obj:
         command += in_path + " | " 
         command += self.path_obj.samtools_path + " view -F 4 > " + sam_path
 
-        sifting_command = self.path_obj.py_path + " "
-        sifting_command += self.path_obj.sam_sift + " "
-        sifting_command += sam_path + " "
-        sifting_command += score_out_path
+   
 
         make_marker = "touch " + marker_path
 
-        return [command + " && " + sifting_command + " && " + make_marker]
+        return [command + " && " + make_marker]
 
     def clean_reads_bwa_simple_p(self, ref_path, sam_name, f_path, r_path, marker_path):
         #for a single host. expected to be called per-host
@@ -112,6 +109,13 @@ class command_obj:
         command += r_path + " "
         command += "|" + " " + self.path_obj.samtools_path + " view -F 4 > " + sam_path
 
+        
+
+        make_marker = "touch " + marker_path
+
+        return [command + " && " + make_marker]
+    
+    def sift_bwa_sam_command(self, sam_path, score_out_path, marker_path):
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.sam_sift + " "
         sifting_command += sam_path + " "
@@ -119,8 +123,7 @@ class command_obj:
 
         make_marker = "touch " + marker_path
 
-        return [command + " && " + sifting_command + " && " + make_marker]
-
+        return [sifting_command + " && " + make_marker]
 
     def clean_reads_bowtie2_command_s(self, ref_path, in_path, marker_path):
         #used for contigs only
