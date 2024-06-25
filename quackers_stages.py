@@ -124,6 +124,7 @@ class q_stage:
                 else:
                     command = self.command_obj.sift_bwa_sam_command(sam_path, score_out_path, sam_sift_marker_path)
                     script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_" + ref_basename + ".sh")
+                    self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
             self.job_control.wait_for_mp_store()
 
