@@ -50,7 +50,7 @@ def import_fastq(fastq_file):
     print("walk:", walk_count)
     print("line count:", line_count)
     print("dict keys:", len(read_dict.keys()))
-    return read_dict
+    return read_dict, read_dict.keys()
 
 def export_hosts(sam_hits_dict, export_dir):
     #sort all reads by host
@@ -67,6 +67,7 @@ def export_hosts(sam_hits_dict, export_dir):
         host_reads = hosts_dict[host]
         host_basename = host.split(".sam")[0]
         host_export_file = os.path.join(export_dir, host_basename + "_reads.txt")
+        
         with open(host_export_file, "w") as host_out:
             for read in host_reads:
                 out_line = read + "\n"
@@ -107,8 +108,8 @@ def sort_samfiles(sam_dir):
     return sam_hits_dict, unique_hosts
 
 
-def sort_reads(raw_read_keys, sam_hits_keys, clean_reads_dict, work_ID):
-    
+def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
+    #ranks hits.
     #clean_reads = list()
     print("[" + work_ID + "] raw keys:", len(raw_read_keys))
     print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
@@ -120,10 +121,10 @@ def sort_reads(raw_read_keys, sam_hits_keys, clean_reads_dict, work_ID):
         if(old_size < new_size):
             continue
         else:
-            clean_reads_dict[read] = 1
+            hits_reads_dict[read] = 1
             #print(dt.today(), "work ID:", work_ID, read, clean_reads_dict[read])
             
-    print("[" + str(work_ID) + "] clean reads dict: " + str(len(clean_reads_dict.keys())))
+    print("[" + str(work_ID) + "] hits reads dict: " + str(len(hits_reads_dict.keys())))
     #return clean_reads
 
 def export_reads(final_out_file, raw_read_dict, keys_to_write):
@@ -175,8 +176,11 @@ if __name__ == "__main__":
     p1_raw_dict = ""
     p2_raw_dict = ""
     final_s_reads = os.path.join(export_dir, "singles.fastq")
-    final_p1_reads  = os.path.join(export_dir, "forward.fastq")
-    final_p2_reads  = os.path.join(export_dir, "reverse.fastq")
+    final_p1_reads  = os.path.join(export_dir, "pair_1.fastq")
+    final_p2_reads  = os.path.join(export_dir, "pair_2.fastq")
+    host_p1_reads = os.path.join(export_dir, "host_p1.fastq")
+    host_p2_reads = os.path.join(export_dir, "host_p2.fastq")
+    host_s_reads = os.path.join(export_dir, "host_s.fastq")
 
     
     print(dt.today(), "starting samfile sort+merge")
@@ -229,12 +233,12 @@ if __name__ == "__main__":
 
     print(dt.today(), "starting clean read extract")
     if(is_single):
-        s_raw_dict = import_fastq(raw_s_read)
+        s_raw_dict, s_raw_keys = import_fastq(raw_s_read)
 
         cpu_count = int(cpu_count)
         split_size = int(len(p1_raw_dict.keys())/cpu_count)
         s_keys = list(sorted(s_raw_dict.keys()))
-        clean_s_reads_dict = manager.dict()
+        hits_s_reads_dict = manager.dict()
         for i_cpu in range(0, cpu_count):
             start_index = i_cpu * split_size
             end_index = ((i_cpu + 1) * split_size)-1
@@ -242,7 +246,7 @@ if __name__ == "__main__":
             if(i_cpu >= cpu_count - 1):
                 s_selection = s_keys[start_index:]
 
-            s_process = mp.Process(target = sort_reads, args = (s_selection, sam_hits_keys, clean_s_reads_dict))
+            s_process = mp.Process(target = sort_reads, args = (s_selection, sam_hits_keys, hits_s_reads_dict))
             s_process.start()
             mp_jobs.append(s_process)
         print(dt.today(), "S jobs launched. waiting")
@@ -250,7 +254,7 @@ if __name__ == "__main__":
             item.join()
         mp_jobs.clear()
         print(dt.today(), "S extraction jobs done. Starting export")
-        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, clean_s_reads_dict.keys()))
+        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, hits_s_reads_dict.keys()))
         s_export_process.start()
         print(dt.today(), "waiting for export S process to finish")
         s_export_process.join()
@@ -259,8 +263,8 @@ if __name__ == "__main__":
 
         
     elif(is_paired):
-        p1_raw_dict = import_fastq(raw_p1_read)
-        p2_raw_dict = import_fastq(raw_p2_read)
+        p1_raw_dict, p1_raw_keys = import_fastq(raw_p1_read)
+        p2_raw_dict, p2_raw_keys = import_fastq(raw_p2_read)
 
         
 
@@ -275,8 +279,8 @@ if __name__ == "__main__":
         
         print("split size:", split_size)
         
-        clean_p1_reads_dict = manager.dict()
-        clean_p2_reads_dict = manager.dict()
+        hits_p1_reads_dict = manager.dict()
+        hits_p2_reads_dict = manager.dict()
         
 
 
@@ -303,8 +307,8 @@ if __name__ == "__main__":
 
             work_ID = str(i_cpu) + "_1"
             work_ID2 = str(i_cpu) + "_2"
-            p1_process = mp.Process(target = sort_reads, args = (p1_selection, sam_hits_keys, clean_p1_reads_dict, work_ID))
-            p2_process = mp.Process(target = sort_reads, args = (p2_selection, sam_hits_keys, clean_p2_reads_dict, work_ID2))
+            p1_process = mp.Process(target = sort_reads, args = (p1_selection, sam_hits_keys, hits_p1_reads_dict, work_ID))
+            p2_process = mp.Process(target = sort_reads, args = (p2_selection, sam_hits_keys, hits_p2_reads_dict, work_ID2))
 
             p1_process.start()
             p2_process.start()
@@ -318,15 +322,21 @@ if __name__ == "__main__":
     
         print(dt.today(), "paired extraction jobs done! Starting export")
         
-        final_p1_reads_dict = dict(clean_p1_reads_dict)
-        final_p2_reads_dict = dict(clean_p2_reads_dict)
+        final_hits_p1_reads_dict = dict(hits_p1_reads_dict)
+        final_hits_p2_reads_dict = dict(hits_p2_reads_dict)
 
-        print(final_p1_reads_dict)
-        for key in final_p1_reads_dict.keys():
+        p1_keys_to_export = p1_raw_keys - hits_p1_reads_dict.keys()
+        p2_keys_to_export = p2_raw_keys - hits_p2_reads_dict.keys()
+
+        count = 0
+        for key in p1_keys_to_export:
+            count += 1
             print("keys to write:", key)
+            if(count > 10):
+                break
 
-        p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, clean_p1_reads_dict.keys()))
-        p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, clean_p2_reads_dict.keys()))
+        p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, p1_keys_to_export))
+        p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, p2_keys_to_export))
 
         p1_export_process.start()
         p2_export_process.start()
