@@ -367,10 +367,10 @@ class path_obj:
 
         #---------------------------------------------------------------------------
         #Assign paths for scripts
-        self.sam_sift               = self.assign_value("scripts", "sam_sift", "str", "scripts/sam_sift.py")
-        self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "scripts/clean_reads_reconcile.py")
-        self.AR_reconcile           = self.assign_value("scripts", "AR_reconcile", "str", "scripts/AR_reconcile.py")
-        self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "scripts/contig_reconcile.py")
+        self.sam_sift               = self.assign_value("scripts", "sam_sift", "str", "/quackers_pipe/scripts/sam_sift.py")
+        self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "/quackers_pipe/scripts/clean_reads_reconcile.py")
+        self.AR_reconcile           = self.assign_value("scripts", "AR_reconcile", "str", "/quackers_pipe/scripts/AR_reconcile.py")
+        self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "/quackers_pipe/scripts/contig_reconcile.py")
 
         #------------------------------------------------------------------
         #Assign singular values for settings
