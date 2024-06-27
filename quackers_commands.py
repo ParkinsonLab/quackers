@@ -223,7 +223,8 @@ class command_obj:
         
         command += "-o" + " " + export_dir  + " "
         command += "-t" + " " + str(os.cpu_count()) + " "
-        command += "--phred-offset" + " " + str(quality_encoding)
+        command += "--phred-offset" + " " + str(quality_encoding) + " "
+        command += "--only-assembler"
 
         make_marker = "touch" + " " + marker_path
         return [command + " && " + make_marker]
@@ -232,6 +233,7 @@ class command_obj:
         command = self.path_obj.mspades_path + " " 
         command += "-s" + " " + single_path + " "
         command += "-t" + " " + str(os.cpu_count()) + " "
+        command += "--only-assembler" + " "
         command += "--phread-offset" + " " + str(quality_encoding) + " " 
         command += "-o" + " " + export_dir 
 

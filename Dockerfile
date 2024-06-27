@@ -231,11 +231,7 @@ RUN wget https://github.com/marbl/Mash/releases/download/v2.3/mash-Linux64-v2.3.
 && mv mash-Linux64-v2.3/* . \
 && rm *.tar
 
-ENV PATH="${PATH}:/quackers_tools/fastANI"
-ENV PATH="${PATH}:/quackers_tools/fasttree"
-ENV PATH="${PATH}:/quackers_tools/mash"
-ENV PATH="${PATH}:/quackers_tools/adapterremoval"
-ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
+
 
 
 WORKDIR /quackers_tools
@@ -246,23 +242,35 @@ RUN wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-
 
 WORKDIR /quackers_tools
 
-RUN wget https://github.com/ablab/spades/releases/download/v3.15.5/SPAdes-3.15.5.tar.gz \
-&& tar -xzf SPAdes-3.15.5.tar.gz \
-&& mv SPAdes-3.15.5 SPAdes 
-
+#RUN wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz \
+#&& tar -xzf SPAdes-4.0.0-Linux.tar.gz \
+#&& mv SPAdes-4.0.0-Linux SPAdes \
+#&& rm *.tar.gz \
+#&& rm *.tar.bz2
 RUN apt-get update \
 && apt-get install -y cmake \
 && apt-get install -y zlib1g-dev \
 && apt-get install -y libbz2-dev
+
+RUN wget https://github.com/ablab/spades/archive/refs/tags/v4.0.0.zip \
+&& unzip v4.0.0.zip \
+&& mv spades-4.0.0 SPAdes
+
 WORKDIR SPAdes
 
+
 RUN sh spades_compile.sh
+
+
+#WORKDIR SPAdes
+
+#RUN sh spades_compile.sh
 #RUN sh "PREFIX=/quackers_tools/SPAdes" spades_compile.sh
 
 #RUN conda install -y spades
-#RUN wget https://github.com/ablab/spades/releases/download/v3.15.5/SPAdes-3.15.5-Linux.tar.gz \
-#&& tar -xzf SPAdes-3.15.5-Linux.tar.gz \
-#&& mv SPAdes-3.15.5-Linux SPAdes \
+#RUN wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz \
+#&& tar -xzf SPAdes-4.0.0-Linux.tar.gz \
+#&& mv SPAdes-4.0.0-Linux SPAdes \
 #&& rm *.tar.gz
 ENV PATH="${PATH}:/quackers_tools/SPAdes/bin"
 WORKDIR /quackers_tools
@@ -341,17 +349,23 @@ RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-
 && rm *.tar.gz
 
 ENV PATH="${PATH}:/quackers_tools/salmon-latest_linux_x86_64/bin"
+ENV PATH="${PATH}:/quackers_tools/fastANI"
+ENV PATH="${PATH}:/quackers_tools/fasttree"
+ENV PATH="${PATH}:/quackers_tools/mash"
+ENV PATH="${PATH}:/quackers_tools/adapterremoval"
+ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
 
 
 WORKDIR /quackers_pipe
 
-
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_stages.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_paths.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_pipe.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_commands.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.ini
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/MetaPro_utilities.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_stages.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/quackers_paths.py
+
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.ini
+
 
 WORKDIR /quackers_pipe/scripts
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/AR_reconcile.py
