@@ -43,8 +43,11 @@ if __name__ == "__main__":
 
     with open(sam_file, "r") as sam_in:
         for raw_line in sam_in:
+            if(raw_line.startswith("@")):
+                continue
             line = raw_line.strip("\n")
             line_split = line.split("\t")
+            
             #print("line:", line_split)
             #time.sleep(1)
             read_ID = line_split[0]
