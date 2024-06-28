@@ -56,12 +56,18 @@ class q_stage:
             
 
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.clean_dir)
+        if(os.path.exists(self.dir_obj.clean_dir_mkr)):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.clean_dir)
+            return True
+        else:
+            print(dt.today(), "error in low-quality filter.  Did not finish properly.  Run needs investigation")
+            return False
 
     def host_filter(self):
         #launch for each new ref path
         #walk through each host and launch a bwa job
         list_of_hosts = sorted(self.path_obj.config["hosts"].keys())
+        list_of_markers = list()
 
         if(len(list_of_hosts) == 0):
             #skip host-cleaning. move data
@@ -83,7 +89,7 @@ class q_stage:
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
                 host_bwa_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_host_bwa_mkr")
-                
+                list_of_markers.append(host_bwa_marker_path)
                 
                 if(os.path.exists(host_bwa_marker_path)):
                     print("skipping Host filter:", ref_basename)
@@ -108,6 +114,7 @@ class q_stage:
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
                 sam_sift_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr")
+                list_of_markers.append(sam_sift_marker_path)
                 sam_path = ""
                 score_out_path = ""
                 sam_name = ref_basename
@@ -130,15 +137,30 @@ class q_stage:
 
 
             command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr)
-            
+            list_of_markers.append(self.dir_obj.host_recon_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
             self.job_control.wait_for_mp_store()
 
-            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
 
+            #check markers
+            all_clear = True
+            for marker in list_of_markers:
+                if(not os.path.exists(marker)):
+                    all_clear = False
+                    break
+
+            if(all_clear):
+                self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
+                return True
+            else:
+                print(dt.today(), "not all host-filter jobs exited cleanly.  Stop the pipeline")
+                return False
         
     def assembly(self):
         command = ""
+        list_of_markers = list()
+        list_of_markers.append(self.dir_obj.assembly_mkr)
+
         if(not os.path.exists(self.dir_obj.assembly_mkr)):
             if(self.op_mode == "single"):
                 command = self.command_obj.metaspades_command_s(self.dir_obj.host_final_s, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
@@ -151,7 +173,7 @@ class q_stage:
         else:
             print(dt.today(), "skipping: metaspades")
 
-
+        list_of_markers.append(self.dir_obj.assembly_bt2_idx_mkr)
         if(not os.path.exists(self.dir_obj.assembly_bt2_idx_mkr)):
             print(dt.today(), "indexing contigs for BT2")
             print("using:", self.dir_obj.assembly_bt2_idx)
@@ -161,6 +183,7 @@ class q_stage:
         else:
             print(dt.today(), "skipping BT2 contig indexing")
         
+        list_of_markers.append(self.dir_obj.assembly_pp_mkr)
         if(not os.path.exists(self.dir_obj.assembly_pp_mkr)):
             command = ""
             if(self.op_mode == "single"):
@@ -172,6 +195,7 @@ class q_stage:
         else:
             print(dt.today(), "skipping BT2 align contigs")
 
+        list_of_markers.append(self.dir_obj.assembly_scan_sam_mkr)
         if(not os.path.exists(self.dir_obj.assembly_scan_sam_mkr)):
             command = self.command_obj.bt2_scan_sam(self.dir_obj.assembly_scan_sam_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_scan_sam_job, command)
@@ -181,21 +205,32 @@ class q_stage:
                         
 
 
-
+        list_of_markers.append(self.dir_obj.assembly_reconcile_mkr)
         if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr)):
             command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
             self.job_control.wait_for_mp_store()
         else:
             print(dt.today(), "skipping contig-read reconciliation")
-        
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
 
+        all_clear = True
+        for marker in list_of_markers:
+            if(not os.path.exists(marker)):
+                all_clear = False
+                break
+
+        if(all_clear):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
+            return True
+        else:
+            print(dt.today(), "not all assembly jobs exited cleanly. Stopping here.")
+            return False
     
     def concoct_binning(self):
-        #print(dt.today(), "temp holder")
+        list_of_markers = list()
         #requires adjusting headers and junk before sending off to concoct.
         #code just removes the dangling portion of the ID in each contig
+        list_of_markers.append(self.dir_obj.cct_prep_mkr)
         if(not os.path.exists(self.dir_obj.cct_prep_mkr)):
             command = self.command_obj.concoct_prep_command(self.dir_obj.cct_prep_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_prep_job_path, command)
@@ -203,6 +238,7 @@ class q_stage:
         else:
             print(dt.today(), "skipping concoct prep")
 
+        list_of_markers.append(self.dir_obj.cct_mkr)
         if(not os.path.exists(self.dir_obj.cct_mkr)):
             command = self.command_obj.concoct_command(self.dir_obj.cct_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.cct_job_path, command)
@@ -210,6 +246,7 @@ class q_stage:
         else:
             print(dt.today(), "skipping concoct binning")
 
+        list_of_markers.append(self.dir_obj.cct_checkm_mkr)
         if(not os.path.exists(self.dir_obj.cct_checkm_mkr)):
             print(dt.today(), "running checkm")
             command = self.command_obj.checkm_command(self.dir_obj.cct_checkm_mkr)
@@ -218,23 +255,44 @@ class q_stage:
         else:
             print(dt.today(), "skipping checkm")
             print(self.dir_obj.cct_checkm_mkr)
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
-            
+
+
+        all_clear = True
+        for marker in list_of_markers:
+            if(not os.path.exists(marker)):
+                all_clear = False
+                break
+        if(all_clear):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
+            return True
+        else:
+            print(dt.today(), "not all concoct binning jobs exited cleanly. Stopping here")
+            return False
+
     def metabat2_binning(self):
+
         print(dt.today(), "running metawrap-binning: metabat2")
         command = self.command_obj.metabat2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbat2_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbat2_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbat2_bin_dir)
-
+        if(os.path.exists(self.dir_obj.mbat2_mkr)):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbat2_bin_dir)
+            return True
+        else:
+            print(dt.today(), "MetaBat2 did not finish cleanly. stopping here")
+            return False
 
     def maxbin2_binning(self):
         print(dt.today(), "running metawrap-binning: maxbin2")
         command = self.command_obj.maxbin2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbin2_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbin2_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
-        
+        if(os.path.exists(self.dir_obj.mbin2_mkr)):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
+            return True
+        else:
+            print(dt.today(), "MaxBin2 binning did not exit cleanly. Stopping here")        
+            return False
 
     def metawrap_bin_refine(self):
         print("running metawrap bin_refinement")
@@ -245,7 +303,7 @@ class q_stage:
 
     def gtdbtk_classify(self):
         print("running GTDB-tk classify")
-        
+        list_of_markers = list()
         for bin_choice in self.bin_tools:
             marker_path = ""
             job_path = ""
@@ -258,14 +316,26 @@ class q_stage:
             elif(bin_choice == "mbin2"):
                 marker_path = self.dir_obj.gtdbtk_mbin2_mkr
                 job_path = self.dir_obj.gtdbtk_mbin2_job
+            list_of_markers.append(marker_path)
             command = self.command_obj.gtdbtk_command(bin_choice, marker_path)
             self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+        all_clear = True
+        for marker in list_of_markers:
+            if(not os.path.join(marker)):
+                all_clear = False
+                break
+        if(all_clear):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+            return True
+        else:
+            print(dt.today(), "not all gtdbtk jobs exited cleanly. stopping here")
+            return False
 
     def metawrap_quant(self):
         print(dt.today(), "running metawrap quant bin")
+        list_of_markers = list()
         marker_path = ""
         job_path = ""
         for bin_choice in self.bin_tools:
@@ -279,9 +349,20 @@ class q_stage:
                 marker_path = self.dir_obj.mwrap_quant_mbin2_mkr
                 job_path = self.dir_obj.mwrap_quant_mbin2_job
 
+            list_of_markers.append(marker_path)
             command = self.command_obj.metawrap_quantify_command(bin_choice, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, marker_path)
             self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
+        all_clear = True
+        for marker in list_of_markers:
+            if(not os.path.exists(marker)):
+                all_clear = False
+                break
+        if(all_clear):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
+            return True
+        else:
+            print(dt.today(), "not all quant-bin jobs exited cleanly. stopping here")
+            return False

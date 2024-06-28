@@ -24,41 +24,72 @@ def run_pipe(path_obj, args_pack):
     dir_obj = q_path.dir_structure(args_pack, path_obj)
     mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
+
+    low_quality_gate = False
+    host_filter_gate = False
+    assembly_gate = False
+    cct_bin_gate = False
+    mbat2_bin_gate = False
+    mbin2_bin_gate = False
+    bin_refine_gate = False
+    gtdbtk_gate = False
+    quant_gate = False
+
     
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):
-        stage_obj.low_quality_filter()
+        low_quality_gate = stage_obj.low_quality_filter()
+        if(not low_quality_gate):
+            sys.exit("Error with low-quality filter")
     
+
     stage_obj.check_host_bypass()
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
         
-        stage_obj.host_filter()
-    
+        host_filter_gate = stage_obj.host_filter()
+        if(not host_filter_gate):
+            sys.exit("Error with host filter")
+
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
-        stage_obj.assembly()
+        assembly_gate = stage_obj.assembly()
+        if(not assembly_gate):
+            sys.exit("Error with assembly")
+
+    #note: binning kept serial.  Not for any good reason, other than: it won't make a difference in speed. 
+    #binning takes mem
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
-        stage_obj.concoct_binning()    
+        cct_bin_gate = stage_obj.concoct_binning()    
+        if(not cct_bin_gate):
+            sys.exit("Error with concoct binning")
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mbat2_bin_dir)):
-        stage_obj.metabat2_binning()
+        mbat2_bin_gate = stage_obj.metabat2_binning()
+        if(not mbat2_bin_gate):
+            sys.exit("Error with MetaBat2 binning")
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mbin2_bin_dir)):
-        stage_obj.maxbin2_binning()
-
+        mbin2_bin_gate = stage_obj.maxbin2_binning()
+        if(not mbin2_bin_gate):
+            sys.exit("Error with MaxBin2 binning")
     
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_bin_r_dir)):
-        stage_obj.metawrap_bin_refine()
+        bin_refine_gate = stage_obj.metawrap_bin_refine()
+        if(not bin_refine_gate):
+            sys.exit("Error with metawrap bin refinement")
 
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.gtdbtk_class_dir)):
-        stage_obj.gtdbtk_classify()
+        gtdbtk_gate = stage_obj.gtdbtk_classify()
+        if(not gtdbtk_gate):
+            sys.exit("Error with gtdbtk")
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.mwrap_quant_dir)):
-        stage_obj.metawrap_quant()
+        quant_gate = stage_obj.metawrap_quant()
+        if(not quant_gate):
+            sys.exit("Error with metawrap quant-bins")
     
-
     print(dt.today(), "QUACKERS DONE!")
 
 def parse_inputs():
