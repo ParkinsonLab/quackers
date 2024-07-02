@@ -42,30 +42,11 @@ class command_obj:
             remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_AR_s0
 
         
-        AR_reconcile = self.path_obj.py_path + " "
-        AR_reconcile += self.path_obj.AR_reconcile + " "
-        AR_reconcile += self.dir_obj.clean_dir_final_f + " "
-        AR_reconcile += self.dir_obj.clean_dir_final_r + " "
-        AR_reconcile += self.dir_obj.clean_dir_AR_sf + " "
-        AR_reconcile += self.dir_obj.clean_dir_AR_sr + " "
-        AR_reconcile += self.dir_obj.clean_dir_final_f + " "
-        AR_reconcile += self.dir_obj.clean_dir_final_r
-
-        combine_singles = "cat" + " "
-        combine_singles += self.dir_obj.clean_dir_AR_s0 + " "
-        combine_singles += self.dir_obj.clean_dir_AR_sf + " "
-        combine_singles += self.dir_obj.clean_dir_AR_sr + " "
-        combine_singles += ">>" + " "
-        combine_singles += self.dir_obj.clean_dir_final_s
-        
         
         
         make_marker = "touch" + " " + marker_path
 
-        #if(self.op_mode == "single"):
         return [remove_lq +  " && " + make_marker]
-        #else:
-        #    return [remove_lq + " && " + AR_reconcile + " && " + combine_singles + " && " + make_marker ]
 
     def bwa_index_ref_command(self, ref_path, marker_path):
         command = self.path_obj.BWA_path

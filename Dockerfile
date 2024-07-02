@@ -368,8 +368,9 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.i
 
 
 WORKDIR /quackers_pipe/scripts
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/AR_reconcile.py
+
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/clean_reads_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/AR_reconcile.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/contig_reconcile.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/sam_sift.py
 
