@@ -24,12 +24,14 @@ def import_fastq(fastq_file):
         read_dict = dict()
         read_ID = ""
         seq = ""
+        true_ID = ""
         qual = ""
         inner_dict = dict()
         for line in fastq_in:
             
             if(line_count % 4 ==  0):
                 read_ID = line.strip("\n")
+                true_ID = read_ID
                 read_ID = read_ID.split("\t")[0]
                 read_ID = read_ID.split(" ")[0]
                 read_ID = read_ID.strip("@")
@@ -44,6 +46,7 @@ def import_fastq(fastq_file):
                 qual = line.strip("\n")
                 inner_dict["seq"] = seq
                 inner_dict["qual"] = qual
+                inner_dict["ID"] = true_ID
                 read_dict[read_ID] = inner_dict
 
             line_count += 1
@@ -128,7 +131,8 @@ def export_reads(final_out_file, raw_read_dict, keys_to_write):
             selected_read = raw_read_dict[read_ID]
             seq = selected_read["seq"]
             qual = selected_read["qual"]
-            out_line = "@" + read_ID + "\n" + seq + "\n" + "+" + "\n" + qual + "\n"
+            true_ID = selected_read["ID"]
+            out_line = true_ID + "\n" + seq + "\n" + "+" + "\n" + qual + "\n"
             s_out.write(out_line)
 
 
