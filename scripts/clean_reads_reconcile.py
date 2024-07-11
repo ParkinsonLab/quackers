@@ -30,30 +30,39 @@ def import_fastq(fastq_file):
         inner_dict = dict()
         for line in fastq_in:
             
-            if(line_count % 4 ==  0):
+            if(line_count ==  0):
                 read_ID = line.strip("\n")
                 true_ID = read_ID
                 read_ID = read_ID.split("\t")[0]
                 read_ID = read_ID.split(" ")[0]
                 read_ID = read_ID.strip("@")
-                walk_count += 1
+                line_count += 1
                 
-            elif(line_count % 4 ==  1):
+            elif(line_count ==  1):
                 seq = line.strip("\n")
-                
+                line_count += 1
             
-            elif(line_count % 4 == 3):
+            elif(line_count == 2):
+                line_count += 1
+            
+            elif(line_count == 3):
                
                 qual = line.strip("\n")
                 inner_dict["seq"] = seq
                 inner_dict["qual"] = qual
                 inner_dict["ID"] = true_ID
                 read_dict[read_ID] = inner_dict
+                inner_dict = dict()
 
-            line_count += 1
+                #print("key:", read_ID)
+                #print("ID:", true_ID)
+                #print("seq:", seq)
+                #print("qual:", qual)
+                #print("===========================")
+                #time.sleep(1)
+
+                line_count = 0
     
-    print("walk:", walk_count)
-    print("line count:", line_count)
     print("dict keys:", len(read_dict.keys()))
     return read_dict, read_dict.keys()
 
@@ -95,7 +104,7 @@ def sort_samfiles(sam_dir):
                 for line in sam_in:
                     line_split = line.strip("\n").split("\t")
                     read_ID = line_split[0]
-                    #print("whole line:", line)
+                    print("whole line:", line)
                     
                     list_of_reads.append(read_ID)
                     score = float(line_split[1])
@@ -116,8 +125,8 @@ def sort_samfiles(sam_dir):
 def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
     #ranks hits.
     #clean_reads = list()
-    print("[" + work_ID + "] raw keys:", len(raw_read_keys))
-    print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
+    #print("[" + work_ID + "] raw keys:", len(raw_read_keys))
+    #print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
     for read in raw_read_keys:
         hit_reads = set(sorted(sam_hits_keys))
         old_size = len(hit_reads)
@@ -129,18 +138,25 @@ def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
             hits_reads_dict[read] = 1
             #print(dt.today(), "work ID:", work_ID, read, clean_reads_dict[read])
             
-    print("[" + str(work_ID) + "] hits reads dict: " + str(len(hits_reads_dict.keys())))
+    #print("[" + str(work_ID) + "] hits reads dict: " + str(len(hits_reads_dict.keys())))
     #return clean_reads
 
 def export_reads(final_out_file, raw_read_dict, keys_to_write):
     with open(final_out_file, "w") as s_out:
         for read_ID in keys_to_write:
+            #print(tag, "writing:", read_ID)
             selected_read = raw_read_dict[read_ID]
+            #for item in selected_read:
+                #print("INSIDE:", item, selected_read[item])
             true_ID = selected_read["ID"]
             seq = selected_read["seq"]
             qual = selected_read["qual"]
             out_line = true_ID + "\n" + seq + "\n" + "+" + "\n" + qual + "\n"
             s_out.write(out_line)
+            #print("out line:", out_line)
+            #print("=========================")
+            #time.sleep(1)
+            
 
 
 def sort_host_hits(sam_hits_dict):
@@ -331,16 +347,11 @@ if __name__ == "__main__":
         final_hits_p1_reads_dict = dict(hits_p1_reads_dict)
         final_hits_p2_reads_dict = dict(hits_p2_reads_dict)
 
-        p1_keys_to_export = p1_raw_keys - hits_p1_reads_dict.keys()
-        p2_keys_to_export = p2_raw_keys - hits_p2_reads_dict.keys()
+        p1_keys_to_export = set(p1_raw_keys) - set(hits_p1_reads_dict.keys())
+        p2_keys_to_export = set(p2_raw_keys) - set(hits_p2_reads_dict.keys())
 
-        count = 0
-        for key in p1_keys_to_export:
-            count += 1
-            print("keys to write:", key)
-            if(count > 10):
-                break
-
+       
+        
         p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, p1_keys_to_export))
         p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, p2_keys_to_export))
 
@@ -352,6 +363,9 @@ if __name__ == "__main__":
         for item in mp_jobs:
             item.join()
         mp_jobs.clear()
+        #export_reads(final_p1_reads, p1_raw_dict, p1_keys_to_export, "p1")
+        #export_reads(final_p2_reads, p2_raw_dict, p2_keys_to_export, "p2")
+        
         print(dt.today(), "done!")
         
 
