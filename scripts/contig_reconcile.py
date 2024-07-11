@@ -29,19 +29,21 @@ def import_fastq(fastq_file):
         inner_dict = dict()
         for line in fastq_in:
             
-            if(line_count % 4 ==  0):
+            if(line_count ==  0):
                 read_ID = line.strip("\n")
                 true_ID = read_ID
                 read_ID = read_ID.split("\t")[0]
                 read_ID = read_ID.split(" ")[0]
                 read_ID = read_ID.strip("@")
-                walk_count += 1
+                line_count += 1
                 
-            elif(line_count % 4 ==  1):
+            elif(line_count ==  1):
                 seq = line.strip("\n")
-                
+                line_count += 1
+            elif(line_count == 2):
+                line_count += 1
             
-            elif(line_count % 4 == 3):
+            elif(line_count == 3):
                
                 qual = line.strip("\n")
                 inner_dict["seq"] = seq
@@ -49,9 +51,8 @@ def import_fastq(fastq_file):
                 inner_dict["ID"] = true_ID
                 read_dict[read_ID] = inner_dict
 
-            line_count += 1
+                line_count = 0
     
-    print("walk:", walk_count)
     print("line count:", line_count)
     print("dict keys:", len(read_dict.keys()))
     return read_dict
