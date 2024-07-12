@@ -348,12 +348,15 @@ RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.10.0/salmon-
 && tar -xzvf salmon-1.10.0_linux_x86_64.tar.gz \
 && rm *.tar.gz
 
+
 ENV PATH="${PATH}:/quackers_tools/salmon-latest_linux_x86_64/bin"
 ENV PATH="${PATH}:/quackers_tools/fastANI"
 ENV PATH="${PATH}:/quackers_tools/fasttree"
 ENV PATH="${PATH}:/quackers_tools/mash"
 ENV PATH="${PATH}:/quackers_tools/adapterremoval"
 ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
+ENV PATH="${PATH}:/quackers_tools/megahit/bin"
+
 
 
 WORKDIR /quackers_pipe
@@ -369,9 +372,11 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.i
 
 WORKDIR /quackers_pipe/scripts
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/clean_reads_reconcile.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/contig_reconcile.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/sam_sift.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/clean_reads_reconcile.py
+
+WORKDIR /quackers_pipe/modded_scripts
 
 
 

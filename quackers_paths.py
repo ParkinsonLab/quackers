@@ -336,7 +336,7 @@ class path_obj:
         
 
         self.tool_install_path = "/quackers_tools"
-        self.temp_internal_scripts_path = "/home/billy/storage/quackers"
+        self.temp_internal_scripts_path = "/quackers_pipe"
         #self.mwrap_temp_path = os.path.join(self.temp_internal_scripts_path, "modded_scripts")
 
         self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
