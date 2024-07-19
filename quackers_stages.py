@@ -24,6 +24,7 @@ class q_stage:
         self.path_obj = path_obj
         self.dir_obj = dir_obj
         self.command_obj = q_com.command_obj(path_obj, dir_obj, self.quality_encoding)
+        self.mspades_contig_fail = False
         
         
         
@@ -148,8 +149,21 @@ class q_stage:
                 self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_p_job, command)
                 
             self.job_control.wait_for_mp_store()
+
+            if not(os.path.exists(self.dir_obj.assembly_contigs)):
+                print(dt.today(), "metaspades failed to make contigs. entering backup mode")
+
+                if(self.op_mode == "single"):
+                    command = self.command_obj.megahit_command_s(self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_s_job, command)
+                else:
+                    command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_p_job, command)
+                self.job_control.wait_for_mp_store()
+                #set new contigs
+                self.dir_obj.assembly_contigs = self.dir_obj.assembly_alt_contigs
         else:
-            print(dt.today(), "skipping: metaspades")
+            print(dt.today(), "skipping: contig assembly")
 
 
         if(not os.path.exists(self.dir_obj.assembly_bt2_idx_mkr)):
@@ -190,6 +204,8 @@ class q_stage:
             print(dt.today(), "skipping contig-read reconciliation")
         
         self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
+
+ 
 
     
     def concoct_binning(self):

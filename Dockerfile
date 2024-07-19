@@ -378,6 +378,11 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/
 
 WORKDIR /quackers_pipe/modded_scripts
 
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/concoct_coverage_table.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/extract_fasta_bins.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/merge_cutup_clustering.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/print_comment.py
+
 
 
 CMD ["bash"]
