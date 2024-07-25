@@ -66,6 +66,8 @@ class dir_structure:
         
         self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assembly_dir)
         self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
+        self.assembly_alt_dir_data = os.path.join(self.assembly_dir_top, "megahit")
+        self.assembly_alt_contigs = os.path.join(self.assembly_alt_dir_data, "final_contigs.fasta")
         self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
         self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
         self.assembly_contigs   = os.path.join(self.assembly_dir_data, "contigs.fasta")
@@ -82,7 +84,9 @@ class dir_structure:
         self.assembly_final_r   = os.path.join(self.assembly_dir_end, "reverse.fastq")
 
         self.assembly_mspades_s_job = os.path.join(self.assembly_dir_top, "assemble_s.sh")
+        self.assembly_mhit_s_job = os.path.join(self.assembly_dir_top, "assemble_mhit_s.sh")
         self.assembly_mspades_p_job = os.path.join(self.assembly_dir_top, "assemble_p.sh")
+        self.assembly_mhit_p_job = os.path.join(self.assembly_dir_top, "assemble_mhit_p.sh")
         self.assembly_bwa_idx_job = os.path.join(self.assembly_dir_top, "index_contigs.sh")
         self.assembly_pp_job = os.path.join(self.assembly_dir_top, "clean_reads.sh")
         self.assembly_recon_job = os.path.join(self.assembly_dir_top, "clean_reads_reconcile.sh")
@@ -339,7 +343,7 @@ class path_obj:
         self.temp_internal_scripts_path = "/quackers_pipe"
         #self.mwrap_temp_path = os.path.join(self.temp_internal_scripts_path, "modded_scripts")
 
-        self.megahit_path       = os.path.join(self.tool_install_path, "megahit", "bin", "megahit")
+        self.megahit_path       = "megahit"
         self.samtools_path      = "samtools"
         self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
         self.bowtie2_idx_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
@@ -389,15 +393,16 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
-        self.clean_dir          = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
-        self.host_dir           = self.assign_value("directory", "host_filter", "str", "1_host_filter")
-        self.assembly_dir       = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
-        self.cct_bin_dir        = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")
-        self.mbin2_bin_dir       = self.assign_value("directory", "maxbin2_binning", "str", "3b_maxbin2_binning")
-        self.mbat2_bin_dir      = self.assign_value("directory", "metabat2_binning", "str", "3c_metabat2_binning")
-        self.mwrap_bin_r_dir    = self.assign_value("directory", "metawrap_bin_refinement", "str", "4_mwrap_bin_r")
-        self.gtdbtk_class_dir   = self.assign_value("directory", "gtdbtk_classify", "str", "5_gtdbtk_classify")
-        self.mwrap_quant_dir    = self.assign_value("directory", "metawrap_quant_bin", "str", "6_metawrap_quant_bins")
+        self.clean_dir              = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
+        self.host_dir               = self.assign_value("directory", "host_filter", "str", "1_host_filter")
+        self.assembly_dir           = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
+        self.backup_assembly_dir    = self.assign_value("directory", "contig_backup", "str", "2a_contig_assembly")
+        self.cct_bin_dir            = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")
+        self.mbin2_bin_dir          = self.assign_value("directory", "maxbin2_binning", "str", "3b_maxbin2_binning")
+        self.mbat2_bin_dir          = self.assign_value("directory", "metabat2_binning", "str", "3c_metabat2_binning")
+        self.mwrap_bin_r_dir        = self.assign_value("directory", "metawrap_bin_refinement", "str", "4_mwrap_bin_r")
+        self.gtdbtk_class_dir       = self.assign_value("directory", "gtdbtk_classify", "str", "5_gtdbtk_classify")
+        self.mwrap_quant_dir        = self.assign_value("directory", "metawrap_quant_bin", "str", "6_metawrap_quant_bins")
 
         #-----------------------------------------------------------
         #keep flags

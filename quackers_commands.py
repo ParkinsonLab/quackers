@@ -223,7 +223,32 @@ class command_obj:
         return [command + " && " + make_marker]
     
 
+    def megahit_command_p(self, forward_path, reverse_path, export_dir, marker_path):
+        command = self.path_obj.megahit_path + " "
+        command += "-1" + " " + forward_path + " "
+        command += "-2" + " " + reverse_path + " "
+        command += "-o" + " " + export_dir
 
+        mv_file = "mv" + " "
+        mv_file += os.path.join(export_dir, "final.contigs.fa") + " "
+        mv_file += os.path.join(export_dir, "final_contigs.fasta")
+
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + mv_file + " && " + make_marker]
+    
+    def megahit_command_s(self, single_path, export_dir, marker_path):
+        command = self.path_obj.megahit_path + " "
+        command += "-r" + " " + single_path + " "
+        command += "-o" + " " + export_dir
+
+        mv_file = "mv" + " "
+        mv_file += os.path.join(export_dir, "final.contigs.fa") + " "
+        mv_file += os.path.join(export_dir, "final_contigs.fasta")
+
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + mv_file + " && " + make_marker]
 
 
     
