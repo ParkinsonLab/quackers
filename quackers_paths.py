@@ -67,7 +67,7 @@ class dir_structure:
         self.assembly_dir_top   = os.path.join(self.output_dir, path_obj.assembly_dir)
         self.assembly_dir_data  = os.path.join(self.assembly_dir_top, "data")
         self.assembly_alt_dir_data = os.path.join(self.assembly_dir_top, "megahit")
-        self.assembly_alt_contigs = os.path.join(self.assembly_alt_dir_data, "final_contigs.fa")
+        self.assembly_alt_contigs = os.path.join(self.assembly_alt_dir_data, "final_contigs.fasta")
         self.assembly_dir_end   = os.path.join(self.assembly_dir_top, "export")
         self.assembly_dir_temp  = os.path.join(self.assembly_dir_top, "temp")
         self.assembly_contigs   = os.path.join(self.assembly_dir_data, "contigs.fasta")

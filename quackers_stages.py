@@ -25,6 +25,10 @@ class q_stage:
         self.dir_obj = dir_obj
         self.command_obj = q_com.command_obj(path_obj, dir_obj, self.quality_encoding)
         self.mspades_contig_fail = False
+
+        if(os.path.exists(self.dir_obj.assembly_alt_contigs)):
+            print(dt.today(), "metaspades contigs overrided with megahit-backup")
+            self.dir_obj.assembly_contigs = self.dir_obj.assembly_alt_contigs
         
         
         
