@@ -361,27 +361,27 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 WORKDIR /quackers_pipe
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/quackers_pipe.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/quackers_commands.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/MetaPro_utilities.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/quackers_stages.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/quackers_paths.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/MetaPro_utilities.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_stages.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_paths.py
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/Config.ini
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/Config.ini
 
 
 WORKDIR /quackers_pipe/scripts
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/scripts/contig_reconcile.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/scripts/sam_sift.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/scripts/clean_reads_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/contig_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/sam_sift.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/clean_reads_reconcile.py
 
 WORKDIR /quackers_pipe/modded_scripts
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/modded_scripts/concoct_coverage_table.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/modded_scripts/extract_fasta_bins.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/modded_scripts/merge_cutup_clustering.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.1/modded_scripts/print_comment.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/concoct_coverage_table.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/extract_fasta_bins.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/merge_cutup_clustering.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/print_comment.py
 
 
 
