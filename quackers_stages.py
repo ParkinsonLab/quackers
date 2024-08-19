@@ -145,18 +145,22 @@ class q_stage:
     def assembly(self):
         command = ""
         if(not os.path.exists(self.dir_obj.assembly_mkr)):
-            if(self.op_mode == "single"):
-                command = self.command_obj.metaspades_command_s(self.dir_obj.host_final_s, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
-                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_s_job, command)
-            else:
-                command = self.command_obj.metaspades_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
-                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_p_job, command)
-                
-            self.job_control.wait_for_mp_store()
 
-            if not(os.path.exists(self.dir_obj.assembly_contigs)):
-                print(dt.today(), "metaspades failed to make contigs. entering backup mode")
+            if(self.path_obj.contig_tool == "metaspades"):
+                print(dt.today(), "Choosing MetaSPADES for contig generation")
+                if(self.op_mode == "single"):
+                    command = self.command_obj.metaspades_command_s(self.dir_obj.host_final_s, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
+                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_s_job, command)
+                else:
+                    command = self.command_obj.metaspades_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
+                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_p_job, command)
+                    
+                self.job_control.wait_for_mp_store()
 
+            #if not(os.path.exists(self.dir_obj.assembly_contigs)):
+            #    print(dt.today(), "metaspades failed to make contigs. entering backup mode")
+            elif(self.path_obj.contig_tool == "megahit"):
+                print(dt.today(), "choosing MEGAHIT for contig generation")
                 if(self.op_mode == "single"):
                     command = self.command_obj.megahit_command_s(self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
                     self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_s_job, command)

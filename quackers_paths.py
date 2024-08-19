@@ -388,6 +388,7 @@ class path_obj:
         self.megahit_contig_len = self.assign_value("MEGAHIT_settings", "contig_len", "int", 1000)
         self.megehit_threads    = self.assign_value("settings", "threads", "int", 64)
         self.AR_minlength       = self.assign_value("settings", "AdapterRemoval_minlength", "int", 30)
+        self.contig_tool        = self.assign_value("settings", "contig tool", "str", "metaspades")
         
 
         #--------------------------------------------------------------
