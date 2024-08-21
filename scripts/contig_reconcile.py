@@ -57,39 +57,21 @@ def import_fastq(fastq_file):
     print("dict keys:", len(read_dict.keys()))
     return read_dict
 
-def export_hosts(sam_hits_dict, export_dir):
-    #sort all reads by host
-    hosts_dict = dict()
-    for read_ID in sam_hits_dict:
-        entry = sam_hits_dict[read_ID]
-        samfile = entry.split("|")[0]
-        if(samfile in hosts_dict):
-            hosts_dict[samfile].append(read_ID)
-        else:
-            hosts_dict[samfile] = [read_ID]
 
-    for host in hosts_dict:
-        host_reads = hosts_dict[host]
-        host_basename = host.split(".sam")[0]
-        host_export_file = os.path.join(export_dir, host_basename + "_reads.txt")
-        with open(host_export_file, "w") as host_out:
-            for read in host_reads:
-                out_line = read + "\n"
-                host_out.write(out_line)
 
 def sort_samfiles(sam_path):
     #opening one score_bt2/bwa.out
-    unique_hosts = set()
+  
     sam_hits_dict = dict()
     list_of_reads = list()
     
-    print("sam path:", sam_path)
+    #print("sam score path:", sam_path)
     with open(sam_path, "r") as sam_in:
         
         for line in sam_in:
             line_split = line.strip("\n").split("\t")
             read_ID = line_split[0]
-            #print("whole line:", line)
+            #print("whole line:", line.strip("\n"))
             
             list_of_reads.append(read_ID)
             score = float(line_split[1])
@@ -97,14 +79,19 @@ def sort_samfiles(sam_path):
             #note: paired-hits will get a double-chance to act.
             if(read_ID in sam_hits_dict):
                 old_hit = sam_hits_dict[read_ID]
-                #print("old hit:", old_hit)
-                old_score = float(old_hit.split("|")[1])
+                #print("old hit:", old_hit, "vs new hit:", score)
+                old_score = old_hit #float(old_hit.split("|")[1])
                 if(old_score < score):
+                #    print("new hit used!")
                     sam_hits_dict[read_ID] = score
+                #else:
+                #    print("old hit used")
             else:
+                #print("first hit found. logging")
                 sam_hits_dict[read_ID] = score
+            #time.sleep(1)
 
-    return sam_hits_dict, unique_hosts
+    return sam_hits_dict
 
 
 def sort_reads(raw_read_keys, sam_hits_keys, clean_reads_dict, work_ID):
@@ -148,10 +135,10 @@ def sort_host_hits(sam_hits_dict):
             host_bin_dict[sam_hit] = [read_id]
     return host_bin_dict
 
-def export_host_list(export_dir, host_bins_dict, host_name):
+def export_host_list(export_dir, host_bins_dict):
     #export all host lists
     #for host_sam in host_bins_dict.keys():
-    host_sam = host_bins_dict[host_name]
+    host_name = "contigs"
     short_host_name = host_name.split(".")[0]
     #print("using:", host_name)
     host_bin_file = os.path.join(export_dir, short_host_name + "_hits.txt")
@@ -181,15 +168,17 @@ if __name__ == "__main__":
 
     
     print(dt.today(), "starting samfile sort+merge")
-    sam_hits_dict, unique_hosts = sort_samfiles(sam_score_file)
+    sam_hits_dict = sort_samfiles(sam_score_file)
 
-    
-    print(dt.today(), "exporting host lists")
-    export_hosts(sam_hits_dict, export_dir)
+ 
     
 
     if(os.path.exists(raw_s_read)):
         is_single = True
+        print(dt.today(), "sample is SINGLE-ended")
+    else:
+        is_paired = True
+        print(dt.today(), "samplie is PAIRED-ended")
 
     if(os.path.exists(raw_p1_read) and (os.path.exists(raw_p2_read))):
         is_paired = True
@@ -205,28 +194,9 @@ if __name__ == "__main__":
     manager = mp.Manager()
     sam_hits_keys = sam_hits_dict.keys()
 
-    count = 0
-    for test_sam_key in sam_hits_keys:
-        print("sam hits keys:", test_sam_key)
-        count += 1
-        if(count > 10):
-            break
-
-
 
     mp_jobs = []
-    #--------------------------------------------
-    #deal with host lists
-    host_bin_dict = sort_host_hits(sam_hits_dict)
-    print(dt.today(), "starting host export")
-    for unique_host in unique_hosts:
-        host_export_process = mp.Process(target = export_host_list, args = (export_dir, host_bin_dict, unique_host))
-        host_export_process.start()
-        mp_jobs.append(host_export_process)
-    print(dt.today(), "all host export jobs launched. waiting")
-    for item in mp_jobs:
-        item.join()
-    mp_jobs.clear()
+
 
     print(dt.today(), "starting clean read extract")
     if(is_single):

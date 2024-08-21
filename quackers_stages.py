@@ -146,7 +146,7 @@ class q_stage:
         command = ""
         if(not os.path.exists(self.dir_obj.assembly_mkr)):
 
-            if(self.path_obj.contig_tool == "metaspades"):
+            if((self.path_obj.contig_tool == "metaspades") or (self.path_obj.contig_tool == "MetaSPAdes") or (self.path_obj.contig_tool == "mspades")):
                 print(dt.today(), "Choosing MetaSPADES for contig generation")
                 if(self.op_mode == "single"):
                     command = self.command_obj.metaspades_command_s(self.dir_obj.host_final_s, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
@@ -159,7 +159,7 @@ class q_stage:
 
             #if not(os.path.exists(self.dir_obj.assembly_contigs)):
             #    print(dt.today(), "metaspades failed to make contigs. entering backup mode")
-            elif(self.path_obj.contig_tool == "megahit"):
+            elif((self.path_obj.contig_tool == "megahit") or (self.path_obj.contig_tool == "MEGAHIT") or self.path_obj.contig_tool == "mhit"):
                 print(dt.today(), "choosing MEGAHIT for contig generation")
                 if(self.op_mode == "single"):
                     command = self.command_obj.megahit_command_s(self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
