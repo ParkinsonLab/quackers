@@ -312,7 +312,7 @@ class path_obj:
                 print("[" + key0 + "|" + key1 + "] found. using: " + export_value)
         else:
             print(key0 + " not found in config: default used:", default_value)
-        time.sleep(1)
+        #time.sleep(1)
         
         if(type == "str"):
             export_value = str(export_value)
