@@ -371,6 +371,7 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/Config.i
 
 
 WORKDIR /quackers_pipe/scripts
+<<<<<<< Updated upstream
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/contig_reconcile.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/sam_sift.py
@@ -382,6 +383,12 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_s
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/extract_fasta_bins.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/merge_cutup_clustering.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/modded_scripts/print_comment.py
+=======
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/sam_sift.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/clean_reads_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.0/scripts/contig_reconcile.py
+
+>>>>>>> Stashed changes
 
 
 

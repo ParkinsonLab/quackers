@@ -4,16 +4,18 @@ import sys
 import time
 from datetime import datetime as dt
 import quackers_commands as q_com
-import MetaPro_utilities as mp_util
+import MetaPro_utilities_v2 as mp_util
 
 
 class q_stage:
     def __init__(self, out_path, path_obj, dir_obj, args_pack):
+        self.path_obj = path_obj
+        self.dir_obj = dir_obj
         self.bin_tools = ["cct", "mbat2", "mbin2"]
         self.start_s_path   = args_pack["s_path"]
         self.start_f_path  = args_pack["p1_path"]
         self.start_r_path  = args_pack["p2_path"]
-        self.job_control = mp_util.mp_util(out_path)#, self.path_obj.bypass_log_name)
+        self.job_control = mp_util.mp_util(out_path, self.path_obj.bypass_log_name)
         self.op_mode = args_pack["op_mode"]
         self.quality_encoding = "64"
         if(self.op_mode == "single"):
@@ -21,8 +23,7 @@ class q_stage:
         else:
             self.quality_encoding = self.job_control.determine_encoding(self.start_f_path)
 
-        self.path_obj = path_obj
-        self.dir_obj = dir_obj
+        
         self.command_obj = q_com.command_obj(path_obj, dir_obj, self.quality_encoding)
         self.mspades_contig_fail = False
 

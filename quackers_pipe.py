@@ -3,7 +3,7 @@ import sys
 import time
 from datetime import datetime as dt
 from wsgiref.util import shift_path_info
-import MetaPro_utilities as mpu
+import MetaPro_utilities_v2 as mpu
 import quackers_paths as q_path
 import quackers_commands as q_comm
 import quackers_stages as q_stage
@@ -22,7 +22,7 @@ def run_pipe(path_obj, args_pack):
     #-------------------------------------------------------
     #step 1: hosts
     dir_obj = q_path.dir_structure(args_pack, path_obj)
-    mp_obj = mpu.mp_util(args_pack["out"])#, path_obj.bypass_log)
+    mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
     
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):

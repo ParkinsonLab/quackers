@@ -309,9 +309,10 @@ class path_obj:
             settings_map = self.config[key0]
             if(key1 in settings_map):
                 export_value = settings_map[key1]
+                print("[" + key0 + "|" + key1 + "] found. using: " + export_value)
         else:
             print(key0 + " not found in config: default used:", default_value)
-            
+        time.sleep(1)
         
         if(type == "str"):
             export_value = str(export_value)
@@ -378,8 +379,9 @@ class path_obj:
         #------------------------------------------------------------------
         #Assign singular values for settings
 
-        self.bypass_log         = self.assign_value("settings", "bypass_log_name", "str", "bypass_log.txt")
-        self.bypass_log         = os.path.join(self.output_path, self.bypass_log)
+        self.bypass_log_name    = self.assign_value("settings", "bypass_log_name", "str", "bypass_log.txt")
+        
+        self.bypass_log         = os.path.join(self.output_path, self.bypass_log_name)
         self.operating_mode     = self.assign_value("settings", "operating_mode", "str", "single")
         self.BBMAP_k            = self.assign_value("BBMAP_settings", "k", "int", 25)
         self.BBMAP_hdist        = self.assign_value("BBMAP_settings", "hdist", "int", 1)
