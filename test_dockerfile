@@ -306,6 +306,7 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 
 WORKDIR /quackers_pipe
+RUN apt-get update
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py

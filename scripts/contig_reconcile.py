@@ -7,7 +7,9 @@
 #note2: too slow. use multithreading to finish this faster
 #note3: reconstituted to be just-for-contigs.  Just for 1 file.
 
-#weak, 
+#note4: multithreading didn't do anything.  removed checks on scorefile.  Assuming there will only be 1 hit.
+#multi-hit check was holdover from host-filter days.
+
 import os
 import sys
 from datetime import datetime as dt
@@ -59,52 +61,63 @@ def import_fastq(fastq_file):
 
 
 
+
 def sort_samfiles(sam_path):
     #opening one score_bt2/bwa.out
+    #going low-tech here. assuming there's only valid entries.  
   
-    sam_hits_dict = dict()
-    list_of_reads = list()
+    sam_hits_set = set()
     
     #print("sam score path:", sam_path)
     with open(sam_path, "r") as sam_in:
-        
         for line in sam_in:
-            line_split = line.strip("\n").split("\t")
+            line_split = line.split("\t")
             read_ID = line_split[0]
-            #print("whole line:", line.strip("\n"))
-            
-            list_of_reads.append(read_ID)
-            score = float(line_split[1])
-            
-            #note: paired-hits will get a double-chance to act.
-            if(read_ID in sam_hits_dict):
-                old_hit = sam_hits_dict[read_ID]
-                #print("old hit:", old_hit, "vs new hit:", score)
-                old_score = old_hit #float(old_hit.split("|")[1])
-                if(old_score < score):
-                #    print("new hit used!")
-                    sam_hits_dict[read_ID] = score
-                #else:
-                #    print("old hit used")
-            else:
-                #print("first hit found. logging")
-                sam_hits_dict[read_ID] = score
-            #time.sleep(1)
+            sam_hits_set.add(read_ID)
 
-    return sam_hits_dict
+    return sam_hits_set
 
 
 def sort_reads(raw_read_keys, sam_hits_keys, clean_reads_dict, work_ID):
     
     #clean_reads = list()
-    print("[" + work_ID + "] raw keys:", len(raw_read_keys))
-    print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
+    if(work_ID == "0_1"):
+        print("[" + work_ID + "] raw keys:", len(raw_read_keys))
+        print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
+    count = 0
+    start_time = time.time()
+    full_count = len(raw_read_keys)
     for read in raw_read_keys:
+        if(work_ID == "0_1"):
+
+            
+            count += 1
+            now_time = time.time()
+            time_diff = int(now_time - start_time)
+            #print(dt.today(), "[" + work_ID + "] on:", count)
+            if(count == 10):
+                
+                print(dt.today(), "[" + work_ID + "] first 10 done:", time_diff)
+            elif(count == 100):
+                print(dt.today(), "[" + work_ID + "] first 100 done:", time_diff)
+            elif(count == 1000):
+                print(dt.today(), "[" + work_ID + "] first 1000 done", time_diff)
+
+            elif(count == int(full_count / 10)):
+                print(dt.today(), "[" + work_ID + "] 10% done", time_diff)
+
+            elif(count == int(full_count / 4)):
+                print(dt.today(), "[" + work_ID + "] 25% done", time_diff)
+
+            elif(count == int(full_count /2)):
+                print(dt.today(), "[" + work_ID + "] 50% done", time_diff)
+
+            elif(count == int(full_count * 0.75)):
+                print(dt.today(), "[" + work_ID + "] 75% done", time_diff)
+
+
         hit_reads = set(sorted(sam_hits_keys))
-        old_size = len(hit_reads)
-        hit_reads.add(read)
-        new_size = len(hit_reads)
-        if(old_size < new_size):
+        if(not read in hit_reads):
             continue
         else:
             clean_reads_dict[read] = 1
@@ -121,36 +134,17 @@ def export_reads(final_out_file, raw_read_dict, keys_to_write):
             qual = selected_read["qual"]
             true_ID = selected_read["ID"]
             out_line = true_ID + "\n" + seq + "\n" + "+" + "\n" + qual + "\n"
+
+            print("Writing:", true_ID)
             s_out.write(out_line)
 
 
-def sort_host_hits(sam_hits_dict):
-    #separate the reads into samfiles
-    host_bin_dict = dict()
-    for read_id in sam_hits_dict.keys():
-        sam_hit = sam_hits_dict[read_id].split("|")[0]
-        if(sam_hit in host_bin_dict):
-            host_bin_dict[sam_hit].append(read_id)
-        else:
-            host_bin_dict[sam_hit] = [read_id]
-    return host_bin_dict
-
-def export_host_list(export_dir, host_bins_dict):
-    #export all host lists
-    #for host_sam in host_bins_dict.keys():
-    host_name = "contigs"
-    short_host_name = host_name.split(".")[0]
-    #print("using:", host_name)
-    host_bin_file = os.path.join(export_dir, short_host_name + "_hits.txt")
-    with open(host_bin_file, "w") as out_file:
-        for read in host_bins_dict[host_name]:
-            out_line = read + "\n"
-            out_file.write(out_line)
 
 
 
 
 if __name__ == "__main__":
+    print(dt.today(), "RUNNING contig reconcile mod")
     sam_score_file = sys.argv[1]
     export_dir = sys.argv[2]
     raw_s_read = sys.argv[3]
@@ -163,12 +157,14 @@ if __name__ == "__main__":
     p1_raw_dict = ""
     p2_raw_dict = ""
     final_s_reads = os.path.join(export_dir, "singles.fastq")
-    final_p1_reads  = os.path.join(export_dir, "forward.fastq")
-    final_p2_reads  = os.path.join(export_dir, "reverse.fastq")
+    final_p1_reads  = os.path.join(export_dir, "remaining_forward.fastq")
+    final_p2_reads  = os.path.join(export_dir, "remaining_reverse.fastq")
+
+    print("export destination:", final_p1_reads)
 
     
     print(dt.today(), "starting samfile sort+merge")
-    sam_hits_dict = sort_samfiles(sam_score_file)
+    sam_hits_set = sort_samfiles(sam_score_file)
 
  
     
@@ -178,7 +174,7 @@ if __name__ == "__main__":
         print(dt.today(), "sample is SINGLE-ended")
     else:
         is_paired = True
-        print(dt.today(), "samplie is PAIRED-ended")
+        print(dt.today(), "sample is PAIRED-ended")
 
     if(os.path.exists(raw_p1_read) and (os.path.exists(raw_p2_read))):
         is_paired = True
@@ -189,10 +185,10 @@ if __name__ == "__main__":
 
     
 
-    cpu_count = mp.cpu_count()
+    cpu_count = mp.cpu_count() * 2
     cpu_count = cpu_count - 1
     manager = mp.Manager()
-    sam_hits_keys = sam_hits_dict.keys()
+    
 
 
     mp_jobs = []
@@ -201,27 +197,12 @@ if __name__ == "__main__":
     print(dt.today(), "starting clean read extract")
     if(is_single):
         s_raw_dict = import_fastq(raw_s_read)
+        s_keys_set = set(s_raw_dict.keys())
+        s_clean_keys = list(s_keys_set - sam_hits_set)
 
-        cpu_count = int(cpu_count)
-        split_size = int(len(p1_raw_dict.keys())/cpu_count)
-        s_keys = list(sorted(s_raw_dict.keys()))
-        clean_s_reads_dict = manager.dict()
-        for i_cpu in range(0, cpu_count):
-            start_index = i_cpu * split_size
-            end_index = ((i_cpu + 1) * split_size)-1
-            s_selection = s_keys[start_index:end_index]
-            if(i_cpu >= cpu_count - 1):
-                s_selection = s_keys[start_index:]
 
-            s_process = mp.Process(target = sort_reads, args = (s_selection, sam_hits_keys, clean_s_reads_dict))
-            s_process.start()
-            mp_jobs.append(s_process)
-        print(dt.today(), "S jobs launched. waiting")
-        for item in mp_jobs:
-            item.join()
-        mp_jobs.clear()
         print(dt.today(), "S extraction jobs done. Starting export")
-        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, clean_s_reads_dict.keys()))
+        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, s_clean_keys))
         s_export_process.start()
         print(dt.today(), "waiting for export S process to finish")
         s_export_process.join()
@@ -234,70 +215,19 @@ if __name__ == "__main__":
         p2_raw_dict = import_fastq(raw_p2_read)
 
         
+        p1_keys_set = set(p1_raw_dict.keys())
+        p2_keys_set = set(p2_raw_dict.keys())
 
-        cpu_count = int(cpu_count / 2)
-        split_size = int(len(p1_raw_dict.keys())/cpu_count)
-
-        print("cpu count:", cpu_count)
-        print("full reads:", len(p1_raw_dict.keys()))
-        p1_keys = list(sorted(p1_raw_dict.keys()))
-        p2_keys = list(sorted(p2_raw_dict.keys()))
-        
-        
-        print("split size:", split_size)
-        
-        clean_p1_reads_dict = manager.dict()
-        clean_p2_reads_dict = manager.dict()
-        
+        p1_clean_keys = list(p1_keys_set - sam_hits_set)
+        p2_clean_keys = list(p2_keys_set - sam_hits_set)
 
 
-        for i_cpu in range(0, cpu_count):
-            start_index = i_cpu * split_size
-            end_index = ((i_cpu + 1) * split_size)-1
-            p1_selection = p1_keys[start_index:end_index]
-            p2_selection = p2_keys[start_index:end_index]
-
-            start_selection = p1_selection[0]
-            end_selection = p1_selection[-1]
-            start_main = p1_keys[start_index]
-            end_main = p1_keys[end_index-1]
+        print("clean keys to write[P1]:", len(p1_clean_keys))
+        print("clean keys to write[P2]:", len(p2_clean_keys))
 
 
-            if(i_cpu >= cpu_count -1):
-                end_index = len(p1_keys)
-                p1_selection = p1_keys[start_index:end_index]
-                p2_selection = p2_keys[start_index:end_index]
-                #print("LAST bin")
-                #print("start:", start_index, "end:", end_index)
-                end_main = p1_keys[end_index-1]
-                end_selection = p1_selection[-1]
-
-            work_ID = str(i_cpu) + "_1"
-            work_ID2 = str(i_cpu) + "_2"
-            p1_process = mp.Process(target = sort_reads, args = (p1_selection, sam_hits_keys, clean_p1_reads_dict, work_ID))
-            p2_process = mp.Process(target = sort_reads, args = (p2_selection, sam_hits_keys, clean_p2_reads_dict, work_ID2))
-
-            p1_process.start()
-            p2_process.start()
-            mp_jobs.append(p1_process)
-            mp_jobs.append(p2_process)
-
-        print(dt.today(), "P extraction jobs launched. waiting")
-        for item in mp_jobs:
-            item.join()
-        mp_jobs.clear()
-    
-        print(dt.today(), "paired extraction jobs done! Starting export")
-        
-        final_p1_reads_dict = dict(clean_p1_reads_dict)
-        final_p2_reads_dict = dict(clean_p2_reads_dict)
-
-        print(final_p1_reads_dict)
-        for key in final_p1_reads_dict.keys():
-            print("keys to write:", key)
-
-        p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, clean_p1_reads_dict.keys()))
-        p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, clean_p2_reads_dict.keys()))
+        p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, p1_clean_keys))
+        p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, p2_clean_keys))
 
         p1_export_process.start()
         p2_export_process.start()
