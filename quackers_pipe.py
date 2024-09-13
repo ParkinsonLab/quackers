@@ -25,10 +25,6 @@ def run_pipe(path_obj, args_pack):
     mp_obj = mpu.mp_util(args_pack["out"], path_obj.bypass_log)
     stage_obj = q_stage.q_stage(args_pack["out"], path_obj, dir_obj, args_pack)
     
-    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):
-        stage_obj.low_quality_filter()
-    
-
 
     stage_obj.check_host_bypass()
 
@@ -36,6 +32,10 @@ def run_pipe(path_obj, args_pack):
         
         stage_obj.host_filter()
     
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):
+        stage_obj.low_quality_filter()
+
+
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
 

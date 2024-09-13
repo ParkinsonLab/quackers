@@ -396,8 +396,8 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
-        self.clean_dir              = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
-        self.host_dir               = self.assign_value("directory", "host_filter", "str", "1_host_filter")
+        self.clean_dir              = self.assign_value("directory", "clean_reads", "str", "1_clean_reads")
+        self.host_dir               = self.assign_value("directory", "host_filter", "str", "0_host_filter")
         self.assembly_dir           = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
         self.backup_assembly_dir    = self.assign_value("directory", "contig_backup", "str", "2a_contig_assembly")
         self.cct_bin_dir            = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")
