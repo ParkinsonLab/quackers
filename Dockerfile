@@ -125,14 +125,6 @@ RUN chmod -R 777 /quackers_tools
 
 RUN apt-get install -y python-profiler
 
-WORKDIR /quackers
-
-RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/MetaPro_utilities.py 
-RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_commands.py
-RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_paths.py
-RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_pipe.py
-RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/quackers_stages.py
-
 #WORKDIR /quackers/scripts
 #RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/scripts/0a_Run_bbduk_trimming_filtering.sh
 
@@ -359,11 +351,21 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 
 
+RUN apt-get update \
+&& apt-get install -y ncbi-blast+ git libglpk-dev r-base-core exonerate bedtools barrnap bc parallel curl libcurl4-openssl-dev libssl-dev libsbml5-dev bc
+WORKDIR /quackers_tools/gapseq
+RUN apt-get update \
+&& apt-get install -y r-base
+RUN apt-get update \
+&& apt-get install curl
+RUN wget https://compsysbio.org/quackers_deps/gapseq_r_install.R
+
+RUN Rscript gapseq_r_install.R
 WORKDIR /quackers_pipe
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_pipe.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_commands.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/MetaPro_utilities.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/MetaPro_utilities_v2.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_stages.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_paths.py
 
