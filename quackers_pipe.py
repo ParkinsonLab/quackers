@@ -67,7 +67,7 @@ def run_pipe(path_obj, args_pack):
 
 def parse_inputs():
     parser = ArgumentParser(description="Quackers: a metagenomic processing pipeline <and maybe more>. 2024. "
-                            "Version 1.0.0")
+                            "Version 1.0.2")
     parser.add_argument("-o", "-O", "--output_dir", "--Output_dir", type=str, help="Path to the output directory")
     parser.add_argument("-c", "-C", "--config", type=str, help="Path to a configuration file")
     parser.add_argument("-1", "--forward", "--f", type=str, help="Used only for paired-end reads: Path to the forward-end data")
