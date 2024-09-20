@@ -354,16 +354,30 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 RUN apt-get update \
 && apt-get install -y ncbi-blast+ git libglpk-dev r-base-core exonerate bedtools barrnap bc parallel curl libcurl4-openssl-dev libssl-dev libsbml5-dev bc
+
 WORKDIR /quackers_tools/gapseq
 
 RUN apt-get update \
 && apt-get install -y r-base
 RUN apt-get update \
-&& apt-get install curl
+&& apt-get install curl \
+&& apt-get install -y libcurl4-openssl-dev
+
+
 RUN apt-get update \
-&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R
+&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
 
 RUN Rscript gapseq_r_install.R
+
+
+RUN git clone https://github.com/jotech/gapseq
+
+ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq/"
+#RUN sh src/update_sequences.sh
+
+
 WORKDIR /quackers_pipe
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_pipe.py
@@ -389,11 +403,7 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_s
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/merge_cutup_clustering.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/print_comment.py
 
-WORKDIR /quackers_pipe/gapseq
-RUN wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz
-RUN wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
-R CMD INSTALL sybil_2.2.0.tar.gz
-R CMD INSTALL sybilSBML_3.1.2.tar.gz
-rm sybil_2.2.0.tar.gz
-rm sybilSBML_3.1.2.tar.gz
+
+
+
 CMD ["bash"]

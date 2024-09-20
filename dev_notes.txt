@@ -1,3 +1,11 @@
+Sept 19, 2024:
+---------------------------------
+Input to gapseq is MAGs.
+Output of quackers are taxa bins.  They're the same thing.
+However, there probably needs to be a merge step to force it into 1 file? Maybe? Read more.
+
+OK, MAGs are taxa bins.  It's ok.  Each bin is a MAG. 
+
 Sept 18, 2024:
 --------------------------------------------------------------------
 Contig resolution has been nerf'd using assumptions.  Now installing GapSeq <R tool> and integrating to Quackers
