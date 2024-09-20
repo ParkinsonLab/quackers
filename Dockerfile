@@ -352,27 +352,33 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 
 
-RUN apt-get update \
-&& apt-get install -y ncbi-blast+ git libglpk-dev r-base-core exonerate bedtools barrnap bc parallel curl libcurl4-openssl-dev libssl-dev libsbml5-dev bc
+
 
 WORKDIR /quackers_tools/gapseq
 
 RUN apt-get update \
-&& apt-get install -y r-base
-RUN apt-get update \
+&& apt-get install -y ncbi-blast+ git libglpk-dev r-base-core exonerate bedtools barrnap bc parallel curl libcurl4-openssl-dev libssl-dev libsbml5-dev bc \
+&& apt-get update \
+&& apt-get install -y r-base \
+&& apt-get update \
 && apt-get install curl \
-&& apt-get install -y libcurl4-openssl-dev
-
-
-RUN apt-get update \
-&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
+&& apt-get install -y libcurl4-openssl-dev \
+&& apt-get update \
+&& wget https://compsysbio.org/quackers_deps/working_packages.R \
 && wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
-&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
+&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz \
+&& Rscript working_packages.R \
 
-RUN Rscript gapseq_r_install.R
+&& git clone https://github.com/jotech/gapseq
+RUN apt-get update \
+&& apt-get install -y libc6-dev \
+&& apt-get -y install libglpk-dev 
+RUN deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/
 
-
-RUN git clone https://github.com/jotech/gapseq
+RUN wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
+&& wget https://cran.r-project.org/src/contrib/Matrix_1.7-0.tar.gz \
+&& R CMD INSTALL Matrix_1.7-0.tar.gz \
+&& Rscript gapseq_r_install.R 
 
 ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq/"
 #RUN sh src/update_sequences.sh
