@@ -1,3 +1,10 @@
+Oct 01, 2024:
+---------------------------------
+Most of the native packages are broken for GapSeq install.
+Swapped to using conda and it's ok
+
+
+
 Sept 19, 2024:
 ---------------------------------
 Input to gapseq is MAGs.

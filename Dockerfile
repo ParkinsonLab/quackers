@@ -348,7 +348,7 @@ ENV PATH="${PATH}:/quackers_tools/fasttree"
 ENV PATH="${PATH}:/quackers_tools/mash"
 ENV PATH="${PATH}:/quackers_tools/adapterremoval"
 ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
-ENV PATH="${PATH}:/quackers_tools/megahit/bin"
+
 
 
 
@@ -370,18 +370,9 @@ RUN apt-get update \
 && Rscript working_packages.R \
 
 && git clone https://github.com/jotech/gapseq
-RUN apt-get update \
-&& apt-get install -y libc6-dev \
-&& apt-get -y install libglpk-dev 
-RUN deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/
 
-RUN wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
-&& wget https://cran.r-project.org/src/contrib/Matrix_1.7-0.tar.gz \
-&& R CMD INSTALL Matrix_1.7-0.tar.gz \
-&& Rscript gapseq_r_install.R 
 
-ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq/"
-#RUN sh src/update_sequences.sh
+
 
 
 WORKDIR /quackers_pipe
@@ -409,7 +400,30 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_s
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/merge_cutup_clustering.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/print_comment.py
 
+WORKDIR /quackers_tools/gapseq
+RUN wget https://github.com/curl/curl/releases/download/curl-7_55_0/curl-7.55.0.tar.gz \
+&& tar -xzvf curl-7.55.0.tar.gz \
+&& cd curl-7.55.0 \
+&& ./configure \
+&& make \
+&& make install
+
+#RUN conda install --solver=classic conda-forge::conda-libmamba-solver conda-forge::libmamba conda-forge::libmambapy conda-forge::libarchive
+RUN conda install -n base libarchive -c main --force-reinstall --solver classic
+
+RUN conda install -y conda-forge::glpk \
+&& conda install -y conda-forge::r-sybil \
+&& conda install -y r::r-httr \
+&& conda install -y bioconda::libsbml 
 
 
+
+RUN apt-get install -y build-essential \
+&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
+RUN Rscript gapseq_r_install.R
+
+ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
 
 CMD ["bash"]
