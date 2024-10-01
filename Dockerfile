@@ -1,8 +1,8 @@
 #FROM continuumio/anaconda3
-#version 1.0.0: 
+#version 1.0.3: 
 
 FROM ubuntu:22.04
-MAINTAINER Billy Law
+#MAINTAINER Billy Law
 
 ENV TZ=America/Canada
 ENV DEBIAN_FRONTEND=noninteractive
@@ -46,7 +46,7 @@ RUN python3 setup.py install
 WORKDIR /quackers_tools
 RUN wget http://eddylab.org/software/hmmer/hmmer.tar.gz \
 && tar -xzvf hmmer.tar.gz 
-WORKDIR hmmer-3.4
+WORKDIR /quackers_tools/hmmer-3.4
 RUN sh configure && make 
 
 WORKDIR /quackers_tools
@@ -74,7 +74,7 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.20/samtools-1.
 && tar -xvf samtools.tar.bz2 
 
 
-WORKDIR samtools-1.20
+WORKDIR /quackers_tools/samtools-1.20
 RUN sh configure \
 && make \
 && make install
@@ -124,9 +124,6 @@ RUN rm *.tar.gz \
 RUN chmod -R 777 /quackers_tools
 
 RUN apt-get install -y python-profiler
-
-#WORKDIR /quackers/scripts
-#RUN wget https://raw.githubusercontent.com/billytaj/quackers/develop/scripts/0a_Run_bbduk_trimming_filtering.sh
 
 RUN pip install --force-reinstall -v "scikit-learn==1.1.0"
 
@@ -178,10 +175,6 @@ RUN wget https://bitbucket.org/berkeleylab/metabat/get/37db58fe3fda88f118dfdf188
 && mv berkeleylab-metabat-37db58fe3fda metabat \
 && cd metabat/src
 
-#RUN git clone https://bitbucket.org/berkeleylab/metabat.git #\
-#&& git checkout v2.12.1
-
-
 ENV CONDA_DIR="/opt/conda"
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda
@@ -204,9 +197,6 @@ ENV PATH="${PATH}:/quackers_tools/bowtie2"
 WORKDIR /quackers_tools/gtdbtk
 RUN python3 setup.py install
 
-#WORKDIR /quackers_tools/gtdbtk_data
-#RUN wget https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_data.tar.gz \
-#&& tar -xzvf gtdbtk_data.tar.gz
 ENV GTDBTK_DATA_PATH="/quackers_tools/gtdbtk_data/release214"
 
 WORKDIR /quackers_tools/fastANI
@@ -235,11 +225,6 @@ RUN wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-
 
 WORKDIR /quackers_tools
 
-#RUN wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz \
-#&& tar -xzf SPAdes-4.0.0-Linux.tar.gz \
-#&& mv SPAdes-4.0.0-Linux SPAdes \
-#&& rm *.tar.gz \
-#&& rm *.tar.bz2
 RUN apt-get update \
 && apt-get install -y cmake \
 && apt-get install -y zlib1g-dev \
@@ -249,22 +234,13 @@ RUN wget https://github.com/ablab/spades/archive/refs/tags/v4.0.0.zip \
 && unzip v4.0.0.zip \
 && mv spades-4.0.0 SPAdes
 
-WORKDIR SPAdes
+WORKDIR /quackers_tools/SPAdes
 
 
 RUN sh spades_compile.sh
 
 
-#WORKDIR SPAdes
 
-#RUN sh spades_compile.sh
-#RUN sh "PREFIX=/quackers_tools/SPAdes" spades_compile.sh
-
-#RUN conda install -y spades
-#RUN wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz \
-#&& tar -xzf SPAdes-4.0.0-Linux.tar.gz \
-#&& mv SPAdes-4.0.0-Linux SPAdes \
-#&& rm *.tar.gz
 ENV PATH="${PATH}:/quackers_tools/SPAdes/bin"
 WORKDIR /quackers_tools
 RUN chmod -R 777 /quackers_tools/SPAdes
@@ -274,30 +250,6 @@ RUN chmod -R 777 /quackers_tools/SPAdes
 RUN apt-get update \
 && apt-get install -y -qq build-essential libgsl0-dev bedtools mummer samtools
 
-#RUN rm *.tar.gz
-#RUN pip uninstall pandas
-#RUN pip install --force-reinstall -v pandas==1.0.0 
-#RUN pip install --force-reinstall -v 'pandas==0.13.0'
-
-#RUN conda install -y bioconda::maxbin2
-#RUN wget http://compsysbio.org/quackers_deps/MaxBin-2.2.7.tar.gz \
-#&& tar -xzvf MaxBin-2.2.7.tar.gz \
-#&& rm *.gz \
-#&& mv MaxBin-2.2.7 maxbin
-
-#RUN wget https://github.com/edgraham/BinSanity/archive/refs/tags/v0.5.3.zip \
-#&& unzip v0.5.3.zip \
-#&& mv BinSanity-0.5.3 binsanity
-#RUN pip install scikit-learn
-#ENV PATH="${PATH}:/quackers_tools/binsanity/bin"
-
-
-#RUN wget http://compsysbio.org/quackers_deps/subread-2.0.6-Linux-x86_64.tar.gz -O subread.tar.gz \
-#&& tar -xzvf subread.tar.gz \
-#&& mv subread-2.0.6-Linux-x86_64 subread \
-#&& rm *.gz 
-
-#ENV PATH="${PATH}:/quackers_tools/subread/bin"
 
 RUN apt-get update \
 && apt-get install perl
@@ -323,9 +275,6 @@ RUN pip2 install matplotlib
 RUN apt-get install -y python-tk
 
 
-#RUN cd biopython-1.76 \
-#&& python2 setup.py install
-
 RUN wget https://github.com/bluenote-1577/skani/releases/download/latest/skani \
 && chmod 777 skani
 
@@ -350,10 +299,6 @@ ENV PATH="${PATH}:/quackers_tools/adapterremoval"
 ENV PATH="${PATH}:/quackers_tools/cdhit_dup"
 
 
-
-
-
-
 WORKDIR /quackers_tools/gapseq
 
 RUN apt-get update \
@@ -368,9 +313,33 @@ RUN apt-get update \
 && wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
 && wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz \
 && Rscript working_packages.R \
-
 && git clone https://github.com/jotech/gapseq
 
+WORKDIR /quackers_tools/gapseq
+RUN wget https://github.com/curl/curl/releases/download/curl-7_55_0/curl-7.55.0.tar.gz \
+&& tar -xzvf curl-7.55.0.tar.gz \
+&& cd curl-7.55.0 \
+&& ./configure \
+&& make \
+&& make install
+
+#RUN conda install --solver=classic conda-forge::conda-libmamba-solver conda-forge::libmamba conda-forge::libmambapy conda-forge::libarchive
+RUN conda install -n base libarchive -c main --force-reinstall --solver classic
+
+RUN conda install -y conda-forge::glpk \
+&& conda install -y conda-forge::r-sybil \
+&& conda install -y r::r-httr \
+&& conda install -y bioconda::libsbml 
+
+
+
+RUN apt-get install -y build-essential \
+&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
+&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
+RUN Rscript gapseq_r_install.R
+
+ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
 
 
 
@@ -400,30 +369,6 @@ RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_s
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/merge_cutup_clustering.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/print_comment.py
 
-WORKDIR /quackers_tools/gapseq
-RUN wget https://github.com/curl/curl/releases/download/curl-7_55_0/curl-7.55.0.tar.gz \
-&& tar -xzvf curl-7.55.0.tar.gz \
-&& cd curl-7.55.0 \
-&& ./configure \
-&& make \
-&& make install
 
-#RUN conda install --solver=classic conda-forge::conda-libmamba-solver conda-forge::libmamba conda-forge::libmambapy conda-forge::libarchive
-RUN conda install -n base libarchive -c main --force-reinstall --solver classic
-
-RUN conda install -y conda-forge::glpk \
-&& conda install -y conda-forge::r-sybil \
-&& conda install -y r::r-httr \
-&& conda install -y bioconda::libsbml 
-
-
-
-RUN apt-get install -y build-essential \
-&& wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
-&& wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
-&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
-RUN Rscript gapseq_r_install.R
-
-ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
 
 CMD ["bash"]
