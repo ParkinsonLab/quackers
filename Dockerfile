@@ -142,7 +142,7 @@ RUN wget https://github.com/matsen/pplacer/releases/download/v1.1.alpha17/pplace
 
 #for linux-only
 WORKDIR /quackers_tools/checkm_data
-RUN wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz \
+RUN wget https://compsysbio.org/quackers_deps/checkm_data_2015_01_16.tar.gz \
 && tar -xzvf checkm_data_2015_01_16.tar.gz \
 && rm *.tar.gz
 
@@ -326,8 +326,8 @@ RUN wget https://github.com/curl/curl/releases/download/curl-7_55_0/curl-7.55.0.
 #RUN conda install --solver=classic conda-forge::conda-libmamba-solver conda-forge::libmamba conda-forge::libmambapy conda-forge::libarchive
 RUN conda install -n base libarchive -c main --force-reinstall --solver classic
 
-RUN conda install -y conda-forge::glpk \
-&& conda install -y conda-forge::r-sybil \
+RUN apt-get update \ 
+&& conda install -y conda-forge::glpk \
 && conda install -y r::r-httr \
 && conda install -y bioconda::libsbml 
 
@@ -336,7 +336,11 @@ RUN conda install -y conda-forge::glpk \
 RUN apt-get install -y build-essential \
 && wget https://compsysbio.org/quackers_deps/gapseq_r_install.R \
 && wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
-&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
+&& wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz \
+&& wget https://github.com/euba/BacArena/archive/refs/tags/v1.8.1.zip 
+
+
+
 RUN Rscript gapseq_r_install.R
 
 ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
