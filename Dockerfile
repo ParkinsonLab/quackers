@@ -344,34 +344,36 @@ RUN apt-get install -y build-essential \
 RUN Rscript gapseq_r_install.R
 
 ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
+ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 
 
 
 
 WORKDIR /quackers_pipe
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_pipe.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_commands.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/MetaPro_utilities_v2.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_stages.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/quackers_paths.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/quackers_pipe.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/quackers_commands.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/MetaPro_utilities_v2.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/quackers_stages.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/quackers_paths.py
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/Config.ini
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/Config.ini
 
 
 WORKDIR /quackers_pipe/scripts
 
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/scripts/contig_reconcile.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/scripts/sam_sift.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/scripts/clean_reads_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/scripts/contig_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/scripts/sam_sift.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/scripts/clean_reads_reconcile.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/tests/test_quackers_config.py
 
 WORKDIR /quackers_pipe/modded_scripts
 
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/concoct_coverage_table.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/extract_fasta_bins.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/merge_cutup_clustering.py
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.2/modded_scripts/print_comment.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/modded_scripts/concoct_coverage_table.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/modded_scripts/extract_fasta_bins.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/modded_scripts/merge_cutup_clustering.py
+RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.4/modded_scripts/print_comment.py
 
 
 
