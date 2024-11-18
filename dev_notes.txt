@@ -1,3 +1,18 @@
+Nov 15, 2024:
+---------------------------------
+This mem thing is truly a wild goosechase.
+This looks like the sfwr eqv of a paper jam. 
+
+System couldn't do concoct because it was missing a .bam from megahit.  
+Even though the commands ran fine, with no crashes.
+So, it's not repeatable.  maybe even a goof from the server.
+A robustness check would give some feedback and stop the pipe from going crazy.
+
+Nov 12, 2024:
+-------------------------------
+complaints about issues with out-of-mem on systems with limited memory.
+We need to triage.
+
 Oct 01, 2024:
 ---------------------------------
 Most of the native packages are broken for GapSeq install.

@@ -94,7 +94,7 @@ class dir_structure:
 
         self.assembly_sam_convert_job = os.path.join(self.assembly_dir_top, "sam_convert.sh")
 
-        self.assembly_mkr                       = os.path.join(self.assembly_dir_top, "assembly_mspades")
+        self.assembly_mkr                       = os.path.join(self.assembly_dir_top, "assembly_gattai")
         self.assembly_bt2_idx_mkr               = os.path.join(self.assembly_dir_top, "assembly_bt2_idx")
         self.assembly_bwa_idx_mkr               = os.path.join(self.assembly_dir_top, "assembly_bwa_idx")
         self.assembly_scan_sam_mkr              = os.path.join(self.assembly_dir_top, "assembly_scan_sam")

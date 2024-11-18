@@ -29,7 +29,7 @@ def get_match_score(cigar_segment):
         return 0
         
     match_score = 100 * (matched / length)
-    print("match score:", match_score)
+    #print("match score:", match_score)
     
     return match_score
 
@@ -48,12 +48,12 @@ if __name__ == "__main__":
             line = raw_line.strip("\n")
             line_split = line.split("\t")
             
-            #print("line:", line_split)
+            print("line:", line_split)
             #time.sleep(1)
             read_ID = line_split[0]
             read_quality = line_split[5]
-            if(read_quality != "*"):
-                print("found something")
+            #if(read_quality != "*"):
+                #print("found something")
             match_score = get_match_score(read_quality)
             if(match_score > 0):
                 #print("quality[", read_quality, "]:", line)
