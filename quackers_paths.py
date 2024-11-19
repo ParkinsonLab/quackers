@@ -209,6 +209,91 @@ class dir_structure:
         make_folder(self.mwrap_quant_dir_top)
         make_folder(self.mwrap_quant_dir_data)
 
+
+    def check_mkr_host(self):
+        all_ok = True
+        if(not os.path.exists(self.host_bwa_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.host_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.host_recon_mkr)):
+            all_ok = False
+
+        return all_ok    
+
+    def check_mkr_clean(self):
+        all_ok = True
+        if(not os.path.exists(self.clean_dir_mkr)):
+            all_ok = False
+        return all_ok   
+    
+    def check_mkr_assembly(self):
+        all_ok = True
+        if(not os.path.exists(self.assembly_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_bt2_idx_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_bwa_idx_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_scan_sam_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_pp_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_reconcile_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.assembly_sam_convert_mkr)):
+            all_ok = False
+        return all_ok
+    
+    def check_mkr_bin_cct(self):
+        all_ok = True
+        if(not os.path.exists(self.cct_prep_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.cct_checkm_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.cct_mkr)):
+            all_ok = False
+
+        return all_ok
+    
+    def check_mkr_bin_mbin2(self):
+        all_ok = True
+        if(not os.path.exists(self.mbin2_mkr)):
+            all_ok = False
+        return all_ok
+
+    def check_mkr_bin_mbat2(self):
+        all_ok = True
+        if(not os.path.exists(self.mbat2_mkr)):
+            all_ok = False
+        return all_ok    
+    
+    def check_mkr_mwrap_bin_r(self):
+        all_ok = True
+        if(not os.path.exists(self.mwrap_bin_r_mkr)):
+            all_ok = False
+        return all_ok
+    
+    def check_mkr_gtdbtk(self):
+        all_ok = True
+        if(not os.path.exists(self.gtdbtk_cct_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.gtdbtk_mbin2_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.gtdbtk_mbat2_mkr)):
+            all_ok = False
+        return all_ok
+
+    def check_mkr_mwrap_quant(self):
+        all_ok = True
+        if(not os.path.exists(self.mwrap_quant_cct_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.mwrap_quant_mbat2_mkr)):
+            all_ok = False
+        if(not os.path.exists(self.mwrap_quant_mbin2_mkr)):
+            all_ok = False
+        return all_ok
+
 #classes that store all tool paths for Quackers.
 #also classes that store all datapaths.
 

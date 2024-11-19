@@ -66,7 +66,13 @@ class q_stage:
             
 
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.clean_dir)
+        
+        if(self.dir_obj.check_mkr_clean):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.clean_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: "+ self.path_obj.clean_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
 
     def host_filter(self):
         #launch for each new ref path
@@ -151,8 +157,12 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
             self.job_control.wait_for_mp_store()
 
-            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
-
+            if(self.dir_obj.check_mkr_host()):
+                self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
+            else:
+                message_line = str(dt.today()) + " broken at: " + self.path_obj.host_dir
+                self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+                sys.exit("bad_stage")
         
     def assembly(self):
         command = ""
@@ -222,9 +232,13 @@ class q_stage:
             self.job_control.wait_for_mp_store()
         else:
             print(dt.today(), "skipping contig-read reconciliation")
-        
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
-
+    
+        if(self.dir_obj.check_mkr_assembly()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.assembly_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
  
 
     
@@ -254,30 +268,52 @@ class q_stage:
         else:
             print(dt.today(), "skipping checkm")
             print(self.dir_obj.cct_checkm_mkr)
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
-            
+
+        if(self.dir_obj.check_mkr_cct()):    
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.cct_bin_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
+        
+
     def metabat2_binning(self):
         print(dt.today(), "running metawrap-binning: metabat2")
         command = self.command_obj.metabat2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbat2_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbat2_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbat2_bin_dir)
-
+    
+        if(self.dir_obj.check_mkr_bin_mbat2()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbat2_bin_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.mbat2_bin_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
 
     def maxbin2_binning(self):
         print(dt.today(), "running metawrap-binning: maxbin2")
         command = self.command_obj.maxbin2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbin2_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbin2_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
-        
+        if(not self.dir_obj.check_mkr_bin_mbin2()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.mbin2_bin_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
 
     def metawrap_bin_refine(self):
         print("running metawrap bin_refinement")
         command = self.command_obj.metawrap_bin_refinement_command(self.dir_obj.mwrap_bin_r_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_bin_r_job, command)
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_r_dir)
+        if(not self.dir_obj.check_mkr_mwrap_bin_r()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_r_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.mwrap_bin_r_dir
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
+
 
     def gtdbtk_classify(self):
         print("running GTDB-tk classify")
@@ -298,7 +334,12 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+        if(not self.dir_obj.check_mkr_gtdbtk()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.gtdbtk_class_dir 
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
 
     def metawrap_quant(self):
         print(dt.today(), "running metawrap quant bin")
@@ -320,4 +361,9 @@ class q_stage:
         
         
         self.job_control.wait_for_mp_store()
-        self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
+        if(not self.dir_obj.check_mkr_mwrap_quant()):
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
+        else:
+            message_line = str(dt.today()) + " broken at: " + self.path_obj.mwrap_quant_dir 
+            self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
+            sys.exit("bad_stage")
