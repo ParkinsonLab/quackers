@@ -16,10 +16,14 @@ class dir_structure:
     def __init__(self, args_pack, path_obj):
         os.umask(0)
         self.output_dir = args_pack["out"]
+        if("p1_path" in args_pack):
+            self.start_f = args_pack["p1_path"] 
+        
+        if("p2_path" in args_pack):
+            self.start_r = args_pack["p2_path"]
 
-        self.start_f = args_pack["p1_path"] 
-        self.start_r = args_pack["p2_path"]
-        self.start_s = args_pack["s_path"]
+        if("s_path" in args_pack):
+            self.start_s = args_pack["s_path"]
 
         self.clean_dir_top = os.path.join(self.output_dir, path_obj.clean_dir)
         self.clean_dir_data = os.path.join(self.clean_dir_top, "data")
@@ -210,13 +214,17 @@ class dir_structure:
         make_folder(self.mwrap_quant_dir_data)
 
 
-    def check_mkr_host(self):
+    def check_mkr_host(self, list_of_mkrs):
         all_ok = True
-        if(not os.path.exists(self.host_bwa_mkr)):
-            all_ok = False
-        if(not os.path.exists(self.host_mkr)):
-            all_ok = False
+        for mkr in list_of_mkrs:
+            if(not os.path.exists(mkr)):
+                print(dt.today(), "missing mkr: ", mkr)
+                all_ok = False
+                break
+
+
         if(not os.path.exists(self.host_recon_mkr)):
+            print(dt.today(), "missing HOST recon - expecting:", self.host_recon_mkr)
             all_ok = False
 
         return all_ok    

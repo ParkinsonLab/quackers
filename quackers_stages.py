@@ -78,7 +78,7 @@ class q_stage:
         #launch for each new ref path
         #walk through each host and launch a bwa job
         list_of_hosts = sorted(self.path_obj.config["hosts"].keys())
-
+        list_of_mkrs = list()
         if(len(list_of_hosts) == 0):
             #skip host-cleaning. move data
             self.hosts_bypassed = True 
@@ -103,7 +103,7 @@ class q_stage:
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
                 host_bwa_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_host_bwa_mkr")
-                
+                list_of_mkrs.append(host_bwa_marker_path)
                 
                 if(os.path.exists(host_bwa_marker_path)):
                     print("skipping Host filter:", ref_basename)
@@ -130,6 +130,7 @@ class q_stage:
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
                 sam_sift_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr")
+                list_of_mkrs.append(sam_sift_marker_path)
                 sam_path = ""
                 score_out_path = ""
                 sam_name = ref_basename
@@ -157,7 +158,7 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
             self.job_control.wait_for_mp_store()
 
-            if(self.dir_obj.check_mkr_host()):
+            if(self.dir_obj.check_mkr_host(list_of_mkrs)):
                 self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.host_dir)
             else:
                 message_line = str(dt.today()) + " broken at: " + self.path_obj.host_dir
