@@ -28,14 +28,12 @@ def run_pipe(path_obj, args_pack):
 
     stage_obj.check_host_bypass()
 
-    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
-        
-        stage_obj.host_filter()
-    
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.clean_dir)):
         stage_obj.low_quality_filter()
 
-
+    if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
+        stage_obj.host_filter()
+    
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
 

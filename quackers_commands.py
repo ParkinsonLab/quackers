@@ -23,13 +23,13 @@ class command_obj:
     def adapterremoval_command(self, quality_encoding, marker_path):
         remove_lq = self.path_obj.ar_path + " "
         if(self.op_mode == "single"):
-            #remove_lq += "--file1" + " " + self.dir_obj.start_s + " '"
-            remove_lq += "--file1" + " " + self.dir_obj.host_final_s + " '"
+            remove_lq += "--file1" + " " + self.dir_obj.start_s + " '"
+            #remove_lq += "--file1" + " " + self.dir_obj.host_final_s + " '"
         elif(self.op_mode == "paired"):
-            #remove_lq += "--file1" + " " + self.dir_obj.start_f + " "
-            #remove_lq += "--file2" + " " + self.dir_obj.start_r + " "
-            remove_lq += "--file1" + " " + self.dir_obj.host_final_f + " "
-            remove_lq += "--file2" + " " + self.dir_obj.host_final_r + " "
+            remove_lq += "--file1" + " " + self.dir_obj.start_f + " "
+            remove_lq += "--file2" + " " + self.dir_obj.start_r + " "
+            #remove_lq += "--file1" + " " + self.dir_obj.host_final_f + " "
+            #remove_lq += "--file2" + " " + self.dir_obj.host_final_r + " "
         
         remove_lq += "--qualitybase" + " " + str(quality_encoding) + " "
         if(quality_encoding == 33):
