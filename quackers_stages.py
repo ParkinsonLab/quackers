@@ -47,14 +47,14 @@ class q_stage:
             self.hosts_bypassed = True 
             print(dt.today(), "no hosts used: bypassing host filter")
             if(self.op_mode == "single"):
-                #self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
-                self.dir_obj.host_final_s = self.dir_obj.start_s
+                self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
+                #self.dir_obj.host_final_s = self.dir_obj.start_s
                 
             elif(self.op_mode == "paired"):
-                #self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
-                #self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
-                self.dir_obj.host_final_f = self.dir_obj.start_f
-                self.dir_obj.host_final_r = self.dir_obj.start_r
+                self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
+                self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
+                #self.dir_obj.host_final_f = self.dir_obj.start_f
+                #self.dir_obj.host_final_r = self.dir_obj.start_r
     
     def low_quality_filter(self):
         if (os.path.exists(self.dir_obj.clean_dir_mkr)):
@@ -84,14 +84,14 @@ class q_stage:
             self.hosts_bypassed = True 
             print(dt.today(), "no hosts used: bypassing host filter")
             if(self.op_mode == "single"):
-                #self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
-                self.dir_obj.host_final_s = self.dir_obj.start_s
+                self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
+                #self.dir_obj.host_final_s = self.dir_obj.start_s
                 
             elif(self.op_mode == "paired"):
-                #self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
-                #self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
-                self.dir_obj.host_final_f = self.dir_obj.start_f
-                self.dir_obj.host_final_r = self.dir_obj.start_r
+                self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
+                self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
+                #self.dir_obj.host_final_f = self.dir_obj.start_f
+                #self.dir_obj.host_final_r = self.dir_obj.start_r
 
         else:
 
@@ -110,12 +110,12 @@ class q_stage:
                 else:
                     command = ""
                     if(self.op_mode == "single"):
-                        #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
-                        command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.start_s, host_bwa_marker_path)
+                        command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
+                        #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.start_s, host_bwa_marker_path)
                         #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
                     else:
-                        #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
-                        command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.start_f, self.dir_obj.start_r, host_bwa_marker_path)
+                        command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
+                        #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.start_f, self.dir_obj.start_r, host_bwa_marker_path)
                         #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
                     script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
