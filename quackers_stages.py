@@ -110,11 +110,13 @@ class q_stage:
                 else:
                     command = ""
                     if(self.op_mode == "single"):
-                        command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
+                        #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
+                        command = self.command_obj.clean_reads_bowtie2_command_s(host_ref_path, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
                         #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.start_s, host_bwa_marker_path)
                         #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
                     else:
-                        command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
+                        #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
+                        command = self.command_obj.clean_reads_bowtie2_command_p(host_ref_path, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_read_final_r, host_bwa_marker_path)
                         #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.start_f, self.dir_obj.start_r, host_bwa_marker_path)
                         #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
