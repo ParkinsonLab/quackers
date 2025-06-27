@@ -101,6 +101,37 @@ class command_obj:
 
         return [command + " && " + make_marker]
     
+    def host_rem_bt2_p(self, ref_path, sam_name, f_path, r_path, marker_path):
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        command = self.path_obj.bowtie2_path + " "
+        command += "-p " + str(os.cpu_count()) + " "
+        command += "-q" + " "
+        command += "-x" + " "
+        command += ref_path + " "
+        command += "-1" + " " + f_path + " "
+        command += "-2" + " " + r_path + " "
+        #command += "--phred" + str(self.phred_encoding) + " "
+        #command += "-S " + sam_path
+        command += "|" + " " + self.path_obj.samtools_path + " view -F 4 > " + sam_path
+
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " &&  " + make_marker]
+    
+    def host_rem_bt2_s(self, ref_path, sam_name, in_path, marker_path):
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        command = self.path_obj.bowtie2_path 
+        command += " -x "
+        command += ref_path + " "
+        command += "-U" + " " + in_path + " " 
+        #command += "--phred" + str(self.phred_encoding) + " "
+        #command += "-S " + " " + self.dir_obj.assembly_raw_sam
+        command += "|" + " " + self.path_obj.samtools_path + " view -F 4 > " + sam_path
+
+        make_marker = "touch" + " " + marker_path
+
+        return [command + " && " + make_marker]
+    
     def sift_bwa_sam_command(self, sam_path, score_out_path, marker_path):
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.sam_sift + " "

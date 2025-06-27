@@ -3,7 +3,7 @@
 
 FROM ubuntu:24.04
 #MAINTAINER Billy Law
-#FROM python:2
+FROM python:2
 FROM python:3
 ENV TZ=America/Canada
 ENV DEBIAN_FRONTEND=noninteractive
@@ -353,17 +353,15 @@ RUN apt-get install -y build-essential \
 && wget https://cran.r-project.org/src/contrib/Archive/sybil/sybil_2.2.0.tar.gz \
 && wget https://cran.r-project.org/src/contrib/Archive/sybilSBML/sybilSBML_3.1.2.tar.gz
 
-RUN conda install -y bioconda::python-libsbml 
 
 
-
-
+RUN pip install python-libsbml 
 RUN Rscript gapseq_r_install.R
-
 ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
-
+ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 WORKDIR /quackers_pipe
-RUN apt-get update
+RUN apt-get update && apt-get install less
+
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py

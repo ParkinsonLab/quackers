@@ -33,11 +33,13 @@ def run_pipe(path_obj, args_pack):
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
         stage_obj.host_filter()
-    
+
+      
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
 
-    
+    print(dt.today(), "stopping here")
+    sys.exit()  
 
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.cct_bin_dir)):
         stage_obj.concoct_binning()    
@@ -75,10 +77,10 @@ def parse_inputs():
     parser.add_argument("-stop", "--stop_at", type = str, help = "debug stage-stop")
     args = parser.parse_args()
 
-    output_dir  = args.output_dir
-    config_path = args.config
-    p1_path     = args.forward
-    p2_path     = args.reverse
+    output_dir  = os.path.abspath(args.output_dir)
+    config_path = os.path.abspath(args.config)
+    p1_path     = os.path.abspath(args.forward)
+    p2_path     = os.path.abspath(args.reverse)
     s_path      = args.single
     stop_stage = args.stop_at
     debug_mode = args.debug

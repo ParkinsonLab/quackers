@@ -525,7 +525,7 @@ class path_obj:
                 #print(host_entry)
                 #self.check_lib_integrity(self.config["hosts"][host_entry])
                 #self.check_if_indexed(self.config["hosts"][host_entry])
-                self.check_if_indexed_bwa(self.config["hosts"][host_entry])
+                #self.check_if_indexed_bwa(self.config["hosts"][host_entry])
                 
                 self.hosts_path_dict[str(host_entry)] = self.assign_value("hosts", host_entry, "str", "none")
                 print("check host:", "key:", host_entry, "value:", self.hosts_path_dict[str(host_entry)])
