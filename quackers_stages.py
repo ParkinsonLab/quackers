@@ -211,8 +211,12 @@ class q_stage:
                 else:
                     print("working in contigs paired")
                     time.sleep(3)
-                    command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
-                    print("command:", command)
+                    if(len(self.dir_obj.clean_dir_final_s) > 1000):
+                        command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                        print("command:", command)
+                    else:
+                        command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, "None", self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                        
                     self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_p_job, command)
                 self.job_control.wait_for_mp_store()
                 #set new contigs
