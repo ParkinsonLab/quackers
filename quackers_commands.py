@@ -36,15 +36,18 @@ class command_obj:
             remove_lq += "--qualitymax" + " " + "75" + " "
         remove_lq += "--threads" + " " + str(os.cpu_count()) + " "
         remove_lq += "--minlength" + " " + str(self.path_obj.AR_minlength) + " "
+        remove_lq += "--minquality" + " " + str(20) + " "
         #remove_lq += "--basename" + " " + self.dir_obj.clean_dir_data + "_AR" + " "
         remove_lq += "--trimqualities" + " "
+        remove_lq += "--trimns" + " "
+        
         
         if(self.op_mode == "single"):
             remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_s
         else:
             remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_f + " " 
             remove_lq += "--output2" + " " + self.dir_obj.clean_dir_final_r + " "
-            remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_AR_s0
+            remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_final_s
 
         
         
@@ -102,7 +105,7 @@ class command_obj:
         return [command + " && " + make_marker]
     
     def host_rem_bt2_p(self, ref_path, sam_name, f_path, r_path, marker_path):
-        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p.sam")
         command = self.path_obj.bowtie2_path + " "
         command += "-p " + str(os.cpu_count()) + " "
         command += "-q" + " "
@@ -119,7 +122,7 @@ class command_obj:
         return [command + " &&  " + make_marker]
     
     def host_rem_bt2_s(self, ref_path, sam_name, in_path, marker_path):
-        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+        sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s.sam")
         command = self.path_obj.bowtie2_path 
         command += " -x "
         command += ref_path + " "
@@ -132,7 +135,7 @@ class command_obj:
 
         return [command + " && " + make_marker]
     
-    def sift_bwa_sam_command(self, sam_path, score_out_path, marker_path):
+    def sift_bt2_sam_command(self, sam_path, score_out_path, marker_path):
         sifting_command = self.path_obj.py_path + " "
         sifting_command += self.path_obj.sam_sift + " "
         sifting_command += sam_path + " "
@@ -259,10 +262,11 @@ class command_obj:
         return [command + " && " + make_marker]
     
 
-    def megahit_command_p(self, forward_path, reverse_path, export_dir, marker_path):
+    def megahit_command_p(self, forward_path, reverse_path, s_path, export_dir, marker_path):
         command = self.path_obj.megahit_path + " "
         command += "-1" + " " + forward_path + " "
         command += "-2" + " " + reverse_path + " "
+        command += "-r" + " " + s_path + " "
         command += "-o" + " " + export_dir
 
         mv_file = "mv" + " "

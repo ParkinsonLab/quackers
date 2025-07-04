@@ -56,10 +56,13 @@ class dir_structure:
         self.host_final_s   = os.path.join(self.host_dir_end, "single.fastq")
 
         self.host_mkr = os.path.join(self.host_dir_top, "host_filter")
-        self.host_bwa_mkr = os.path.join(self.host_dir_top, "host_filter_bwa")
-        self.host_recon_mkr = os.path.join(self.host_dir_top, "host_filter_reconcile")
+        self.host_bt2_mkr = os.path.join(self.host_dir_top, "host_filter_bt2")
+        self.host_recon_mkr_p = os.path.join(self.host_dir_top, "host_filter_reconcile_p")
+        self.host_recon_mkr_s = os.path.join(self.host_dir_top, "host_filter_reconcile_s")
+        
 
-        self.host_recon_job = os.path.join(self.host_dir_top, "reconcile.sh")
+        self.host_recon_job_p = os.path.join(self.host_dir_top, "reconcile_p.sh")
+        self.host_recon_job_s = os.path.join(self.host_dir_top, "reconcile_s.sh")
         #self.host_clean_bwa_p_job = os.path.join(self.host_dir_top, "host_clean_bwa_p.sh")
         #self.host_clean_bwa_s_job = os.path.join(self.host_dir_top, "host_clean_bwa_s.sh")
 
@@ -222,10 +225,6 @@ class dir_structure:
                 all_ok = False
                 break
 
-
-        if(not os.path.exists(self.host_recon_mkr)):
-            print(dt.today(), "missing HOST recon - expecting:", self.host_recon_mkr)
-            all_ok = False
 
         return all_ok    
 
@@ -428,16 +427,16 @@ class path_obj:
         else:
             self.config.read(config_path)
             print("Config found: using custom args")
-        self.output_path = output_folder_path   
+        
 
-
+        
         
 
         self.tool_install_path = "/quackers_tools"
         self.temp_internal_scripts_path = "/quackers_pipe"
         #self.mwrap_temp_path = os.path.join(self.temp_internal_scripts_path, "modded_scripts")
 
-        self.megahit_path       = "megahit"
+        self.megahit_path       = "/quackers_tools/megahit/bin/megahit"
         self.samtools_path      = "samtools"
         self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
         self.bowtie2_idx_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
@@ -469,12 +468,28 @@ class path_obj:
         self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "/quackers_pipe/scripts/clean_reads_reconcile.py")
         self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "/quackers_pipe/scripts/contig_reconcile.py")
 
+        #-----------------------------------
+        # raw data
+        self.p1 = self.assign_value("input", "pair_1", "str", "None")
+        self.p2 = self.assign_value("input", "pair_2", "str", "None")
+        self.s = self.assign_value("input", "s", "str", "None")
+        self.output_dir = self.assign_value("input", "output_dir", "str", "None")
+        if(self.output_dir != "None"):
+            self.output_dir = os.path.abspath(self.output_dir)
+        if(self.p1 != "None"):
+            self.p1 = os.path.abspath(self.p1)
+        if(self.p2 != "None"):
+            self.p2 = os.path.abspath(self.p2)
+        if(self.s != "None"):
+            self.s = os.path.abspath(self.s)
+        
+
         #------------------------------------------------------------------
         #Assign singular values for settings
 
         self.bypass_log_name    = self.assign_value("settings", "bypass_log_name", "str", "bypass_log.txt")
         
-        self.bypass_log         = os.path.join(self.output_path, self.bypass_log_name)
+        self.bypass_log         = os.path.join(self.output_dir, self.bypass_log_name)
         self.operating_mode     = self.assign_value("settings", "operating_mode", "str", "single")
         self.BBMAP_k            = self.assign_value("BBMAP_settings", "k", "int", 25)
         self.BBMAP_hdist        = self.assign_value("BBMAP_settings", "hdist", "int", 1)
@@ -489,8 +504,8 @@ class path_obj:
         #--------------------------------------------------------------
         #directory structure
 
-        self.clean_dir              = self.assign_value("directory", "clean_reads", "str", "1_clean_reads")
-        self.host_dir               = self.assign_value("directory", "host_filter", "str", "0_host_filter")
+        self.clean_dir              = self.assign_value("directory", "clean_reads", "str", "0_clean_reads")
+        self.host_dir               = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assembly_dir           = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
         self.backup_assembly_dir    = self.assign_value("directory", "contig_backup", "str", "2a_contig_assembly")
         self.cct_bin_dir            = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")

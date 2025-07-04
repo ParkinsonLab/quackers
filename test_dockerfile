@@ -362,6 +362,15 @@ ENV PATH="${PATH}:/quackers_tools/megahit/bin"
 WORKDIR /quackers_pipe
 RUN apt-get update && apt-get install less
 
+RUN apt-get update \
+&& apt-get install -y libisal-dev 
+
+RUN wget https://github.com/OpenGene/fastp/archive/refs/tags/v1.0.1.tar.gz \
+&& tar -xzvf v1.0.1.tar.gz \
+&& cd fastp-1.0.1 \
+&& make \
+&& make install 
+
 
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py
 RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py

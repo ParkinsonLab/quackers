@@ -77,42 +77,71 @@ def parse_inputs():
     parser.add_argument("-stop", "--stop_at", type = str, help = "debug stage-stop")
     args = parser.parse_args()
 
-    output_dir  = os.path.abspath(args.output_dir)
+    output_dir  = os.path.abspath(args.output_dir) if args.output_dir else "None"
     config_path = os.path.abspath(args.config)
-    p1_path     = os.path.abspath(args.forward)
-    p2_path     = os.path.abspath(args.reverse)
-    s_path      = args.single
-    stop_stage = args.stop_at
-    debug_mode = args.debug
+    p1_path     = args.forward if args.forward else "None"
+    p2_path     = args.reverse if args.reverse else "None"
+    s_path      = args.single if args.single else "None"
+    stop_stage = args.stop_at if args.stop_at else "None"
+    debug_mode = args.debug if args.debug else "None"
 
     operating_mode = ""
 
-    if(p1_path is None):
-        if(s_path is None):
+    path_obj = q_path.path_obj(output_dir, config_path)
+    
+
+    if(output_dir != "None"):
+        output_dir = os.path.abspath(output_dir)
+    else:
+        output_dir = path_obj.output_dir
+        print(dt.today(), "Using config output dir:", output_dir)
+
+    if(p1_path != "None"):
+        p1_path = os.path.abspath(p1_path)
+    else:
+        p1_path = path_obj.p1
+        print(dt.today(), "Using config P1:", p1_path)
+
+    if(p2_path != "None"):
+        p2_path = os.path.abspath(p2_path)
+    else:
+        p2_path = path_obj.p2
+        print(dt.today(), "Using config P2:", p2_path)
+
+    if(s_path != "None"):
+        s_path = os.path.abspath(s_path)
+        print(dt.today(), "Using confing S:", s_path)
+    else:
+        s_path = path_obj.s
+
+
+
+    if(p1_path == "None"):
+        if(s_path == "None"):
             sys.exit("ERROR: expecting at least 1 set of input data: single OR forward + reverse")
         else:
             
-            if(not p2_path is None):
+            if(p2_path != "None"):
                 sys.exit("ERROR: Single and Reverse-end can't both be present. typo?")
             else:
                 operating_mode = "single"
                 print("Pipe running in SINGLE mode")
 
-    if(s_path is None):
-        if(not p1_path is None):
-            if(not p2_path is None):
+    if(s_path == "None"):
+        if(p1_path != "None"):
+            if(p2_path != "None"):
                 operating_mode = "paired"
                 print("Pipe running in PAIRED mode")
             else:
                 sys.exit("ERROR: Reverse-end data missing")
     else:
-        if(not p1_path is None):
-            if(not p2_path is None):
+        if(p1_path != "None"):
+            if(p2_path != "None"):
                 sys.exit("ERROR: all 3 fields filled. single OR forward + reverse. Not all 3")
 
-    if(config_path is None):
+    if(config_path == "None"):
         sys.exit("expecting a config file. Use the < -c/C > or < --config > flag" )
-    if(output_dir is None):
+    if(output_dir == "None"):
         sys.exit("expecting an output directory. Use the < -o/O > or < --output_dir > flag")
 
     if not(os.path.exists(output_dir)):
@@ -135,30 +164,27 @@ def parse_inputs():
     if(args_pack["p2_path"] is None):
         args_pack["p2_path"] = "empty"
 
+    path_obj.operating_mode = args_pack["op_mode"]
     print("S:", args_pack["s_path"])
     print("P1:", args_pack["p1_path"])
     print("P2:", args_pack["p2_path"])
 
     
 
-    return args_pack
+    return path_obj, args_pack
 
 
 
 if __name__ == "__main__":
-    args_pack = parse_inputs()
+    path_obj, args_pack = parse_inputs()
     for item in args_pack:
         print("[" + item + "]", args_pack[item])
 
-    
-    path_obj = q_path.path_obj(args_pack["out"], args_pack["config"])
-    path_obj.operating_mode = args_pack["op_mode"]
-    
     #mp_util = mpu.mp_util(args_pack["out"], path_obj.bypass_log_name)
 
-    if(args_pack["debug_mode"]):
-        print("in debug mode")
-        run_debug(path_obj, args_pack)
+    #if(args_pack["debug_mode"] != "NOn"):
+    #    print("in debug mode")
+    #    run_debug(path_obj, args_pack)
 
 
 

@@ -53,6 +53,7 @@ class q_stage:
             elif(self.op_mode == "paired"):
                 self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
                 self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
+                self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
                 #self.dir_obj.host_final_f = self.dir_obj.start_f
                 #self.dir_obj.host_final_r = self.dir_obj.start_r
     
@@ -90,6 +91,7 @@ class q_stage:
             elif(self.op_mode == "paired"):
                 self.dir_obj.host_final_f = self.dir_obj.clean_dir_final_f
                 self.dir_obj.host_final_r = self.dir_obj.clean_dir_final_r
+                self.dir_obj.host_final_s = self.dir_obj.clean_dir_final_s
                 #self.dir_obj.host_final_f = self.dir_obj.start_f
                 #self.dir_obj.host_final_r = self.dir_obj.start_r
 
@@ -102,25 +104,29 @@ class q_stage:
                 host_ref_path = self.path_obj.hosts_path_dict[host_key]
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
-                host_bwa_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_host_bwa_mkr")
-                list_of_mkrs.append(host_bwa_marker_path)
-                
-                if(os.path.exists(host_bwa_marker_path)):
-                    print("skipping Host filter:", ref_basename)
+                host_bt2_marker_path_p = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_p_host_bt2_mkr")
+                host_bt2_marker_path_s = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_s_host_bt2_mkr")
+                list_of_mkrs.append(host_bt2_marker_path_p)
+                list_of_mkrs.append(host_bt2_marker_path_s)
+                if(os.path.exists(host_bt2_marker_path_p)):
+                    print("skipping Host filter P:", ref_basename)
                 else:
-                    command = ""
-                    if(self.op_mode == "single"):
-                        #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
-                        command = self.command_obj.host_rem_bt2_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
-                        #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.start_s, host_bwa_marker_path)
-                        #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
-                    else:
-                        #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
-                        command = self.command_obj.host_rem_bt2_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
-                        #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.start_f, self.dir_obj.start_r, host_bwa_marker_path)
-                        #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
-
-                    script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_" + ref_basename + ".sh")
+                
+                    #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bwa_marker_path)
+                    command = self.command_obj.host_rem_bt2_p(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, host_bt2_marker_path_p)
+                    #command = self.command_obj.clean_reads_bwa_simple_p(host_ref_path, ref_basename, self.dir_obj.start_f, self.dir_obj.start_r, host_bwa_marker_path)
+                    #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_p_" + ref_basename + ".sh")
+                    self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                
+                if(os.path.exists(host_bt2_marker_path_s)):
+                    print(dt.today(), "skipping host filter S:", ref_basename)
+                else:
+                    #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bwa_marker_path)
+                    command = self.command_obj.host_rem_bt2_s(host_ref_path, ref_basename, self.dir_obj.clean_dir_final_s, host_bt2_marker_path_s)
+                    #command = self.command_obj.clean_reads_bwa_simple_s(host_ref_path, ref_basename, self.dir_obj.start_s, host_bwa_marker_path)
+                    #self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "host_filter_s_" + ref_basename + ".sh")
                     self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
             
             self.job_control.wait_for_mp_store()
@@ -131,33 +137,57 @@ class q_stage:
                 host_ref_path = self.path_obj.hosts_path_dict[host_key]
                 ref_basename = os.path.basename(host_ref_path)
                 ref_basename = ref_basename.split(".")[0]
-                sam_sift_marker_path = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr")
-                list_of_mkrs.append(sam_sift_marker_path)
+                sam_sift_marker_path_p = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr_p")
+                sam_sift_marker_path_s = os.path.join(self.dir_obj.host_dir_top, ref_basename + "_sift_mkr_s")
+                list_of_mkrs.append(sam_sift_marker_path_p)
+                list_of_mkrs.append(sam_sift_marker_path_s)
                 sam_path = ""
                 score_out_path = ""
                 sam_name = ref_basename
-                sam_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + ".sam")
+                sam_path_p = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p.sam")
+                sam_path_s = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s.sam")
                 
-                if(self.op_mode == "single"):
-                    score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s_score_bwa.out")
-                else:
-                    score_out_path = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p_score_bwa.out")
+                score_out_path_s = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_s_score_bt2.out")
+                score_out_path_p = os.path.join(self.dir_obj.host_dir_sam, sam_name + "_p_score_bt2.out")
 
                 
-                if(os.path.exists(sam_sift_marker_path)):
-                    print(dt.today(), "skipping sam sift:", ref_basename)
+                if(os.path.exists(sam_sift_marker_path_p)):
+                    print(dt.today(), "skipping sam sift on P:", ref_basename)
                 else:
-                    command = self.command_obj.sift_bwa_sam_command(sam_path, score_out_path, sam_sift_marker_path)
-                    script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_" + ref_basename + ".sh")
+                    #if(os.path.exists(score_out_path_p)):
+                    command = self.command_obj.sift_bt2_sam_command(sam_path_p, score_out_path_p, sam_sift_marker_path_p)
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_p_" + ref_basename + ".sh")
+                    self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
+                if(os.path.exists(sam_sift_marker_path_s)):
+                    print(dt.today(), "skipping SAM SIFT on s")
+                else:
+                    command = self.command_obj.sift_bt2_sam_command(sam_path_s, score_out_path_s, sam_sift_marker_path_s)
+                    script_path = os.path.join(self.dir_obj.host_dir_top, "sam_sift_s_" + ref_basename + ".sh")
                     self.job_control.launch_and_create_v2_with_mp_store(script_path, command)
 
             self.job_control.wait_for_mp_store()
 
+            if(os.path.exists(self.dir_obj.host_recon_mkr_p)):
+                print(dt.today(), "Skipping host read reconcile P")
+            else:    
+                list_of_mkrs.append(self.dir_obj.host_recon_mkr_p)
+                command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, "None", self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr_p)
+                self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job_p, command)
 
-            #command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr)
-            command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.start_s, self.dir_obj.start_f, self.dir_obj.start_r, self.dir_obj.host_recon_mkr)
+            if(os.path.exists(self.dir_obj.host_recon_mkr_s)):
+                print(dt.today(), "skipping host read reconcile S")
+            else:
+                if(len(self.dir_obj.clean_dir_final_s) > 1000):
+                    list_of_mkrs.append(self.dir_obj.host_recon_mkr_s)
+                    print("FILE:", self.dir_obj.clean_dir_final_s, " is not empty:", len(self.dir_obj.clean_dir_final_s))
+                    print(dt.today(), "working on clean reads reconcile: S")
+                    command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, "None", "None", self.dir_obj.host_recon_mkr_s)
+                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job_s, command)
+                else:
+                    print(dt.today(), "No singletons for host filtering.  Skip")
+            #command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.start_s, self.dir_obj.start_f, self.dir_obj.start_r, self.dir_obj.host_recon_mkr)
             
-            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job, command)
+            print(dt.today(), "working on clean reads reconcile")
             self.job_control.wait_for_mp_store()
 
             if(self.dir_obj.check_mkr_host(list_of_mkrs)):
@@ -168,33 +198,29 @@ class q_stage:
                 sys.exit("bad_stage")
         
     def assembly(self):
-        command = ""
+        
         if(not os.path.exists(self.dir_obj.assembly_mkr)):
-
-            if((self.path_obj.contig_tool == "metaspades") or (self.path_obj.contig_tool == "MetaSPAdes") or (self.path_obj.contig_tool == "mspades")):
-                print(dt.today(), "Choosing MetaSPADES for contig generation")
-                if(self.op_mode == "single"):
-                    command = self.command_obj.metaspades_command_s(self.dir_obj.host_final_s, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
-                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_s_job, command)
-                else:
-                    command = self.command_obj.metaspades_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.quality_encoding, self.dir_obj.assembly_dir_data, self.dir_obj.assembly_mkr)
-                    self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mspades_p_job, command)
-                    
-                self.job_control.wait_for_mp_store()
-
-            #if not(os.path.exists(self.dir_obj.assembly_contigs)):
-            #    print(dt.today(), "metaspades failed to make contigs. entering backup mode")
-            elif((self.path_obj.contig_tool == "megahit") or (self.path_obj.contig_tool == "MEGAHIT") or self.path_obj.contig_tool == "mhit"):
+            command = ""
+            if(("megahit" in self.path_obj.contig_tool) or ("MEGAHIT" in self.path_obj.contig_tool)):
                 print(dt.today(), "choosing MEGAHIT for contig generation")
+                time.sleep(3)
                 if(self.op_mode == "single"):
                     command = self.command_obj.megahit_command_s(self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
                     self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_s_job, command)
+                    print("command:", command)
                 else:
-                    command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                    print("working in contigs paired")
+                    time.sleep(3)
+                    command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
+                    print("command:", command)
                     self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_mhit_p_job, command)
                 self.job_control.wait_for_mp_store()
                 #set new contigs
                 self.dir_obj.assembly_contigs = self.dir_obj.assembly_alt_contigs
+            else:
+                print(dt.today(), "MetaSPADES discontinued.  Use MegaHit")
+                sys.exit("Stop")
+            
         else:
             print(dt.today(), "skipping: contig assembly")
 
@@ -230,7 +256,12 @@ class q_stage:
 
 
         if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr)):
-            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+            #command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
+
+            #command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, "None", "None", self.dir_obj.assembly_reconcile_mkr)
             self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
             self.job_control.wait_for_mp_store()
         else:
@@ -241,8 +272,8 @@ class q_stage:
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.assembly_dir
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, message_line)
-            sys.exit("bad_stage")
- 
+        #sys.exit("bad_stage")
+
 
     
     def concoct_binning(self):
