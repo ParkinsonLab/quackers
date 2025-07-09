@@ -171,19 +171,22 @@ class q_stage:
                 print(dt.today(), "Skipping host read reconcile P")
             else:    
                 list_of_mkrs.append(self.dir_obj.host_recon_mkr_p)
-                command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, "None", self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr_p)
+                command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_sam, self.dir_obj.host_dir_end, "None", self.dir_obj.clean_dir_final_f, self.dir_obj.clean_dir_final_r, self.dir_obj.host_recon_mkr_p)
                 self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job_p, command)
 
             if(os.path.exists(self.dir_obj.host_recon_mkr_s)):
                 print(dt.today(), "skipping host read reconcile S")
             else:
-                if(len(self.dir_obj.clean_dir_final_s) > 1000):
+                if(os.path.getsize(self.dir_obj.clean_dir_final_s) > 1000):
                     list_of_mkrs.append(self.dir_obj.host_recon_mkr_s)
-                    print("FILE:", self.dir_obj.clean_dir_final_s, " is not empty:", len(self.dir_obj.clean_dir_final_s))
+                    print("FILE:", self.dir_obj.clean_dir_final_s, " is not empty:", os.path.getsize(self.dir_obj.clean_dir_final_s))
                     print(dt.today(), "working on clean reads reconcile: S")
-                    command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, "None", "None", self.dir_obj.host_recon_mkr_s)
+                    command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_sam, self.dir_obj.host_dir_end, self.dir_obj.clean_dir_final_s, "None", "None", self.dir_obj.host_recon_mkr_s)
                     self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.host_recon_job_s, command)
                 else:
+                    print("size of clean dir final s:", os.path.getsize(self.dir_obj.clean_dir_final_s))
+                    print("file:", self.dir_obj.clean_dir_final_s)
+                    time.sleep(10)
                     print(dt.today(), "No singletons for host filtering.  Skip")
             #command = self.command_obj.clean_reads_reconcile(self.dir_obj.host_dir_data, self.dir_obj.host_dir_end, self.dir_obj.start_s, self.dir_obj.start_f, self.dir_obj.start_r, self.dir_obj.host_recon_mkr)
             
@@ -211,7 +214,7 @@ class q_stage:
                 else:
                     print("working in contigs paired")
                     time.sleep(3)
-                    if(len(self.dir_obj.clean_dir_final_s) > 1000):
+                    if(os.path.getsize(self.dir_obj.clean_dir_final_s) > 1000):
                         command = self.command_obj.megahit_command_p(self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, self.dir_obj.assembly_alt_dir_data, self.dir_obj.assembly_mkr)
                         print("command:", command)
                     else:
@@ -259,17 +262,20 @@ class q_stage:
 
 
 
-        if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr)):
-            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+        if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr_p)):
+            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, "None", self.dir_obj.assembly_final_f, self.dir_obj.assembly_final_r, self.dir_obj.assembly_reconcile_mkr_p)
             #command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
-            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
-
-            #command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
-            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, self.dir_obj.host_final_s, "None", "None", self.dir_obj.assembly_reconcile_mkr)
-            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job, command)
-            self.job_control.wait_for_mp_store()
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job_p, command)
         else:
-            print(dt.today(), "skipping contig-read reconciliation")
+            print(dt.today(), "skipping contig-read reconciliation P")
+        if(not os.path.exists(self.dir_obj.assembly_reconcile_mkr_s)):
+            #command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.assembly_dir_data, "None", self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.assembly_reconcile_mkr)
+            command = self.command_obj.contig_reconcile(self.dir_obj.assembly_score_out, self.dir_obj.host_final_s, "None", "None", self.dir_obj.assembly_final_s, "None", "None", self.dir_obj.assembly_reconcile_mkr_s)
+            self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.assembly_recon_job_s, command)
+            
+        else:
+            print(dt.today(), "skipping contig-read reconciliation S")
+        self.job_control.wait_for_mp_store()    
     
         if(self.dir_obj.check_mkr_assembly()):
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.assembly_dir)

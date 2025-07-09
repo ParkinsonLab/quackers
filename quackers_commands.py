@@ -43,18 +43,47 @@ class command_obj:
         
         
         if(self.op_mode == "single"):
-            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_s
+            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_AR_s#self.dir_obj.clean_dir_final_s
         else:
-            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_final_f + " " 
-            remove_lq += "--output2" + " " + self.dir_obj.clean_dir_final_r + " "
-            remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_final_s
+            remove_lq += "--output1" + " " + self.dir_obj.clean_dir_AR_f + " "#self.dir_obj.clean_dir_final_f + " " 
+            remove_lq += "--output2" + " " + self.dir_obj.clean_dir_AR_r + " "#self.dir_obj.clean_dir_final_r + " "
+            remove_lq += "--singleton" + " " + self.dir_obj.clean_dir_AR_s #self.dir_obj.clean_dir_final_s
 
+
+        vsearch_f = self.path_obj.vsearch + " --fastq_filter" + " " + self.dir_obj.clean_dir_AR_f + " "
+        vsearch_f += "--fastq_ascii 33" + " "
+        vsearch_f += "--fastq_maxee 2.0" + " "
+        vsearch_f += "--fastqout" + " " + self.dir_obj.clean_dir_vsearch_f
+
+        vsearch_r = self.path_obj.vsearch + " --fastq_filter" + " " + self.dir_obj.clean_dir_AR_r + " "
+        vsearch_r += "--fastq_ascii 33" + " "
+        vsearch_r += "--fastq_maxee 2.0" + " "
+        vsearch_r += "--fastqout" + " " + self.dir_obj.clean_dir_vsearch_r
+
+        vsearch_s = self.path_obj.vsearch + " --fastq_filter" + " " + self.dir_obj.clean_dir_AR_s + " "
+        vsearch_s += "--fastq_ascii 33" + " "
+        vsearch_s += "--fastq_maxee 2.0" + " "
+        vsearch_s += "--fastqout" + " " + self.dir_obj.clean_dir_vsearch_s
+
+        orphanizer = "python3" + " " + self.path_obj.orphanizer + " "
+        orphanizer += self.dir_obj.clean_dir_vsearch_f + " "
+        orphanizer += self.dir_obj.clean_dir_vsearch_r + " "
+        orphanizer += self.dir_obj.clean_dir_vsearch_s + " "
+        orphanizer += self.dir_obj.clean_dir_final_f + " "
+        orphanizer += self.dir_obj.clean_dir_final_r + " "
+        orphanizer += self.dir_obj.clean_dir_final_s        
+
+        
         
         
         
         make_marker = "touch" + " " + marker_path
 
-        return [remove_lq +  " && " + make_marker]
+        return [remove_lq,
+                vsearch_f,
+                vsearch_r,
+                vsearch_s,
+                orphanizer + " && " + make_marker]
 
     def bwa_index_ref_command(self, ref_path, marker_path):
         command = self.path_obj.BWA_path
@@ -197,15 +226,17 @@ class command_obj:
 
         return [convert_sam + " && " + sort_bam + " && " + index_bam + " && " + sifting_command + " && " + make_marker]
     
-    def contig_reconcile(self, sam_score_file, export_path, s_reads, f_reads, r_reads, marker_path):
+    def contig_reconcile(self, sam_score_file, s_reads, f_reads, r_reads, s_out_reads, f_out_reads, r_out_reads, marker_path):
 
         command = self.path_obj.py_path + " "
         command += self.path_obj.contig_reconcile + " "
         command += sam_score_file + " "
-        command += export_path + " "
         command += s_reads + " "
         command += f_reads + " "
-        command += r_reads
+        command += r_reads + " "
+        command += s_out_reads + " "
+        command += f_out_reads + " "
+        command += r_out_reads 
 
         make_marker = "touch " + marker_path
 
@@ -266,7 +297,8 @@ class command_obj:
         command = self.path_obj.megahit_path + " "
         command += "-1" + " " + forward_path + " "
         command += "-2" + " " + reverse_path + " "
-        command += "-r" + " " + s_path + " "
+        if(s_path != "None"):
+            command += "-r" + " " + s_path + " "
         command += "-o" + " " + export_dir
 
         mv_file = "mv" + " "

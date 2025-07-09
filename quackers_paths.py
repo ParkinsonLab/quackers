@@ -29,14 +29,15 @@ class dir_structure:
         self.clean_dir_data = os.path.join(self.clean_dir_top, "data")
         self.clean_dir_end = os.path.join(self.clean_dir_top, "export")
 
-        self.clean_dir_AR_s0 = os.path.join(self.clean_dir_data, "s0.fastq")
-        self.clean_dir_AR_sf = os.path.join(self.clean_dir_data, "sf.fastq")
-        self.clean_dir_AR_sr = os.path.join(self.clean_dir_data, "sr.fastq")
+
         self.clean_dir_AR_f = os.path.join(self.clean_dir_data, "AR_f.fastq")
         self.clean_dir_AR_r = os.path.join(self.clean_dir_data, "AR_r.fastq")
         self.clean_dir_AR_s = os.path.join(self.clean_dir_data, "AR_s.fastq")
+        self.clean_dir_vsearch_f = os.path.join(self.clean_dir_data, "v_f.fastq")
+        self.clean_dir_vsearch_r = os.path.join(self.clean_dir_data, "v_r.fastq")
+        self.clean_dir_vsearch_s = os.path.join(self.clean_dir_data, "vsearch_s.fastq")
+
         self.clean_dir_final_s = os.path.join(self.clean_dir_end, "single.fastq")
-        #specifically-named for metawrap binning.
         self.clean_dir_final_f = os.path.join(self.clean_dir_end, "pair_1.fastq")
         self.clean_dir_final_r = os.path.join(self.clean_dir_end, "pair_2.fastq")
         self.clean_dir_job = os.path.join(self.clean_dir_top, "AR.sh")
@@ -96,7 +97,8 @@ class dir_structure:
         self.assembly_mhit_p_job = os.path.join(self.assembly_dir_top, "assemble_mhit_p.sh")
         self.assembly_bwa_idx_job = os.path.join(self.assembly_dir_top, "index_contigs.sh")
         self.assembly_pp_job = os.path.join(self.assembly_dir_top, "clean_reads.sh")
-        self.assembly_recon_job = os.path.join(self.assembly_dir_top, "clean_reads_reconcile.sh")
+        self.assembly_recon_job_p = os.path.join(self.assembly_dir_top, "contig_reconcile_p.sh")
+        self.assembly_recon_job_s = os.path.join(self.assembly_dir_top, "contig_reconcile_s.sh")
         self.assembly_scan_sam_job = os.path.join(self.assembly_dir_top, "scan_sam.sh")
 
         self.assembly_sam_convert_job = os.path.join(self.assembly_dir_top, "sam_convert.sh")
@@ -106,10 +108,11 @@ class dir_structure:
         self.assembly_bwa_idx_mkr               = os.path.join(self.assembly_dir_top, "assembly_bwa_idx")
         self.assembly_scan_sam_mkr              = os.path.join(self.assembly_dir_top, "assembly_scan_sam")
 
-        self.assembly_pp_mkr                    = os.path.join(self.assembly_dir_top, "assembly_bwa_pp")
+        self.assembly_pp_mkr                    = os.path.join(self.assembly_dir_top, "assembly_bt2_pp")
 
-        self.assembly_reconcile_mkr             = os.path.join(self.assembly_dir_top, "assembly_reconcile")
-        self.assembly_sam_convert_mkr   = os.path.join(self.assembly_dir_top, "assembly_sam_convert")
+        self.assembly_reconcile_mkr_p             = os.path.join(self.assembly_dir_top, "assembly_reconcile_p")
+        self.assembly_reconcile_mkr_s             = os.path.join(self.assembly_dir_top, "assembly_reconcile_s")
+        #self.assembly_sam_convert_mkr   = os.path.join(self.assembly_dir_top, "assembly_sam_convert")
 
         make_folder(self.assembly_dir_top)
         make_folder(self.assembly_dir_temp)
@@ -246,10 +249,11 @@ class dir_structure:
             all_ok = False
         if(not os.path.exists(self.assembly_pp_mkr)):
             all_ok = False
-        if(not os.path.exists(self.assembly_reconcile_mkr)):
+        if(not os.path.exists(self.assembly_reconcile_mkr_p)):
             all_ok = False
-        if(not os.path.exists(self.assembly_sam_convert_mkr)):
+        if(not os.path.exists(self.assembly_reconcile_mkr_s)):
             all_ok = False
+
         return all_ok
     
     def check_mkr_bin_cct(self):
@@ -445,6 +449,7 @@ class path_obj:
         self.ar_path            = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
         self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
+        self.vsearch            = "vsearch"
         self.py_path            = "python3"
         self.BWA_path           = "bwa"
         self.mspades_path       = "metaspades.py"
@@ -460,13 +465,14 @@ class path_obj:
         self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
         self.cct_get_bins       = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "extract_fasta_bins.py")
 
-
+        
 
         #---------------------------------------------------------------------------
         #Assign paths for scripts
         self.sam_sift               = self.assign_value("scripts", "sam_sift", "str", "/quackers_pipe/scripts/sam_sift.py")
         self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "/quackers_pipe/scripts/clean_reads_reconcile.py")
         self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "/quackers_pipe/scripts/contig_reconcile.py")
+        self.orphanizer             = self.assign_value("scripts", "orphanizer", "str", "/quackers_pipe/scripts/read_orphan.py")
 
         #-----------------------------------
         # raw data
