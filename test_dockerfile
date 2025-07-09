@@ -106,19 +106,24 @@ RUN wget -q https://sourceforge.net/projects/bbmap/files/BBMap_39.08.tar.gz && \
     tar -xzf BBMap_39.08.tar.gz && \
     rm *.tar.gz
 
-# Install Python 2.7 for legacy tools (optimized build)
-RUN wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
+# Install Python 2.7 from source for Ubuntu 24.04 (required for MetaWRAP)
+RUN apt-get update && \
+    apt-get install -y wget build-essential zlib1g-dev libncurses5-dev \
+                       libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
+                       libffi-dev libsqlite3-dev libbz2-dev && \
+    wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
     tar -xzf Python-2.7.18.tgz && \
     cd Python-2.7.18 && \
-    ./configure --enable-optimizations --prefix=/usr/local && \
+    ./configure --prefix=/usr/local --disable-test-modules && \
     make -j$(nproc) && \
-    make install && \
+    make altinstall && \
     cd .. && \
-    rm -rf Python-2.7.18*
-
-# Install pip2 and minimal Python2 packages
-RUN curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py | python2.7 && \
-    pip2 install --no-cache-dir numpy==1.16.6 biopython==1.76
+    rm -rf Python-2.7.18* && \
+    ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2 && \
+    curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py | PYTHONPATH="" /usr/local/bin/python2.7 && \
+    PYTHONPATH="" /usr/local/bin/pip2.7 install --no-cache-dir numpy==1.16.6 biopython==1.76 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install gapseq
 RUN git clone --depth 1 https://github.com/jotech/gapseq.git
@@ -132,7 +137,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 RUN mkdir -p gtdbtk_data checkm_data pfam_db ncbi_hmms cog_db
 
 # Create multithreaded database download script
-COPY <<'EOF' download_databases.sh
+RUN cat > download_databases.sh << 'EOF'
 #!/bin/bash
 set -euo pipefail
 
@@ -567,5 +572,3 @@ CMD echo "=== Quackers Pipeline Container ===" && \
     echo "Database requirements: ~100GB total space" && \
     echo "Container ready!" && \
     bash
-
-    
