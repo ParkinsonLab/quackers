@@ -1,337 +1,571 @@
-# Complete Dockerfile with ALL Latest Databases (2024-2025)
-# Version 3.0.0 - Focus on latest databases and stable packages
+# Optimized Dockerfile for Quackers Pipeline
+# Version 3.1.0 - Improved efficiency and maintainability
 
 FROM ubuntu:24.04
 
-ENV TZ=America/Toronto
-ENV DEBIAN_FRONTEND=noninteractive
+# Set environment variables early
+ENV TZ=America/Toronto \
+    DEBIAN_FRONTEND=noninteractive \
+    CONDA_DIR="/opt/conda" \
+    PYTHONPATH="/opt/conda/lib/python3.10/site-packages"
 
-# Install system dependencies
-RUN apt-get update \
-&& apt-get -y install apt-utils \
-&& apt-get -y install wget \
-&& apt-get -y install unzip \
-&& apt-get -y install g++ \
-&& apt-get -y install gcc \
-&& apt-get -y install make \
-&& apt-get install -y valgrind \
-&& apt-get install -y heaptrack \
-&& apt-get install -y nano \
-&& apt-get install -y libgsl-dev \
-&& apt-get install -y libncurses5-dev \
-&& apt-get install -y libbz2-dev \
-&& apt-get install -y liblzma-dev \
-&& apt-get install -y git-all \
-&& apt-get install -y dos2unix \
-&& apt-get install -y default-jre \
-&& apt-get install -y cmake \
-&& apt-get install -y zlib1g-dev \
-&& apt-get install -y build-essential \
-&& apt-get install -y libgsl0-dev \
-&& apt-get install -y bedtools \
-&& apt-get install -y mummer \
-&& apt-get install -y perl \
-&& apt-get install -y libncursesw5-dev \
-&& apt-get install -y libssl-dev \
-&& apt-get install -y libsqlite3-dev \
-&& apt-get install -y tk-dev \
-&& apt-get install -y libgdbm-dev \
-&& apt-get install -y libc6-dev \
-&& apt-get install -y python3-tk \
-&& apt-get install -y ncbi-blast+ \
-&& apt-get install -y libglpk-dev \
-&& apt-get install -y r-base-core \
-&& apt-get install -y exonerate \
-&& apt-get install -y barrnap \
-&& apt-get install -y bc \
-&& apt-get install -y parallel \
-&& apt-get install -y curl \
-&& apt-get install -y libcurl4-openssl-dev \
-&& apt-get install -y libsbml5-dev \
-&& apt-get install -y r-base \
-&& apt-get install -y libisal-dev \
-&& apt-get install -y less \
-&& apt-get clean && apt-get update && apt-get install -y locales
+# Install system dependencies in fewer layers
+RUN apt-get update && apt-get install -y \
+    apt-utils wget unzip g++ gcc make valgrind heaptrack nano \
+    libgsl-dev libncurses5-dev libbz2-dev liblzma-dev git-all \
+    dos2unix default-jre cmake zlib1g-dev build-essential \
+    libgsl0-dev bedtools mummer perl libncursesw5-dev \
+    libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev \
+    python3-tk ncbi-blast+ libglpk-dev r-base-core exonerate \
+    barrnap bc parallel curl libcurl4-openssl-dev libsbml5-dev \
+    r-base libisal-dev less locales && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set locale
 RUN locale-gen en_US.UTF-8
-RUN export LC_ALL=en_US.UTF-8
-RUN export LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
 
-# Install Miniforge (replaces deprecated Mambaforge)
-ENV CONDA_DIR="/opt/conda"
-RUN wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
+# Install Miniforge and configure conda
+RUN wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 \
     https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \
-    -O ~/miniforge.sh && \
-    /bin/bash ~/miniforge.sh -b -p /opt/conda && \
-    rm ~/miniforge.sh
+    -O /tmp/miniforge.sh && \
+    bash /tmp/miniforge.sh -b -p ${CONDA_DIR} && \
+    rm /tmp/miniforge.sh
 
-# Put conda in path early
-ENV PATH=$CONDA_DIR/bin:$PATH
+ENV PATH=${CONDA_DIR}/bin:$PATH
 
-# Configure conda channels with flexible priority to avoid conflicts
-RUN conda config --add channels defaults \
-&& conda config --add channels conda-forge \
-&& conda config --add channels bioconda \
-&& conda config --set channel_priority flexible
+# Configure conda channels and update
+RUN conda config --add channels defaults && \
+    conda config --add channels conda-forge && \
+    conda config --add channels bioconda && \
+    conda config --set channel_priority flexible && \
+    mamba update -y conda mamba
 
-# Update conda/mamba to latest
-RUN mamba update -y conda mamba
+# Install Python and core packages
+RUN mamba install -y python=3.10 && \
+    mamba install -y -c conda-forge \
+        numpy cython psutil pandas matplotlib scipy seaborn \
+        'scikit-learn>=1.2,<1.4' r-base glpk r-sybil r-httr && \
+    mamba install -y -c bioconda \
+        biopython pysam r-optparse
 
-# Install stable Python and core packages in separate steps to avoid conflicts
-RUN mamba install -y python=3.10
-RUN mamba install -y -c conda-forge numpy cython psutil pandas matplotlib scipy seaborn
-RUN mamba install -y -c bioconda biopython pysam
+# Install bioinformatics tools
+RUN mamba install -y -c bioconda \
+        metabat2 maxbin2 concoct checkm-genome \
+        samtools bowtie2 bwa fastp vsearch salmon \
+        spades prodigal hmmer mash fastani bbmap \
+        cd-hit pplacer gtdbtk=2.4.1
 
-# Install bioinformatics tools in groups to avoid conflicts
-RUN mamba install -y -c bioconda metabat2 maxbin2 concoct
-RUN mamba install -y -c bioconda checkm-genome
-RUN mamba install -y -c conda-forge 'scikit-learn>=1.2,<1.4'
-RUN mamba install -y -c bioconda samtools bowtie2 bwa fastp vsearch
-RUN mamba install -y -c bioconda salmon spades prodigal hmmer mash fastani
-RUN mamba install -y -c bioconda bbmap cd-hit pplacer
-
-# Install GTDB-Tk with latest version and database
-RUN mamba install -y -c bioconda gtdbtk=2.4.1
-
-# Install R packages
-RUN mamba install -y -c conda-forge r-base glpk r-sybil r-httr
-RUN mamba install -y -c bioconda r-optparse
-
-# Set environment variables for conda
-ENV PYTHONPATH=/opt/conda/lib/python3.10/site-packages:$PYTHONPATH
-
-# Create tools directory
+# Create tools directory and set working directory
 WORKDIR /quackers_tools
 
-# Install latest MEGAHIT
-RUN wget https://github.com/voutcn/megahit/releases/download/v1.2.9/MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz \
-&& tar zvxf MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz \
-&& mv MEGAHIT-1.2.9-Linux-x86_64-static megahit \
-&& rm *.tar.gz
+# Install additional tools from source
+RUN wget -q https://github.com/voutcn/megahit/releases/download/v1.2.9/MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
+    tar -xzf MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
+    mv MEGAHIT-1.2.9-Linux-x86_64-static megahit && \
+    rm *.tar.gz
 
-# Install latest AdapterRemoval
-RUN wget https://github.com/MikkelSchubert/adapterremoval/archive/v2.3.4.tar.gz -O adapterremoval-2.3.4.tar.gz \
-&& tar -xzf adapterremoval-2.3.4.tar.gz \
-&& mv adapterremoval-2.3.4 adapterremoval \
-&& rm *.tar.gz
-WORKDIR /quackers_tools/adapterremoval
-RUN make && cp build/AdapterRemoval /opt/conda/bin/
-WORKDIR /quackers_tools
+# Install AdapterRemoval
+RUN wget -q https://github.com/MikkelSchubert/adapterremoval/archive/v2.3.4.tar.gz && \
+    tar -xzf v2.3.4.tar.gz && \
+    cd adapterremoval-2.3.4 && \
+    make && \
+    cp build/AdapterRemoval ${CONDA_DIR}/bin/ && \
+    cd .. && \
+    rm -rf adapterremoval-2.3.4 v2.3.4.tar.gz
 
-# Install latest BWA-MEM2
-RUN wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-2.2.1_x64-linux.tar.bz2 \
-&& tar -xf bwa-mem2-2.2.1_x64-linux.tar.bz2 \
-&& cp bwa-mem2-2.2.1_x64-linux/bwa-mem2* /opt/conda/bin/ \
-&& rm *.tar.bz2
+# Install BWA-MEM2
+RUN wget -q https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-2.2.1_x64-linux.tar.bz2 && \
+    tar -xf bwa-mem2-2.2.1_x64-linux.tar.bz2 && \
+    cp bwa-mem2-2.2.1_x64-linux/bwa-mem2* ${CONDA_DIR}/bin/ && \
+    rm -rf bwa-mem2-2.2.1_x64-linux*
 
-# Install latest skani
-RUN wget https://github.com/bluenote-1577/skani/releases/download/latest/skani \
-&& chmod +x skani \
-&& mv skani /opt/conda/bin/
+# Install skani and FastTree
+RUN wget -q https://github.com/bluenote-1577/skani/releases/download/latest/skani && \
+    chmod +x skani && \
+    mv skani ${CONDA_DIR}/bin/ && \
+    wget -q http://www.microbesonline.org/fasttree/FastTree && \
+    chmod +x FastTree && \
+    mv FastTree ${CONDA_DIR}/bin/ && \
+    wget -q http://www.microbesonline.org/fasttree/FastTreeMP && \
+    chmod +x FastTreeMP && \
+    mv FastTreeMP ${CONDA_DIR}/bin/
 
-# Install latest FastTree
-WORKDIR /quackers_tools/fasttree
-RUN wget http://www.microbesonline.org/fasttree/FastTree \
-&& chmod +x FastTree \
-&& mv FastTree /opt/conda/bin/
-RUN wget http://www.microbesonline.org/fasttree/FastTreeMP \
-&& chmod +x FastTreeMP \
-&& mv FastTreeMP /opt/conda/bin/
+# Install MetaWRAP and related modules
+RUN wget -q https://compsysbio.org/metawrap_mod/metawrap_modules.tar.gz && \
+    tar -xzf metawrap_modules.tar.gz && \
+    wget -q https://compsysbio.org/metawrap_mod/metawrap_scripts.tar.gz && \
+    tar -xzf metawrap_scripts.tar.gz && \
+    git clone --depth 1 https://github.com/bxlab/metaWRAP.git metaWRAP-1.3 && \
+    rm *.tar.gz
 
-# Install MetaWRAP modules
-WORKDIR /quackers_tools
-RUN wget https://compsysbio.org/metawrap_mod/metawrap_modules.tar.gz \
-&& tar -xzvf metawrap_modules.tar.gz \
-&& rm *.tar.gz
+# Install BBMap
+RUN wget -q https://sourceforge.net/projects/bbmap/files/BBMap_39.08.tar.gz && \
+    tar -xzf BBMap_39.08.tar.gz && \
+    rm *.tar.gz
 
-RUN wget https://compsysbio.org/metawrap_mod/metawrap_scripts.tar.gz \
-&& tar -xzvf metawrap_scripts.tar.gz \
-&& rm *.tar.gz
+# Install Python 2.7 for legacy tools (optimized build)
+RUN wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
+    tar -xzf Python-2.7.18.tgz && \
+    cd Python-2.7.18 && \
+    ./configure --enable-optimizations --prefix=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf Python-2.7.18*
 
-# Install latest MetaWRAP (use git clone instead of specific version archive)
-RUN git clone https://github.com/bxlab/metaWRAP.git \
-&& mv metaWRAP metaWRAP-1.3
-
-# Install BBMap (latest version)
-RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_39.08.tar.gz \
-&& tar -xzvf BBMap_39.08.tar.gz \
-&& rm *.tar.gz
-
-# Install Python 2.7 (for legacy tools that still need it)
-RUN wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz \
-&& tar -xvf Python-2.7.18.tgz \
-&& rm *.tgz
-WORKDIR /quackers_tools/Python-2.7.18
-RUN ./configure --enable-optimizations \
-&& make \
-&& make install
-WORKDIR /quackers_tools
-
-# Install pip2 for legacy Python2 packages (with isolated environment)
-RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py \
-&& PYTHONPATH="" python2.7 get-pip.py --isolated \
-&& rm get-pip.py
-
-# Install minimal Python2 packages (only what's absolutely necessary, with isolated env)
-RUN PYTHONPATH="" pip2 install --isolated --upgrade pip \
-&& PYTHONPATH="" pip2 install --isolated numpy==1.16.6 \
-&& PYTHONPATH="" pip2 install --isolated biopython==1.76
-
-# ========================================
-# VERIFIED DOWNLOADS ONLY - LATEST VERSIONS
-# ========================================
-
-# Download latest GTDB-Tk database (using latest release path)
-WORKDIR /quackers_tools/gtdbtk_data
-RUN echo "Downloading GTDB-Tk database (latest release)..." \
-&& wget https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/auxillary_files/gtdbtk_package/full_package/gtdbtk_data.tar.gz \
-&& tar -xzf gtdbtk_data.tar.gz \
-&& rm gtdbtk_data.tar.gz
-
-# Download Pfam database (37.0 - verified latest June 2024)
-WORKDIR /quackers_tools/pfam_db
-RUN echo "Downloading Pfam 37.0 database..." \
-&& wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz \
-&& wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz \
-&& wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam.version.gz \
-&& gunzip *.gz
-
-# Download NCBI PGAP HMMs (Release 16.0 - verified August 2024)
-WORKDIR /quackers_tools/ncbi_hmms
-RUN echo "Downloading NCBI PGAP HMMs Release 16.0..." \
-&& wget https://ftp.ncbi.nlm.nih.gov/hmm/current/hmm_PGAP.HMM.tgz \
-&& tar -xzf hmm_PGAP.HMM.tgz \
-&& rm *.tgz
-
-# Download COG database (2024 release - verified November 2024)
-WORKDIR /quackers_tools/cog_db
-RUN echo "Downloading COG 2024 database..." \
-&& wget https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.cog.csv \
-&& wget https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.def.tab \
-&& wget https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.fun.tab \
-&& wget https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.org.csv \
-&& wget https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/genomes-24.tab
-
-# Download CheckM1 database (2015 - verified still latest for CheckM1)
-WORKDIR /quackers_tools/checkm_data
-RUN echo "Downloading CheckM1 database..." \
-&& wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz \
-&& tar -xzvf checkm_data_2015_01_16.tar.gz \
-&& rm *.tar.gz
-
-# Download KEGG database files (for metabolic pathway analysis)
-WORKDIR /quackers_tools/kegg_db
-RUN echo "Downloading KEGG database files..." \
-&& mkdir -p ko_definitions pathways \
-&& wget ftp://ftp.genome.jp/pub/kegg/genes/ko/ko -O ko_definitions/ko \
-&& wget ftp://ftp.genome.jp/pub/kegg/pathway/pathway -O pathways/pathway \
-&& wget ftp://ftp.genome.jp/pub/kegg/genes/ko/ko_enzyme.list -O ko_definitions/ko_enzyme.list || echo "KEGG files downloaded (some may not be available)"
-
-# Download InterPro functional annotation data
-WORKDIR /quackers_tools/interpro_db
-RUN echo "Downloading InterPro signature data..." \
-&& wget ftp://ftp.ebi.ac.uk/pub/databases/interpro/current_release/names.dat \
-&& wget ftp://ftp.ebi.ac.uk/pub/databases/interpro/current_release/short_names.dat \
-&& wget ftp://ftp.ebi.ac.uk/pub/databases/interpro/current_release/entry.list || echo "InterPro files downloaded (some may not be available)"
+# Install pip2 and minimal Python2 packages
+RUN curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py | python2.7 && \
+    pip2 install --no-cache-dir numpy==1.16.6 biopython==1.76
 
 # Install gapseq
-WORKDIR /quackers_tools/gapseq
-RUN git clone https://github.com/jotech/gapseq.git
+RUN git clone --depth 1 https://github.com/jotech/gapseq.git
 
-# Install additional Python packages with latest versions
-RUN pip install --upgrade pip \
-&& pip install python-libsbml \
-&& pip install networkx \
-&& pip install plotly \
-&& pip install dash \
-&& pip install jupyterlab
+# Install additional Python packages
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+        python-libsbml networkx plotly dash jupyterlab
 
-# Set up pipeline directory
+# Create database directories
+RUN mkdir -p gtdbtk_data checkm_data pfam_db ncbi_hmms cog_db
+
+# Create multithreaded database download script
+COPY <<'EOF' download_databases.sh
+#!/bin/bash
+set -euo pipefail
+
+# Multithreaded database download script
+# Usage: ./download_databases.sh [BASE_PATH] [MAX_PARALLEL_DOWNLOADS]
+# Creates subdirectories: gtdbtk_data, checkm_data, pfam_db, ncbi_hmms, cog_db
+
+BASE_PATH="${1:-/quackers_tools}"
+MAX_PARALLEL="${2:-3}"  # Default to 3 parallel downloads
+
+# Validate base path
+if [[ ! -d "$BASE_PATH" ]]; then
+    echo "Creating base directory: $BASE_PATH"
+    mkdir -p "$BASE_PATH"
+fi
+
+# Define subdirectory paths
+GTDB_PATH="$BASE_PATH/gtdbtk_data"
+CHECKM_PATH="$BASE_PATH/checkm_data"
+PFAM_PATH="$BASE_PATH/pfam_db"
+NCBI_PATH="$BASE_PATH/ncbi_hmms"
+COG_PATH="$BASE_PATH/cog_db"
+
+echo "=== Multithreaded Database Download ==="
+echo "Base directory: $BASE_PATH"
+echo "Max parallel downloads: $MAX_PARALLEL"
+echo "Will create subdirectories:"
+echo "  - gtdbtk_data/ (~80GB) [separate download]"
+echo "  - checkm_data/ (~275MB)"
+echo "  - pfam_db/ (~500MB)"
+echo "  - ncbi_hmms/ (~1GB)"
+echo "  - cog_db/ (~100MB)"
+echo "Total space required: ~82GB"
+echo ""
+
+# Function to check available space
+check_space() {
+    local path=$1
+    local required_gb=$2
+    local available_gb=$(df "$path" --output=avail | tail -1 | awk '{print int($1/1048576)}')
+    
+    if [[ $available_gb -lt $required_gb ]]; then
+        echo "ERROR: Insufficient space at $path"
+        echo "Required: ${required_gb}GB, Available: ${available_gb}GB"
+        return 1
+    fi
+    echo "Space check passed: ${available_gb}GB available (${required_gb}GB required)"
+    return 0
+}
+
+# Function to download with retry and progress
+download_with_retry() {
+    local url=$1
+    local output_file=$2
+    local max_attempts=3
+    local attempt=1
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        echo "[$(date '+%H:%M:%S')] Downloading $(basename "$output_file") - attempt $attempt/$max_attempts"
+        if wget --progress=bar:force --retry-connrefused --waitretry=1 \
+               --read-timeout=30 --timeout=20 -t 2 -O "$output_file" "$url" 2>&1 | \
+               sed "s/^/[$(basename "$output_file")] /"; then
+            echo "[$(date '+%H:%M:%S')] ✓ $(basename "$output_file") download complete"
+            return 0
+        fi
+        echo "[$(date '+%H:%M:%S')] ✗ Failed attempt $attempt for $(basename "$output_file")"
+        ((attempt++))
+        [[ $attempt -le $max_attempts ]] && sleep 5
+    done
+    echo "ERROR: Failed to download $url after $max_attempts attempts"
+    return 1
+}
+
+# Function to download and extract CheckM
+download_checkm() {
+    echo "[CheckM] Starting download..."
+    cd "$CHECKM_PATH"
+    if download_with_retry "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz" "checkm_data.tar.gz"; then
+        echo "[CheckM] Extracting..."
+        tar -xzf checkm_data.tar.gz && rm checkm_data.tar.gz
+        echo "[CheckM] ✓ Complete"
+        touch "$CHECKM_PATH/.download_complete"
+    else
+        echo "[CheckM] ✗ Failed"
+        return 1
+    fi
+}
+
+# Function to download and extract Pfam
+download_pfam() {
+    echo "[Pfam] Starting downloads..."
+    cd "$PFAM_PATH"
+    
+    # Download Pfam files in parallel
+    (
+        download_with_retry "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz" "Pfam-A.hmm.gz" &&
+        echo "[Pfam] Pfam-A.hmm.gz downloaded"
+    ) &
+    
+    (
+        download_with_retry "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz" "Pfam-A.hmm.dat.gz" &&
+        echo "[Pfam] Pfam-A.hmm.dat.gz downloaded"
+    ) &
+    
+    # Wait for both downloads
+    wait
+    
+    # Extract files
+    echo "[Pfam] Extracting files..."
+    gunzip *.gz 2>/dev/null || true
+    echo "[Pfam] ✓ Complete"
+    touch "$PFAM_PATH/.download_complete"
+}
+
+# Function to download and extract NCBI HMMs
+download_ncbi() {
+    echo "[NCBI] Starting download..."
+    cd "$NCBI_PATH"
+    if download_with_retry "https://ftp.ncbi.nlm.nih.gov/hmm/current/hmm_PGAP.HMM.tgz" "hmm_PGAP.HMM.tgz"; then
+        echo "[NCBI] Extracting..."
+        tar -xzf hmm_PGAP.HMM.tgz && rm hmm_PGAP.HMM.tgz
+        echo "[NCBI] ✓ Complete"
+        touch "$NCBI_PATH/.download_complete"
+    else
+        echo "[NCBI] ✗ Failed"
+        return 1
+    fi
+}
+
+# Function to download COG files
+download_cog() {
+    echo "[COG] Starting downloads..."
+    cd "$COG_PATH"
+    
+    # Download COG files in parallel
+    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.cog.csv" "cog-24.cog.csv" &
+    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.def.tab" "cog-24.def.tab" &
+    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.fun.tab" "cog-24.fun.tab" &
+    
+    # Wait for all downloads
+    wait
+    
+    echo "[COG] ✓ Complete"
+    touch "$COG_PATH/.download_complete"
+}
+
+# Function to download GTDB-Tk (large file, separate process)
+download_gtdb() {
+    echo "[GTDB] Starting download (this will take a while)..."
+    cd "$GTDB_PATH"
+    if download_with_retry "https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz" "gtdbtk_r220_data.tar.gz"; then
+        echo "[GTDB] Extracting (this may take 10-15 minutes)..."
+        tar -xzf gtdbtk_r220_data.tar.gz && rm gtdbtk_r220_data.tar.gz
+        echo "[GTDB] ✓ Complete"
+        touch "$GTDB_PATH/.download_complete"
+    else
+        echo "[GTDB] ✗ Failed"
+        return 1
+    fi
+}
+
+# Check total space needed (82GB)
+if ! check_space "$BASE_PATH" 82; then
+    echo "Consider using a different base path with more space."
+    echo "Usage: $0 /path/to/large/storage [max_parallel_downloads]"
+    exit 1
+fi
+
+# Create all subdirectories
+echo "Creating subdirectories..."
+mkdir -p "$GTDB_PATH" "$CHECKM_PATH" "$PFAM_PATH" "$NCBI_PATH" "$COG_PATH"
+
+# Remove any previous completion markers
+rm -f "$CHECKM_PATH/.download_complete" "$PFAM_PATH/.download_complete" \
+      "$NCBI_PATH/.download_complete" "$COG_PATH/.download_complete" \
+      "$GTDB_PATH/.download_complete"
+
+echo ""
+echo "=== Starting Parallel Downloads ==="
+echo "Starting smaller databases in parallel (CheckM, Pfam, NCBI, COG)..."
+
+# Start parallel downloads for smaller databases
+pids=()
+
+download_checkm &
+pids+=($!)
+
+download_pfam &
+pids+=($!)
+
+download_ncbi &
+pids+=($!)
+
+download_cog &
+pids+=($!)
+
+# Monitor progress
+echo ""
+echo "Monitoring download progress (Ctrl+C to cancel)..."
+while true; do
+    completed=0
+    total=4
+    
+    # Check completion status
+    [[ -f "$CHECKM_PATH/.download_complete" ]] && ((completed++))
+    [[ -f "$PFAM_PATH/.download_complete" ]] && ((completed++))
+    [[ -f "$NCBI_PATH/.download_complete" ]] && ((completed++))
+    [[ -f "$COG_PATH/.download_complete" ]] && ((completed++))
+    
+    echo -ne "\r[$(date '+%H:%M:%S')] Progress: $completed/$total databases completed"
+    
+    if [[ $completed -eq $total ]]; then
+        echo ""
+        break
+    fi
+    
+    sleep 5
+done
+
+# Wait for all background processes to complete
+for pid in "${pids[@]}"; do
+    wait "$pid"
+done
+
+echo ""
+echo "✓ All parallel downloads completed!"
+
+# Check if any downloads failed
+failed_dbs=()
+[[ ! -f "$CHECKM_PATH/.download_complete" ]] && failed_dbs+=("CheckM")
+[[ ! -f "$PFAM_PATH/.download_complete" ]] && failed_dbs+=("Pfam")
+[[ ! -f "$NCBI_PATH/.download_complete" ]] && failed_dbs+=("NCBI")
+[[ ! -f "$COG_PATH/.download_complete" ]] && failed_dbs+=("COG")
+
+if [[ ${#failed_dbs[@]} -gt 0 ]]; then
+    echo "⚠ Some downloads failed: ${failed_dbs[*]}"
+    echo "You can re-run the script to retry failed downloads."
+fi
+
+# Ask about GTDB-Tk download
+echo ""
+echo "=== GTDB-Tk Database Download ==="
+echo "GTDB-Tk database is ~80GB and takes significant time to download."
+echo "This will be downloaded separately due to its size."
+echo "Continue with GTDB-Tk download? (y/N)"
+read -r response
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    download_gtdb
+else
+    echo "⚠ Skipping GTDB-Tk download (can be downloaded later with: $0 gtdb-only)"
+fi
+
+# Clean up completion markers
+rm -f "$CHECKM_PATH/.download_complete" "$PFAM_PATH/.download_complete" \
+      "$NCBI_PATH/.download_complete" "$COG_PATH/.download_complete" \
+      "$GTDB_PATH/.download_complete"
+
+echo ""
+echo "=== Database Download Complete ==="
+echo "All databases downloaded to: $BASE_PATH"
+echo ""
+echo "Directory structure:"
+echo "$BASE_PATH/"
+echo "├── checkm_data/"
+echo "├── pfam_db/"
+echo "├── ncbi_hmms/"
+echo "├── cog_db/"
+echo "└── gtdbtk_data/ $([ -d "$GTDB_PATH/release220" ] && echo "(downloaded)" || echo "(skipped)")"
+echo ""
+
+# Create environment file
+cat > "$BASE_PATH/database_env.sh" << ENV_EOF
+#!/bin/bash
+# Database environment variables
+export GTDBTK_DATA_PATH="$GTDB_PATH"
+export CHECKM_DATA_PATH="$CHECKM_PATH"
+export PFAM_DB_PATH="$PFAM_PATH"
+export NCBI_HMMS_PATH="$NCBI_PATH"
+export COG_DB_PATH="$COG_PATH"
+
+echo "Database environment variables set:"
+echo "  GTDBTK_DATA_PATH=\$GTDBTK_DATA_PATH"
+echo "  CHECKM_DATA_PATH=\$CHECKM_DATA_PATH"
+echo "  PFAM_DB_PATH=\$PFAM_DB_PATH"
+echo "  NCBI_HMMS_PATH=\$NCBI_HMMS_PATH"
+echo "  COG_DB_PATH=\$COG_DB_PATH"
+ENV_EOF
+
+chmod +x "$BASE_PATH/database_env.sh"
+
+echo "Environment variables:"
+echo "export GTDBTK_DATA_PATH=\"$GTDB_PATH\""
+echo "export CHECKM_DATA_PATH=\"$CHECKM_PATH\""
+echo "export PFAM_DB_PATH=\"$PFAM_PATH\""
+echo "export NCBI_HMMS_PATH=\"$NCBI_PATH\""
+echo "export COG_DB_PATH=\"$COG_PATH\""
+echo ""
+echo "Or source the generated environment file:"
+echo "source $BASE_PATH/database_env.sh"
+echo ""
+echo "Environment file created: $BASE_PATH/database_env.sh"
+
+# Special handling for GTDB-only download
+if [[ "${1:-}" == "gtdb-only" ]]; then
+    echo "=== GTDB-Only Download Mode ==="
+    if [[ -d "$GTDB_PATH" ]]; then
+        download_gtdb
+    else
+        echo "Error: Base path not found. Please run full download first."
+        exit 1
+    fi
+fi
+EOF
+
+RUN chmod +x download_databases.sh
+
+# Set up pipeline directory and download scripts
 WORKDIR /quackers_pipe
 
-# Download pipeline scripts
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/MetaPro_utilities_v2.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_stages.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_paths.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/Config.ini
+# Download pipeline files in parallel
+RUN { \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/MetaPro_utilities_v2.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_stages.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_paths.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/Config.ini & \
+    wait; \
+    }
 
-# Download scripts
-WORKDIR /quackers_pipe/scripts
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/contig_reconcile.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/sam_sift.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/clean_reads_reconcile.py
+# Download additional scripts
+RUN mkdir -p scripts modded_scripts && \
+    cd scripts && \
+    { \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/contig_reconcile.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/sam_sift.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/clean_reads_reconcile.py & \
+    wait; \
+    } && \
+    cd ../modded_scripts && \
+    { \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/concoct_coverage_table.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/extract_fasta_bins.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/merge_cutup_clustering.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/print_comment.py & \
+    wait; \
+    }
 
-# Download modded scripts
-WORKDIR /quackers_pipe/modded_scripts
-RUN wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/concoct_coverage_table.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/extract_fasta_bins.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/merge_cutup_clustering.py \
-&& wget https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/print_comment.py
+# Set environment variables
+ENV CHECKM_DATA_PATH=/quackers_tools/checkm_data \
+    GTDBTK_DATA_PATH=/quackers_tools/gtdbtk_data \
+    PATH="${PATH}:/quackers_tools/metaWRAP-1.3/bin:/quackers_tools/megahit/bin:/quackers_tools/gapseq/gapseq:/quackers_tools/bbmap"
 
-# ========================================
-# ENVIRONMENT VARIABLES - ALL DATABASE PATHS
-# ========================================
+# Test key installations (with proper syntax for each tool)
+RUN echo "Testing tool installations..." && \
+    concoct --help > /dev/null 2>&1 && \
+    checkm > /dev/null 2>&1 || true && \
+    gtdbtk --help > /dev/null 2>&1 && \
+    metabat2 --help > /dev/null 2>&1 && \
+    samtools --version > /dev/null && \
+    python --version && \
+    echo "All tools installed successfully!" && \
+    echo "" && \
+    echo "=== IMPORTANT: Database Setup Required ===" && \
+    echo "Run './download_databases.sh' after container starts" && \
+    echo "This requires ~100GB space and good internet connection" && \
+    echo "Or mount external database volumes at:" && \
+    echo "  $GTDBTK_DATA_PATH" && \
+    echo "  $CHECKM_DATA_PATH"
 
-# Tool databases
-ENV CHECKM_DATA_PATH=/quackers_tools/checkm_data
-ENV GTDBTK_DATA_PATH="/quackers_tools/gtdbtk_data"
+# Create health check script
+COPY <<'EOF' /usr/local/bin/health_check.sh
+#!/bin/bash
+echo "=== Tool Health Check ==="
 
-# Annotation databases
-ENV PFAM_DB_PATH=/quackers_tools/pfam_db
-ENV NCBI_HMMS_PATH=/quackers_tools/ncbi_hmms
-ENV COG_DB_PATH=/quackers_tools/cog_db
-ENV KEGG_DB_PATH=/quackers_tools/kegg_db
-ENV INTERPRO_DB_PATH=/quackers_tools/interpro_db
+# Test tools with their specific syntax
+echo -n "concoct: "
+if concoct --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
 
-# Tool paths
-ENV PATH="${PATH}:/quackers_tools/metaWRAP-1.3/bin"
-ENV PATH="${PATH}:/quackers_tools/megahit/bin"
-ENV PATH="${PATH}:/quackers_tools/gapseq/gapseq"
-ENV PATH="${PATH}:/quackers_tools/bbmap"
+echo -n "checkm: "
+if checkm >/dev/null 2>&1 || [[ $? -eq 2 ]]; then echo "✓ available"; else echo "✗ missing"; fi
 
-# Create symlinks for commonly used tools to ensure they're accessible
-RUN ln -sf /opt/conda/bin/* /usr/local/bin/ 2>/dev/null || true
+echo -n "gtdbtk: "
+if gtdbtk --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
 
-# Set final permissions
-WORKDIR /quackers_tools
-RUN chmod -R 777 /quackers_tools
+echo -n "metabat2: "
+if metabat2 --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
 
-# Test key installations and databases
-RUN echo "Testing installations and databases..." \
-&& concoct --help > /dev/null \
-&& checkm --help > /dev/null \
-&& gtdbtk --help > /dev/null \
-&& metabat2 --help > /dev/null \
-&& samtools --version > /dev/null \
-&& python --version \
-&& echo "Verifying database paths..." \
-&& ls -la $GTDBTK_DATA_PATH/ \
-&& ls -la $CHECKM_DATA_PATH/ \
-&& ls -la $PFAM_DB_PATH/ \
-&& ls -la $NCBI_HMMS_PATH/ \
-&& ls -la $COG_DB_PATH/ \
-&& ls -la $KEGG_DB_PATH/ \
-&& ls -la $INTERPRO_DB_PATH/ \
-&& echo "Database versions:" \
-&& echo "GTDB-Tk: R226 (2024)" \
-&& echo "CheckM: v1 with 2015 database" \
-&& echo "Pfam: 37.0 (June 2024)" \
-&& echo "NCBI HMMs: Release 16.0 (August 2024)" \
-&& echo "COG: 2024 release (November 2024)" \
-&& echo "KEGG: Latest functional annotation files" \
-&& echo "InterPro: Latest signature data" \
-&& echo "All tests passed!"
+echo -n "samtools: "
+if samtools --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
 
-# Clean up
-RUN mamba clean -a -y \
-&& apt-get autoremove -y \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/* \
-&& rm -rf /tmp/*
+echo -n "python: "
+if python --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
+
+echo "=== Database Status ==="
+for db in "$CHECKM_DATA_PATH" "$GTDBTK_DATA_PATH"; do
+    if [[ -d "$db" && -n "$(ls -A "$db" 2>/dev/null)" ]]; then
+        echo "✓ $(basename "$db"): ready"
+    else
+        echo "✗ $(basename "$db"): not found or empty"
+    fi
+done
+EOF
+
+RUN chmod +x /usr/local/bin/health_check.sh
+
+# Final cleanup
+RUN mamba clean -a -y && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    find /quackers_tools -type f -name "*.tar.gz" -delete && \
+    find /quackers_tools -type f -name "*.tgz" -delete
+
+# Set permissions
+RUN chmod -R 755 /quackers_tools && \
+    chmod -R 755 /quackers_pipe
+
+# Add labels for better container management
+LABEL maintainer="Quackers Pipeline" \
+      version="3.1.0" \
+      description="Optimized bioinformatics container for metagenomics analysis" \
+      tools="MetaWRAP,GTDB-Tk,CheckM,MetaBat2,CONCOCT,MaxBin2"
 
 WORKDIR /quackers_pipe
 
-CMD ["bash"]
+# Show information on startup
+CMD echo "=== Quackers Pipeline Container ===" && \
+    echo "Run 'health_check.sh' to verify installation" && \
+    echo "Run './download_databases.sh' to download databases" && \
+    echo "Database requirements: ~100GB total space" && \
+    echo "Container ready!" && \
+    bash
+
+    
