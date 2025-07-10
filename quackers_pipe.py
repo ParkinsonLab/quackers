@@ -34,6 +34,9 @@ def run_pipe(path_obj, args_pack):
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
         stage_obj.host_filter()
 
+    if(args_pack["stop"] == "clean"):
+        print(dt.today(), "cleaning finished")
+        sys.exit()
       
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
