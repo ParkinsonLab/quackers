@@ -145,20 +145,44 @@ def export_reads(final_out_file, raw_read_dict, keys_to_write):
 
 if __name__ == "__main__":
     print(dt.today(), "RUNNING contig reconcile mod")
-    sam_score_file = sys.argv[1]
-    export_dir = sys.argv[2]
-    raw_s_read = sys.argv[3]
-    raw_p1_read = sys.argv[4]
-    raw_p2_read = sys.argv[5]
+    sam_score_file = os.path.abspath(sys.argv[1])
+    raw_s_read = sys.argv[2]
+    raw_p1_read = sys.argv[3]
+    raw_p2_read = sys.argv[4]
     
     is_single = False
     is_paired = False
     s_raw_dict = ""
     p1_raw_dict = ""
     p2_raw_dict = ""
-    final_s_reads = os.path.join(export_dir, "singles.fastq")
-    final_p1_reads  = os.path.join(export_dir, "remaining_forward.fastq")
-    final_p2_reads  = os.path.join(export_dir, "remaining_reverse.fastq")
+
+    final_s_reads = sys.argv[5]
+    final_p1_reads = sys.argv[6]
+    final_p2_reads = sys.argv[7]
+
+    if(raw_s_read == "None"):
+        if(raw_p1_read == "None"):
+            print(dt.today(), "Single and P1 can't both be blank. exiting")
+            sys.exit()
+        else:
+            is_paired = True
+            raw_p1_read = os.path.abspath(raw_p1_read)
+            raw_p2_read = os.path.abspath(raw_p2_read)
+            final_p1_reads = os.path.abspath(final_p1_reads)
+            final_p2_reads = os.path.abspath(final_p2_reads)
+    else:
+        if(raw_p1_read != "None"):
+            print(dt.today(), "either single or P1. not both")
+            sys.exit()
+        else:
+            is_single = True
+            raw_s_read = os.path.abspath(raw_s_read)
+            final_s_reads = os.path.abspath(final_s_reads)
+
+
+    #final_s_reads = os.path.join(export_dir, "single.fastq")
+    #final_p1_reads  = os.path.join(export_dir, "remaining_forward.fastq")
+    #final_p2_reads  = os.path.join(export_dir, "remaining_reverse.fastq")
 
     print("export destination:", final_p1_reads)
 
@@ -172,14 +196,14 @@ if __name__ == "__main__":
     if(os.path.exists(raw_s_read)):
         is_single = True
         print(dt.today(), "sample is SINGLE-ended")
-    else:
-        is_paired = True
-        print(dt.today(), "sample is PAIRED-ended")
-
+    
     if(os.path.exists(raw_p1_read) and (os.path.exists(raw_p2_read))):
         is_paired = True
     if(is_paired and is_single):
         sys.exit("Exit at reconciliation.  Single and paired-reads detected")
+    if((not is_paired) and (not is_single)):
+        sys.exit("something wrong.  sample can't be not-single and not-paired.  check inputs")
+    
     print(dt.today(), "starting host sort")        
     #for read_ID in sam_hits_dict:
 

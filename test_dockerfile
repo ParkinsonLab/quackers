@@ -1,5 +1,5 @@
 # Optimized Dockerfile for Quackers Pipeline
-# Version 3.1.0 - Improved efficiency and maintainability
+# Version 3.1.0 - Ubuntu 24.04 with Python 2.7 from source
 
 FROM ubuntu:24.04
 
@@ -61,6 +61,25 @@ RUN mamba install -y -c bioconda \
 # Create tools directory and set working directory
 WORKDIR /quackers_tools
 
+# Install Python 2.7 from source for Ubuntu 24.04 (required for MetaWRAP)
+RUN apt-get update && \
+    apt-get install -y wget build-essential zlib1g-dev libncurses5-dev \
+                       libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
+                       libffi-dev libsqlite3-dev libbz2-dev && \
+    wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
+    tar -xzf Python-2.7.18.tgz && \
+    cd Python-2.7.18 && \
+    ./configure --prefix=/usr/local --disable-test-modules && \
+    make -j$(nproc) && \
+    make altinstall && \
+    cd .. && \
+    rm -rf Python-2.7.18* && \
+    ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2 && \
+    curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py | PYTHONPATH="" /usr/local/bin/python2.7 && \
+    PYTHONPATH="" /usr/local/bin/pip2.7 install --no-cache-dir numpy==1.16.6 biopython==1.76 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install additional tools from source
 RUN wget -q https://github.com/voutcn/megahit/releases/download/v1.2.9/MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
     tar -xzf MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
@@ -106,25 +125,6 @@ RUN wget -q https://sourceforge.net/projects/bbmap/files/BBMap_39.08.tar.gz && \
     tar -xzf BBMap_39.08.tar.gz && \
     rm *.tar.gz
 
-# Install Python 2.7 from source for Ubuntu 24.04 (required for MetaWRAP)
-RUN apt-get update && \
-    apt-get install -y wget build-essential zlib1g-dev libncurses5-dev \
-                       libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
-                       libffi-dev libsqlite3-dev libbz2-dev && \
-    wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && \
-    tar -xzf Python-2.7.18.tgz && \
-    cd Python-2.7.18 && \
-    ./configure --prefix=/usr/local --disable-test-modules && \
-    make -j$(nproc) && \
-    make altinstall && \
-    cd .. && \
-    rm -rf Python-2.7.18* && \
-    ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2 && \
-    curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py | PYTHONPATH="" /usr/local/bin/python2.7 && \
-    PYTHONPATH="" /usr/local/bin/pip2.7 install --no-cache-dir numpy==1.16.6 biopython==1.76 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # Install gapseq
 RUN git clone --depth 1 https://github.com/jotech/gapseq.git
 
@@ -136,324 +136,75 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Create database directories
 RUN mkdir -p gtdbtk_data checkm_data pfam_db ncbi_hmms cog_db
 
-# Create multithreaded database download script
-RUN cat > download_databases.sh << 'EOF'
-#!/bin/bash
-set -euo pipefail
-
-# Multithreaded database download script
-# Usage: ./download_databases.sh [BASE_PATH] [MAX_PARALLEL_DOWNLOADS]
-# Creates subdirectories: gtdbtk_data, checkm_data, pfam_db, ncbi_hmms, cog_db
-
-BASE_PATH="${1:-/quackers_tools}"
-MAX_PARALLEL="${2:-3}"  # Default to 3 parallel downloads
-
-# Validate base path
-if [[ ! -d "$BASE_PATH" ]]; then
-    echo "Creating base directory: $BASE_PATH"
-    mkdir -p "$BASE_PATH"
-fi
-
-# Define subdirectory paths
-GTDB_PATH="$BASE_PATH/gtdbtk_data"
-CHECKM_PATH="$BASE_PATH/checkm_data"
-PFAM_PATH="$BASE_PATH/pfam_db"
-NCBI_PATH="$BASE_PATH/ncbi_hmms"
-COG_PATH="$BASE_PATH/cog_db"
-
-echo "=== Multithreaded Database Download ==="
-echo "Base directory: $BASE_PATH"
-echo "Max parallel downloads: $MAX_PARALLEL"
-echo "Will create subdirectories:"
-echo "  - gtdbtk_data/ (~80GB) [separate download]"
-echo "  - checkm_data/ (~275MB)"
-echo "  - pfam_db/ (~500MB)"
-echo "  - ncbi_hmms/ (~1GB)"
-echo "  - cog_db/ (~100MB)"
-echo "Total space required: ~82GB"
-echo ""
-
-# Function to check available space
-check_space() {
-    local path=$1
-    local required_gb=$2
-    local available_gb=$(df "$path" --output=avail | tail -1 | awk '{print int($1/1048576)}')
-    
-    if [[ $available_gb -lt $required_gb ]]; then
-        echo "ERROR: Insufficient space at $path"
-        echo "Required: ${required_gb}GB, Available: ${available_gb}GB"
-        return 1
-    fi
-    echo "Space check passed: ${available_gb}GB available (${required_gb}GB required)"
-    return 0
-}
-
-# Function to download with retry and progress
-download_with_retry() {
-    local url=$1
-    local output_file=$2
-    local max_attempts=3
-    local attempt=1
-    
-    while [[ $attempt -le $max_attempts ]]; do
-        echo "[$(date '+%H:%M:%S')] Downloading $(basename "$output_file") - attempt $attempt/$max_attempts"
-        if wget --progress=bar:force --retry-connrefused --waitretry=1 \
-               --read-timeout=30 --timeout=20 -t 2 -O "$output_file" "$url" 2>&1 | \
-               sed "s/^/[$(basename "$output_file")] /"; then
-            echo "[$(date '+%H:%M:%S')] ✓ $(basename "$output_file") download complete"
-            return 0
-        fi
-        echo "[$(date '+%H:%M:%S')] ✗ Failed attempt $attempt for $(basename "$output_file")"
-        ((attempt++))
-        [[ $attempt -le $max_attempts ]] && sleep 5
-    done
-    echo "ERROR: Failed to download $url after $max_attempts attempts"
-    return 1
-}
-
-# Function to download and extract CheckM
-download_checkm() {
-    echo "[CheckM] Starting download..."
-    cd "$CHECKM_PATH"
-    if download_with_retry "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz" "checkm_data.tar.gz"; then
-        echo "[CheckM] Extracting..."
-        tar -xzf checkm_data.tar.gz && rm checkm_data.tar.gz
-        echo "[CheckM] ✓ Complete"
-        touch "$CHECKM_PATH/.download_complete"
-    else
-        echo "[CheckM] ✗ Failed"
-        return 1
-    fi
-}
-
-# Function to download and extract Pfam
-download_pfam() {
-    echo "[Pfam] Starting downloads..."
-    cd "$PFAM_PATH"
-    
-    # Download Pfam files in parallel
-    (
-        download_with_retry "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz" "Pfam-A.hmm.gz" &&
-        echo "[Pfam] Pfam-A.hmm.gz downloaded"
-    ) &
-    
-    (
-        download_with_retry "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz" "Pfam-A.hmm.dat.gz" &&
-        echo "[Pfam] Pfam-A.hmm.dat.gz downloaded"
-    ) &
-    
-    # Wait for both downloads
-    wait
-    
-    # Extract files
-    echo "[Pfam] Extracting files..."
-    gunzip *.gz 2>/dev/null || true
-    echo "[Pfam] ✓ Complete"
-    touch "$PFAM_PATH/.download_complete"
-}
-
-# Function to download and extract NCBI HMMs
-download_ncbi() {
-    echo "[NCBI] Starting download..."
-    cd "$NCBI_PATH"
-    if download_with_retry "https://ftp.ncbi.nlm.nih.gov/hmm/current/hmm_PGAP.HMM.tgz" "hmm_PGAP.HMM.tgz"; then
-        echo "[NCBI] Extracting..."
-        tar -xzf hmm_PGAP.HMM.tgz && rm hmm_PGAP.HMM.tgz
-        echo "[NCBI] ✓ Complete"
-        touch "$NCBI_PATH/.download_complete"
-    else
-        echo "[NCBI] ✗ Failed"
-        return 1
-    fi
-}
-
-# Function to download COG files
-download_cog() {
-    echo "[COG] Starting downloads..."
-    cd "$COG_PATH"
-    
-    # Download COG files in parallel
-    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.cog.csv" "cog-24.cog.csv" &
-    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.def.tab" "cog-24.def.tab" &
-    download_with_retry "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.fun.tab" "cog-24.fun.tab" &
-    
-    # Wait for all downloads
-    wait
-    
-    echo "[COG] ✓ Complete"
-    touch "$COG_PATH/.download_complete"
-}
-
-# Function to download GTDB-Tk (large file, separate process)
-download_gtdb() {
-    echo "[GTDB] Starting download (this will take a while)..."
-    cd "$GTDB_PATH"
-    if download_with_retry "https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz" "gtdbtk_r220_data.tar.gz"; then
-        echo "[GTDB] Extracting (this may take 10-15 minutes)..."
-        tar -xzf gtdbtk_r220_data.tar.gz && rm gtdbtk_r220_data.tar.gz
-        echo "[GTDB] ✓ Complete"
-        touch "$GTDB_PATH/.download_complete"
-    else
-        echo "[GTDB] ✗ Failed"
-        return 1
-    fi
-}
-
-# Check total space needed (82GB)
-if ! check_space "$BASE_PATH" 82; then
-    echo "Consider using a different base path with more space."
-    echo "Usage: $0 /path/to/large/storage [max_parallel_downloads]"
-    exit 1
-fi
-
-# Create all subdirectories
-echo "Creating subdirectories..."
-mkdir -p "$GTDB_PATH" "$CHECKM_PATH" "$PFAM_PATH" "$NCBI_PATH" "$COG_PATH"
-
-# Remove any previous completion markers
-rm -f "$CHECKM_PATH/.download_complete" "$PFAM_PATH/.download_complete" \
-      "$NCBI_PATH/.download_complete" "$COG_PATH/.download_complete" \
-      "$GTDB_PATH/.download_complete"
-
-echo ""
-echo "=== Starting Parallel Downloads ==="
-echo "Starting smaller databases in parallel (CheckM, Pfam, NCBI, COG)..."
-
-# Start parallel downloads for smaller databases
-pids=()
-
-download_checkm &
-pids+=($!)
-
-download_pfam &
-pids+=($!)
-
-download_ncbi &
-pids+=($!)
-
-download_cog &
-pids+=($!)
-
-# Monitor progress
-echo ""
-echo "Monitoring download progress (Ctrl+C to cancel)..."
-while true; do
-    completed=0
-    total=4
-    
-    # Check completion status
-    [[ -f "$CHECKM_PATH/.download_complete" ]] && ((completed++))
-    [[ -f "$PFAM_PATH/.download_complete" ]] && ((completed++))
-    [[ -f "$NCBI_PATH/.download_complete" ]] && ((completed++))
-    [[ -f "$COG_PATH/.download_complete" ]] && ((completed++))
-    
-    echo -ne "\r[$(date '+%H:%M:%S')] Progress: $completed/$total databases completed"
-    
-    if [[ $completed -eq $total ]]; then
-        echo ""
-        break
-    fi
-    
-    sleep 5
-done
-
-# Wait for all background processes to complete
-for pid in "${pids[@]}"; do
-    wait "$pid"
-done
-
-echo ""
-echo "✓ All parallel downloads completed!"
-
-# Check if any downloads failed
-failed_dbs=()
-[[ ! -f "$CHECKM_PATH/.download_complete" ]] && failed_dbs+=("CheckM")
-[[ ! -f "$PFAM_PATH/.download_complete" ]] && failed_dbs+=("Pfam")
-[[ ! -f "$NCBI_PATH/.download_complete" ]] && failed_dbs+=("NCBI")
-[[ ! -f "$COG_PATH/.download_complete" ]] && failed_dbs+=("COG")
-
-if [[ ${#failed_dbs[@]} -gt 0 ]]; then
-    echo "⚠ Some downloads failed: ${failed_dbs[*]}"
-    echo "You can re-run the script to retry failed downloads."
-fi
-
-# Ask about GTDB-Tk download
-echo ""
-echo "=== GTDB-Tk Database Download ==="
-echo "GTDB-Tk database is ~80GB and takes significant time to download."
-echo "This will be downloaded separately due to its size."
-echo "Continue with GTDB-Tk download? (y/N)"
-read -r response
-
-if [[ "$response" =~ ^[Yy]$ ]]; then
-    download_gtdb
-else
-    echo "⚠ Skipping GTDB-Tk download (can be downloaded later with: $0 gtdb-only)"
-fi
-
-# Clean up completion markers
-rm -f "$CHECKM_PATH/.download_complete" "$PFAM_PATH/.download_complete" \
-      "$NCBI_PATH/.download_complete" "$COG_PATH/.download_complete" \
-      "$GTDB_PATH/.download_complete"
-
-echo ""
-echo "=== Database Download Complete ==="
-echo "All databases downloaded to: $BASE_PATH"
-echo ""
-echo "Directory structure:"
-echo "$BASE_PATH/"
-echo "├── checkm_data/"
-echo "├── pfam_db/"
-echo "├── ncbi_hmms/"
-echo "├── cog_db/"
-echo "└── gtdbtk_data/ $([ -d "$GTDB_PATH/release220" ] && echo "(downloaded)" || echo "(skipped)")"
-echo ""
-
-# Create environment file
-cat > "$BASE_PATH/database_env.sh" << ENV_EOF
-#!/bin/bash
-# Database environment variables
-export GTDBTK_DATA_PATH="$GTDB_PATH"
-export CHECKM_DATA_PATH="$CHECKM_PATH"
-export PFAM_DB_PATH="$PFAM_PATH"
-export NCBI_HMMS_PATH="$NCBI_PATH"
-export COG_DB_PATH="$COG_PATH"
-
-echo "Database environment variables set:"
-echo "  GTDBTK_DATA_PATH=\$GTDBTK_DATA_PATH"
-echo "  CHECKM_DATA_PATH=\$CHECKM_DATA_PATH"
-echo "  PFAM_DB_PATH=\$PFAM_DB_PATH"
-echo "  NCBI_HMMS_PATH=\$NCBI_HMMS_PATH"
-echo "  COG_DB_PATH=\$COG_DB_PATH"
-ENV_EOF
-
-chmod +x "$BASE_PATH/database_env.sh"
-
-echo "Environment variables:"
-echo "export GTDBTK_DATA_PATH=\"$GTDB_PATH\""
-echo "export CHECKM_DATA_PATH=\"$CHECKM_PATH\""
-echo "export PFAM_DB_PATH=\"$PFAM_PATH\""
-echo "export NCBI_HMMS_PATH=\"$NCBI_PATH\""
-echo "export COG_DB_PATH=\"$COG_PATH\""
-echo ""
-echo "Or source the generated environment file:"
-echo "source $BASE_PATH/database_env.sh"
-echo ""
-echo "Environment file created: $BASE_PATH/database_env.sh"
-
-# Special handling for GTDB-only download
-if [[ "${1:-}" == "gtdb-only" ]]; then
-    echo "=== GTDB-Only Download Mode ==="
-    if [[ -d "$GTDB_PATH" ]]; then
-        download_gtdb
-    else
-        echo "Error: Base path not found. Please run full download first."
-        exit 1
-    fi
-fi
-EOF
-
-RUN chmod +x download_databases.sh
+# Create simple database download script
+RUN { \
+    echo '#!/bin/bash'; \
+    echo 'set -euo pipefail'; \
+    echo ''; \
+    echo '# Simple database download script'; \
+    echo '# Usage: ./download_databases.sh [BASE_PATH]'; \
+    echo ''; \
+    echo 'BASE_PATH="${1:-/quackers_tools}"'; \
+    echo ''; \
+    echo '# Define subdirectory paths'; \
+    echo 'GTDB_PATH="$BASE_PATH/gtdbtk_data"'; \
+    echo 'CHECKM_PATH="$BASE_PATH/checkm_data"'; \
+    echo 'PFAM_PATH="$BASE_PATH/pfam_db"'; \
+    echo 'NCBI_PATH="$BASE_PATH/ncbi_hmms"'; \
+    echo 'COG_PATH="$BASE_PATH/cog_db"'; \
+    echo ''; \
+    echo 'echo "=== Database Download ==="'; \
+    echo 'echo "Base directory: $BASE_PATH"'; \
+    echo 'echo "Downloading essential databases..."'; \
+    echo 'echo ""'; \
+    echo ''; \
+    echo '# Create directories'; \
+    echo 'mkdir -p "$GTDB_PATH" "$CHECKM_PATH" "$PFAM_PATH" "$NCBI_PATH" "$COG_PATH"'; \
+    echo ''; \
+    echo '# Download CheckM (275MB)'; \
+    echo 'echo "[1/4] Downloading CheckM database..."'; \
+    echo 'cd "$CHECKM_PATH"'; \
+    echo 'wget -q --show-progress "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz"'; \
+    echo 'tar -xzf checkm_data_2015_01_16.tar.gz && rm checkm_data_2015_01_16.tar.gz'; \
+    echo 'echo "✓ CheckM complete"'; \
+    echo ''; \
+    echo '# Download Pfam (500MB)'; \
+    echo 'echo "[2/4] Downloading Pfam database..."'; \
+    echo 'cd "$PFAM_PATH"'; \
+    echo 'wget -q --show-progress "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz"'; \
+    echo 'gunzip Pfam-A.hmm.gz'; \
+    echo 'echo "✓ Pfam complete"'; \
+    echo ''; \
+    echo '# Download NCBI HMMs (1GB)'; \
+    echo 'echo "[3/4] Downloading NCBI HMMs..."'; \
+    echo 'cd "$NCBI_PATH"'; \
+    echo 'wget -q --show-progress "https://ftp.ncbi.nlm.nih.gov/hmm/current/hmm_PGAP.HMM.tgz"'; \
+    echo 'tar -xzf hmm_PGAP.HMM.tgz && rm hmm_PGAP.HMM.tgz'; \
+    echo 'echo "✓ NCBI HMMs complete"'; \
+    echo ''; \
+    echo '# Download COG (100MB)'; \
+    echo 'echo "[4/4] Downloading COG database..."'; \
+    echo 'cd "$COG_PATH"'; \
+    echo 'wget -q --show-progress "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.cog.csv"'; \
+    echo 'wget -q --show-progress "https://ftp.ncbi.nlm.nih.gov/pub/COG/COG2024/data/cog-24.def.tab"'; \
+    echo 'echo "✓ COG complete"'; \
+    echo ''; \
+    echo 'echo ""'; \
+    echo 'echo "=== Essential Databases Downloaded ==="'; \
+    echo 'echo "Location: $BASE_PATH"'; \
+    echo 'echo ""'; \
+    echo 'echo "To download GTDB-Tk database (~80GB):"'; \
+    echo 'echo "cd $GTDB_PATH"'; \
+    echo 'echo "wget https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz"'; \
+    echo 'echo "tar -xzf gtdbtk_r220_data.tar.gz && rm gtdbtk_r220_data.tar.gz"'; \
+    echo 'echo ""'; \
+    echo 'echo "Environment variables:"'; \
+    echo 'echo "export GTDBTK_DATA_PATH=\"$GTDB_PATH\""'; \
+    echo 'echo "export CHECKM_DATA_PATH=\"$CHECKM_PATH\""'; \
+    echo 'echo "export PFAM_DB_PATH=\"$PFAM_PATH\""'; \
+    echo 'echo "export NCBI_HMMS_PATH=\"$NCBI_PATH\""'; \
+    echo 'echo "export COG_DB_PATH=\"$COG_PATH\""'; \
+    } > download_databases.sh && chmod +x download_databases.sh
 
 # Set up pipeline directory and download scripts
 WORKDIR /quackers_pipe
@@ -495,7 +246,7 @@ ENV CHECKM_DATA_PATH=/quackers_tools/checkm_data \
 # Test key installations (with proper syntax for each tool)
 RUN echo "Testing tool installations..." && \
     concoct --help > /dev/null 2>&1 && \
-    checkm > /dev/null 2>&1 || true && \
+    (checkm > /dev/null 2>&1 || true) && \
     gtdbtk --help > /dev/null 2>&1 && \
     metabat2 --help > /dev/null 2>&1 && \
     samtools --version > /dev/null && \
@@ -504,54 +255,47 @@ RUN echo "Testing tool installations..." && \
     echo "" && \
     echo "=== IMPORTANT: Database Setup Required ===" && \
     echo "Run './download_databases.sh' after container starts" && \
-    echo "This requires ~100GB space and good internet connection" && \
+    echo "This requires ~2GB space for essential databases" && \
+    echo "GTDB-Tk database (~80GB) can be downloaded separately" && \
     echo "Or mount external database volumes at:" && \
     echo "  $GTDBTK_DATA_PATH" && \
     echo "  $CHECKM_DATA_PATH"
 
 # Create health check script
-COPY <<'EOF' /usr/local/bin/health_check.sh
-#!/bin/bash
-echo "=== Tool Health Check ==="
-
-# Test tools with their specific syntax
-echo -n "concoct: "
-if concoct --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo -n "checkm: "
-if checkm >/dev/null 2>&1 || [[ $? -eq 2 ]]; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo -n "gtdbtk: "
-if gtdbtk --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo -n "metabat2: "
-if metabat2 --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo -n "samtools: "
-if samtools --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo -n "python: "
-if python --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi
-
-echo "=== Database Status ==="
-for db in "$CHECKM_DATA_PATH" "$GTDBTK_DATA_PATH"; do
-    if [[ -d "$db" && -n "$(ls -A "$db" 2>/dev/null)" ]]; then
-        echo "✓ $(basename "$db"): ready"
-    else
-        echo "✗ $(basename "$db"): not found or empty"
-    fi
-done
-EOF
-
-RUN chmod +x /usr/local/bin/health_check.sh
+RUN { \
+    echo '#!/bin/bash'; \
+    echo 'echo "=== Tool Health Check ==="'; \
+    echo 'echo -n "concoct: "'; \
+    echo 'if concoct --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "checkm: "'; \
+    echo 'if checkm >/dev/null 2>&1 || [[ $? -eq 2 ]]; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "gtdbtk: "'; \
+    echo 'if gtdbtk --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "metabat2: "'; \
+    echo 'if metabat2 --help >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "samtools: "'; \
+    echo 'if samtools --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "python: "'; \
+    echo 'if python --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo -n "python2: "'; \
+    echo 'if python2 --version >/dev/null 2>&1; then echo "✓ available"; else echo "✗ missing"; fi'; \
+    echo 'echo "=== Database Status ==="'; \
+    echo 'for db in "$CHECKM_DATA_PATH" "$GTDBTK_DATA_PATH"; do'; \
+    echo '    if [[ -d "$db" && -n "$(ls -A "$db" 2>/dev/null)" ]]; then'; \
+    echo '        echo "✓ $(basename "$db"): ready"'; \
+    echo '    else'; \
+    echo '        echo "✗ $(basename "$db"): not found or empty"'; \
+    echo '    fi'; \
+    echo 'done'; \
+    } > /usr/local/bin/health_check.sh && chmod +x /usr/local/bin/health_check.sh
 
 # Final cleanup
 RUN mamba clean -a -y && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    find /quackers_tools -type f -name "*.tar.gz" -delete && \
-    find /quackers_tools -type f -name "*.tgz" -delete
+    find /quackers_tools -type f -name "*.tar.gz" -delete 2>/dev/null || true && \
+    find /quackers_tools -type f -name "*.tgz" -delete 2>/dev/null || true
 
 # Set permissions
 RUN chmod -R 755 /quackers_tools && \
@@ -561,14 +305,15 @@ RUN chmod -R 755 /quackers_tools && \
 LABEL maintainer="Quackers Pipeline" \
       version="3.1.0" \
       description="Optimized bioinformatics container for metagenomics analysis" \
-      tools="MetaWRAP,GTDB-Tk,CheckM,MetaBat2,CONCOCT,MaxBin2"
+      tools="MetaWRAP,GTDB-Tk,CheckM,MetaBat2,CONCOCT,MaxBin2" \
+      python.versions="3.10,2.7"
 
 WORKDIR /quackers_pipe
 
 # Show information on startup
 CMD echo "=== Quackers Pipeline Container ===" && \
     echo "Run 'health_check.sh' to verify installation" && \
-    echo "Run './download_databases.sh' to download databases" && \
-    echo "Database requirements: ~100GB total space" && \
+    echo "Run './download_databases.sh' to download essential databases (~2GB)" && \
+    echo "For GTDB-Tk: see script output for manual download instructions" && \
     echo "Container ready!" && \
     bash

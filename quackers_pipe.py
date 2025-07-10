@@ -34,6 +34,9 @@ def run_pipe(path_obj, args_pack):
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.host_dir)):
         stage_obj.host_filter()
 
+    if(args_pack["stop_stage"] == "clean"):
+        print(dt.today(), "Quackers stopping after cleaning.")
+        sys.exit()
       
     if(mp_obj.check_bypass_log(path_obj.bypass_log, path_obj.assembly_dir)):
         stage_obj.assembly()
@@ -72,7 +75,7 @@ def parse_inputs():
     parser.add_argument("-2", "--reverse", "--r", type=str, help="Used only for paired-end reads: Path to the reverse-end data")
     parser.add_argument("-s", "-S", "--single", type=str, help="For single-ended reads:, Path to the single-end data")
     parser.add_argument("-debug", "--debug", "--Debug", action='store_true', help="DEBUG MODE")
-    parser.add_argument("-stop", "--stop_at", type = str, help = "debug stage-stop")
+    parser.add_argument("-stop", "--stop_at", type = str, help = "stage-stop")
     args = parser.parse_args()
 
     output_dir  = os.path.abspath(args.output_dir) if args.output_dir else "None"

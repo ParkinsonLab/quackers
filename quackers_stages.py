@@ -313,7 +313,7 @@ class q_stage:
             print(dt.today(), "skipping checkm")
             print(self.dir_obj.cct_checkm_mkr)
 
-        if(self.dir_obj.check_mkr_cct()):    
+        if(self.dir_obj.check_mkr_bin_cct()):    
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.cct_bin_dir)
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.cct_bin_dir

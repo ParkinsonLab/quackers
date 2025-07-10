@@ -243,8 +243,7 @@ class dir_structure:
             all_ok = False
         if(not os.path.exists(self.assembly_bt2_idx_mkr)):
             all_ok = False
-        if(not os.path.exists(self.assembly_bwa_idx_mkr)):
-            all_ok = False
+        
         if(not os.path.exists(self.assembly_scan_sam_mkr)):
             all_ok = False
         if(not os.path.exists(self.assembly_pp_mkr)):
@@ -460,7 +459,7 @@ class path_obj:
         self.mwrap_bin_tool     = "metawrap binning"
         self.mwrap_bin_r_tool   = "metawrap bin_refinement"
         self.mwrap_quant_tool   = "metawrap quant_bins"
-        self.cct_cut_up_fasta   = "python3" + " " + os.path.join(self.tool_install_path, "concoct", "scripts", "cut_up_fasta.py")
+        self.cct_cut_up_fasta   = "python3 /opt/conda/bin/cut_up_fasta.py"
         self.cct_cov_table      = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "concoct_coverage_table.py")
         self.cct_merge_cutup    = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "merge_cutup_clustering.py")
         self.cct_get_bins       = "python3" + " " + os.path.join(self.temp_internal_scripts_path, "modded_scripts", "extract_fasta_bins.py")

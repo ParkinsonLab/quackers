@@ -64,7 +64,7 @@ def import_fastq(fastq_file):
                 line_count = 0
     
     print("dict keys:", len(read_dict.keys()))
-    return read_dict, read_dict.keys()
+    return read_dict, list(read_dict.keys())
 
 def export_hosts(sam_hits_dict, export_dir):
     #sort all reads by host
@@ -87,15 +87,22 @@ def export_hosts(sam_hits_dict, export_dir):
                 out_line = read + "\n"
                 host_out.write(out_line)
 
-def sort_samfiles(sam_dir):
+def sort_samfiles(sam_dir, run_mode):
     list_of_samfiles = os.listdir(sam_dir)
     unique_hosts = set()
     sam_hits_dict = dict()
     list_of_reads = list()
     for samfile in list_of_samfiles:
         
-        
-        if(samfile.endswith("score_bwa.out")):
+        p_keyword = "_p_score_bt2.out"
+        s_keyword = "_s_score_bt2.out"
+
+        if(run_mode == "p"):
+            keyword = p_keyword
+        if(run_mode == "s"):
+            keyword = s_keyword
+
+        if(samfile.endswith(keyword)):
             unique_hosts.add(samfile)
             sam_path = os.path.join(sam_dir, samfile)
             print("sam path:", sam_path)
@@ -118,15 +125,17 @@ def sort_samfiles(sam_dir):
                             sam_hits_dict[read_ID] = samfile + "|" + str(score)
                     else:
                         sam_hits_dict[read_ID] = samfile + "|" + str(score)
-
+        else:
+            print(dt.today(), "skipping:", samfile)
     return sam_hits_dict, unique_hosts
 
 
 def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
     #ranks hits.
     #clean_reads = list()
-    #print("[" + work_ID + "] raw keys:", len(raw_read_keys))
-    #print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
+    
+    print("[" + work_ID + "] raw keys:", len(raw_read_keys))
+    print("[" + work_ID + "] sam hits keys:", len(sam_hits_keys))
     for read in raw_read_keys:
         hit_reads = set(sorted(sam_hits_keys))
         old_size = len(hit_reads)
@@ -136,7 +145,7 @@ def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
             continue
         else:
             hits_reads_dict[read] = 1
-            #print(dt.today(), "work ID:", work_ID, read, clean_reads_dict[read])
+            print(dt.today(), "work ID:", work_ID, read, hits_reads_dict[read])
             
     #print("[" + str(work_ID) + "] hits reads dict: " + str(len(hits_reads_dict.keys())))
     #return clean_reads
@@ -144,7 +153,7 @@ def sort_reads(raw_read_keys, sam_hits_keys, hits_reads_dict, work_ID):
 def export_reads(final_out_file, raw_read_dict, keys_to_write):
     with open(final_out_file, "w") as s_out:
         for read_ID in keys_to_write:
-            #print(tag, "writing:", read_ID)
+            print("writing:", read_ID)
             selected_read = raw_read_dict[read_ID]
             #for item in selected_read:
                 #print("INSIDE:", item, selected_read[item])
@@ -197,38 +206,49 @@ if __name__ == "__main__":
     s_raw_dict = ""
     p1_raw_dict = ""
     p2_raw_dict = ""
-    final_s_reads = os.path.join(export_dir, "singles.fastq")
+    final_s_reads = os.path.join(export_dir, "single.fastq")
     final_p1_reads  = os.path.join(export_dir, "pair_1.fastq")
     final_p2_reads  = os.path.join(export_dir, "pair_2.fastq")
     host_p1_reads = os.path.join(export_dir, "host_p1.fastq")
     host_p2_reads = os.path.join(export_dir, "host_p2.fastq")
     host_s_reads = os.path.join(export_dir, "host_s.fastq")
 
-    
-    print(dt.today(), "starting samfile sort+merge")
-    sam_hits_dict, unique_hosts = sort_samfiles(sam_dir)
-
-    
-    print(dt.today(), "exporting host lists")
-    export_hosts(sam_hits_dict, export_dir)
-    
+    run_mode = ""
 
     if(os.path.exists(raw_s_read)):
+        print(dt.today(), "running on single-mode")
         is_single = True
+        run_mode = "s"
 
     if(os.path.exists(raw_p1_read) and (os.path.exists(raw_p2_read))):
         is_paired = True
+        run_mode = "p"
+        print(dt.today(), "running on paired-mode")
     if(is_paired and is_single):
         sys.exit("Exit at reconciliation.  Single and paired-reads detected")
-    print(dt.today(), "starting host sort")        
+    
     #for read_ID in sam_hits_dict:
 
-    
+    if((not is_single) and (not is_paired)):
+        sys.exit("something wrong with inputs.  Can't be no-single and not-paired")
+
+    print(dt.today(), "starting host sort")   
+
+    print(dt.today(), "starting samfile sort+merge")
+    sam_hits_dict, unique_hosts = sort_samfiles(sam_dir, run_mode)
+
+
+    print("sam hits dict")
+    print(sam_hits_dict)
+
+    print(dt.today(), "exporting host lists")
+    export_hosts(sam_hits_dict, export_dir)
 
     cpu_count = mp.cpu_count()
     cpu_count = cpu_count - 1
     manager = mp.Manager()
     sam_hits_keys = sam_hits_dict.keys()
+
 
     count = 0
     for test_sam_key in sam_hits_keys:
@@ -257,18 +277,30 @@ if __name__ == "__main__":
     if(is_single):
         s_raw_dict, s_raw_keys = import_fastq(raw_s_read)
 
+        #count = 0
+        #for item in s_raw_keys:
+        #    print("SINGLE fastq ID:", item)
+        #    print(s_raw_dict[item])
+        #    count += 1
+        #    if(count > 20):
+        #        break
+
+        #time.sleep(10)
+
+        
         cpu_count = int(cpu_count)
-        split_size = int(len(p1_raw_dict.keys())/cpu_count)
-        s_keys = list(sorted(s_raw_dict.keys()))
+        #cpu_count = 1
+        split_size = int(len(s_raw_dict.keys())/cpu_count)
         hits_s_reads_dict = manager.dict()
         for i_cpu in range(0, cpu_count):
+            work_ID = str(i_cpu) + "_work"
             start_index = i_cpu * split_size
             end_index = ((i_cpu + 1) * split_size)-1
-            s_selection = s_keys[start_index:end_index]
+            s_selection = s_raw_keys[start_index:end_index]
             if(i_cpu >= cpu_count - 1):
-                s_selection = s_keys[start_index:]
+                s_selection = s_raw_keys[start_index:]
 
-            s_process = mp.Process(target = sort_reads, args = (s_selection, sam_hits_keys, hits_s_reads_dict))
+            s_process = mp.Process(target = sort_reads, args = (s_selection, sam_hits_keys, hits_s_reads_dict, work_ID))
             s_process.start()
             mp_jobs.append(s_process)
         print(dt.today(), "S jobs launched. waiting")
@@ -276,7 +308,13 @@ if __name__ == "__main__":
             item.join()
         mp_jobs.clear()
         print(dt.today(), "S extraction jobs done. Starting export")
-        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, hits_s_reads_dict.keys()))
+        for item in hits_s_reads_dict.keys():
+            print(item, hits_s_reads_dict[item])
+        for item in sam_hits_keys:
+            print("sam hits:", item, sam_hits_dict[item])
+        
+        sam_miss_keys = list(set(s_raw_keys) - set(sam_hits_keys))
+        s_export_process = mp.Process(target = export_reads, args = (final_s_reads, s_raw_dict, sam_miss_keys))
         s_export_process.start()
         print(dt.today(), "waiting for export S process to finish")
         s_export_process.join()
@@ -350,7 +388,6 @@ if __name__ == "__main__":
         p1_keys_to_export = set(p1_raw_keys) - set(hits_p1_reads_dict.keys())
         p2_keys_to_export = set(p2_raw_keys) - set(hits_p2_reads_dict.keys())
 
-       
         
         p1_export_process = mp.Process(target = export_reads, args = (final_p1_reads, p1_raw_dict, p1_keys_to_export))
         p2_export_process = mp.Process(target = export_reads, args = (final_p2_reads, p2_raw_dict, p2_keys_to_export))
