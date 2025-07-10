@@ -211,12 +211,12 @@ WORKDIR /quackers_pipe
 
 # Download pipeline files in parallel
 RUN { \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_pipe.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_commands.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/MetaPro_utilities_v2.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_stages.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/quackers_paths.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/Config.ini & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_pipe.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_commands.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/MetaPro_utilities_v2.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_stages.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_paths.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_config.ini & \
     wait; \
     }
 
@@ -224,17 +224,17 @@ RUN { \
 RUN mkdir -p scripts modded_scripts && \
     cd scripts && \
     { \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/contig_reconcile.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/sam_sift.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/scripts/clean_reads_reconcile.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/contig_reconcile.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/sam_sift.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/clean_reads_reconcile.py & \
     wait; \
     } && \
     cd ../modded_scripts && \
     { \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/concoct_coverage_table.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/extract_fasta_bins.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/merge_cutup_clustering.py & \
-    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/test/modded_scripts/print_comment.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/modded_scripts/concoct_coverage_table.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/modded_scripts/extract_fasta_bins.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/modded_scripts/merge_cutup_clustering.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/modded_scripts/print_comment.py & \
     wait; \
     }
 
