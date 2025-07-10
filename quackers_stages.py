@@ -339,7 +339,7 @@ class q_stage:
         command = self.command_obj.maxbin2_bin_command(self.op_mode, self.hosts_bypassed, self.dir_obj.mbin2_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mbin2_job, command)
         self.job_control.wait_for_mp_store()
-        if(not self.dir_obj.check_mkr_bin_mbin2()):
+        if(self.dir_obj.check_mkr_bin_mbin2()):
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mbin2_bin_dir)
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.mbin2_bin_dir
@@ -351,7 +351,7 @@ class q_stage:
         command = self.command_obj.metawrap_bin_refinement_command(self.dir_obj.mwrap_bin_r_mkr)
         self.job_control.launch_and_create_v2_with_mp_store(self.dir_obj.mwrap_bin_r_job, command)
         self.job_control.wait_for_mp_store()
-        if(not self.dir_obj.check_mkr_mwrap_bin_r()):
+        if(self.dir_obj.check_mkr_mwrap_bin_r()):
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_bin_r_dir)
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.mwrap_bin_r_dir
@@ -378,7 +378,7 @@ class q_stage:
             self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         self.job_control.wait_for_mp_store()
-        if(not self.dir_obj.check_mkr_gtdbtk()):
+        if(self.dir_obj.check_mkr_gtdbtk()):
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.gtdbtk_class_dir)
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.gtdbtk_class_dir 
@@ -405,7 +405,7 @@ class q_stage:
         
         
         self.job_control.wait_for_mp_store()
-        if(not self.dir_obj.check_mkr_mwrap_quant()):
+        if(self.dir_obj.check_mkr_mwrap_quant()):
             self.job_control.write_to_bypass_log(self.path_obj.bypass_log, self.path_obj.mwrap_quant_dir)
         else:
             message_line = str(dt.today()) + " broken at: " + self.path_obj.mwrap_quant_dir 
