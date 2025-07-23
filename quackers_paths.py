@@ -441,8 +441,8 @@ class path_obj:
 
         self.megahit_path       = "/quackers_tools/megahit/bin/megahit"
         self.samtools_path      = "samtools"
-        self.bowtie2_path       = os.path.join(self.tool_install_path, "bowtie2", "bowtie2")
-        self.bowtie2_idx_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
+        self.bowtie2_path       = "bowtie2"
+        self.bowtie2_idx_path   = "bowtie2-build"
         self.concoct_path       = "concoct"
         self.checkm_path        = "checkm"
         self.ar_path            = "AdapterRemoval"
