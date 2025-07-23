@@ -445,7 +445,7 @@ class path_obj:
         self.bowtie2_idx_path   = os.path.join(self.tool_install_path, "bowtie2", "bowtie2-build")
         self.concoct_path       = "concoct"
         self.checkm_path        = "checkm"
-        self.ar_path            = os.path.join(self.tool_install_path, "adapterremoval", "AdapterRemoval")
+        self.ar_path            = "AdapterRemoval"
         self.cdhit_path         = os.path.join(self.tool_install_path, "cdhit_dup", "cd-hit-dup")
         self.bbduk_path         = os.path.join(self.tool_install_path, "bbmap", "bbduk.sh")
         self.vsearch            = "vsearch"
