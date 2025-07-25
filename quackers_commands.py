@@ -442,15 +442,11 @@ class command_obj:
 
         
     def metawrap_bin_refinement_command(self, marker_path):
-        refine = self.path_obj.mwrap_bin_r_tool + " "
+        refine = self.path_obj.mwrap_refiner + " "
+        refine += "-1" + " " + self.dir_obj.cct_bins_dir + " "
+        refine += "-2" + " " + self.dir_obj.mbat2_bins_dir + " "
+        refine += "-3" + " " + self.dir_obj.mbin2_bins_dir + " "
         refine += "-o" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
-        refine += "-t" + " " + str(os.cpu_count()) + " "
-        refine += "-A" + " " + self.dir_obj.cct_bins_dir + " "
-        refine += "-B" + " " + self.dir_obj.mbat2_bins_dir + " "
-        refine += "-C" + " " + self.dir_obj.mbin2_bins_dir + " "
-        refine += "-c" + " " + str(50) + " "
-        refine += "-x" + " " + str(10)
-
         make_marker = "touch" + " " + marker_path
         return [refine + " && " + make_marker]
     

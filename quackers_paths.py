@@ -472,6 +472,9 @@ class path_obj:
         self.clean_reads_reconcile  = self.assign_value("scripts", "clean_reads_reconcile", "str", "/quackers_pipe/scripts/clean_reads_reconcile.py")
         self.contig_reconcile       = self.assign_value("scripts", "contig_reconcile", "str", "/quackers_pipe/scripts/contig_reconcile.py")
         self.orphanizer             = self.assign_value("scripts", "orphanizer", "str", "/quackers_pipe/scripts/read_orphan.py")
+        self.mwrap_refiner           = self.assign_value("scripts", "mwrap_refiner", "str", "/quackers_pipe/scripts/sequential_refiner.py")
+
+
 
         #-----------------------------------
         # raw data
@@ -513,7 +516,7 @@ class path_obj:
         self.host_dir               = self.assign_value("directory", "host_filter", "str", "1_host_filter")
         self.assembly_dir           = self.assign_value("directory", "contig_assembly", "str", "2_contig_assemble")
         self.backup_assembly_dir    = self.assign_value("directory", "contig_backup", "str", "2a_contig_assembly")
-        self.cct_bin_dir            = self.assign_value("directory", "contig_binning", "str", "3a_conconct_binning")
+        self.cct_bin_dir            = self.assign_value("directory", "contig_binning", "str", "3a_concoct_binning")
         self.mbin2_bin_dir          = self.assign_value("directory", "maxbin2_binning", "str", "3b_maxbin2_binning")
         self.mbat2_bin_dir          = self.assign_value("directory", "metabat2_binning", "str", "3c_metabat2_binning")
         self.mwrap_bin_r_dir        = self.assign_value("directory", "metawrap_bin_refinement", "str", "4_mwrap_bin_r")
