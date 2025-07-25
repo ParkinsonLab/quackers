@@ -173,47 +173,39 @@ class dir_structure:
 
         self.mwrap_bin_r_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_bin_r_dir)
         self.mwrap_bin_r_dir_data   = os.path.join(self.mwrap_bin_r_dir_top, "data")
+        self.mwrap_refined_bins_dir = os.path.join(self.mwrap_bin_r_dir_data, "Refined_ABC/Refined")
+        self.mwrap_refined_ab_dir = os.path.join(self.mwrap_bin_r_dir_data, "Refined_AB/Refined")
+        self.mwrap_refined_ac_dir = os.path.join(self.mwrap_bin_r_dir_data, "Refined_AC/Refined")
+        self.mwrap_refined_bc_dir = os.path.join(self.mwrap_bin_r_dir_data, "Refined_BC/Refined")
         self.mwrap_bin_r_job = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r.sh")
         self.mwrap_bin_r_mkr = os.path.join(self.mwrap_bin_r_dir_top, "mwrap_bin_r")
+        make_folder(self.mwrap_bin_r_dir_top)
+        make_folder(self.mwrap_bin_r_dir_data)
+        
 
         self.gtdbtk_dir_top = os.path.join(self.output_dir, path_obj.gtdbtk_class_dir)
         self.gtdbtk_dir_data = os.path.join(self.gtdbtk_dir_top, "data")
-        self.gtdbtk_dir_cct = os.path.join(self.gtdbtk_dir_data, "cct")
-        self.gtdbtk_dir_mbat2 = os.path.join(self.gtdbtk_dir_data, "mbat2")
-        self.gtdbtk_dir_mbin2 = os.path.join(self.gtdbtk_dir_data, "mbin2")
-        self.gtdbtk_cct_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_cct.sh")
-        self.gtdbtk_mbat2_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_mbat2.sh")
-        self.gtdbtk_mbin2_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify_mbin2.sh")
-        self.gtdbtk_cct_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_cct")
-        self.gtdbtk_mbin2_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_mbin2")
-        self.gtdbtk_mbat2_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_mbat2")
+        self.gtdbtk_dir_refined = os.path.join(self.gtdbtk_dir_data, "Refined_ABC")
+        self.gtdbtk_dir_refined_ab = os.path.join(self.gtdbtk_dir_data, "Refined_AB")
+        self.gtdbtk_dir_refined_ac = os.path.join(self.gtdbtk_dir_data, "Refined_AC")
+        self.gtdbtk_dir_refined_bc = os.path.join(self.gtdbtk_dir_data, "Refined_BC")
+        
+        self.gtdbtk_mkr = os.path.join(self.gtdbtk_dir_top, "gtdbtk_mkr")
+        self.gtdbtk_job = os.path.join(self.gtdbtk_dir_top, "gtdbtk_classify.sh")
+
 
         make_folder(self.gtdbtk_dir_top)
         make_folder(self.gtdbtk_dir_data)
-        make_folder(self.gtdbtk_dir_cct)
-        make_folder(self.gtdbtk_dir_mbat2)
-        make_folder(self.gtdbtk_dir_mbin2)
 
         self.mwrap_quant_dir_top    = os.path.join(self.output_dir, path_obj.mwrap_quant_dir)
         self.mwrap_quant_dir_data   = os.path.join(self.mwrap_quant_dir_top, "data")
-        self.mwrap_quant_cct_dir = os.path.join(self.mwrap_quant_dir_data, "cct")
-        self.mwrap_quant_mbat2_dir = os.path.join(self.mwrap_quant_dir_data, "mbat2")
-        self.mwrap_quant_mbin2_dir = os.path.join(self.mwrap_quant_dir_data, "mbin2")
-        
-        self.mwrap_quant_cct_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct_job.sh")
-        self.mwrap_quant_cct_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_cct")
+        self.mwrap_quant_refined_dir = os.path.join(self.mwrap_quant_dir_data, "Refined_ABC")
+        self.mwrap_quant_refined_ab_dir = os.path.join(self.mwrap_quant_dir_data, "Refined_AB")
+        self.mwrap_quant_refined_ac_dir = os.path.join(self.mwrap_quant_dir_data, "Refined_AC")
+        self.mwrap_quant_refined_bc_dir = os.path.join(self.mwrap_quant_dir_data, "Refined_BC")
+        self.mwrap_quant_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mkr")
+        self.mwrap_quant_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_job.sh")
 
-        self.mwrap_quant_mbat2_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbat2_job.sh")
-        self.mwrap_quant_mbat2_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbat2")
-        
-        self.mwrap_quant_mbin2_job = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbin2_job.sh")
-        self.mwrap_quant_mbin2_mkr = os.path.join(self.mwrap_quant_dir_top, "mwrap_quant_mbin2")
-        
-        make_folder(self.mwrap_bin_r_dir_top)
-        make_folder(self.mwrap_bin_r_dir_data)
-        make_folder(self.mwrap_quant_cct_dir)
-        make_folder(self.mwrap_quant_mbat2_dir)
-        make_folder(self.mwrap_quant_mbin2_dir)
         
 
         make_folder(self.mwrap_quant_dir_top)
@@ -286,22 +278,15 @@ class dir_structure:
     
     def check_mkr_gtdbtk(self):
         all_ok = True
-        if(not os.path.exists(self.gtdbtk_cct_mkr)):
-            all_ok = False
-        if(not os.path.exists(self.gtdbtk_mbin2_mkr)):
-            all_ok = False
-        if(not os.path.exists(self.gtdbtk_mbat2_mkr)):
+        if(not os.path.exists(self.gtdbtk_mkr)):
             all_ok = False
         return all_ok
 
     def check_mkr_mwrap_quant(self):
         all_ok = True
-        if(not os.path.exists(self.mwrap_quant_cct_mkr)):
+        if(not os.path.exists(self.mwrap_quant_mkr)):
             all_ok = False
-        if(not os.path.exists(self.mwrap_quant_mbat2_mkr)):
-            all_ok = False
-        if(not os.path.exists(self.mwrap_quant_mbin2_mkr)):
-            all_ok = False
+        
         return all_ok
 
 #classes that store all tool paths for Quackers.

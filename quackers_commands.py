@@ -4,7 +4,7 @@ import time
 from datetime import datetime as dt
 import MetaPro_utilities_v2 as mpu
 import quackers_paths as q_path
-
+import psutil
 
 
 class command_obj:
@@ -442,69 +442,109 @@ class command_obj:
 
         
     def metawrap_bin_refinement_command(self, marker_path):
+        """Generate metaWRAP bin refinement command with maximum performance."""
         refine = self.path_obj.mwrap_refiner + " "
         refine += "-1" + " " + self.dir_obj.cct_bins_dir + " "
         refine += "-2" + " " + self.dir_obj.mbat2_bins_dir + " "
         refine += "-3" + " " + self.dir_obj.mbin2_bins_dir + " "
         refine += "-o" + " " + self.dir_obj.mwrap_bin_r_dir_data + " "
+        refine += "-t" + " " + str(os.cpu_count()) + " "
+        
+        # Add memory optimization (80% of available RAM)
+        try:
+            
+            memory_gb = int(psutil.virtual_memory().total / (1024**3) * 0.8)
+            refine += "--memory" + " " + str(memory_gb) + " "
+        except ImportError:
+            pass
+        
         make_marker = "touch" + " " + marker_path
         return [refine + " && " + make_marker]
     
+    
     def gtdbtk_command(self, bin_choice, marker_path):
+        """Generate GTDB-Tk classification command for refined bins."""
         bin_select = ""
         out_dir = ""
-        if(bin_choice == "cct"):
-            bin_select = self.dir_obj.cct_bins_dir
-            out_dir = self.dir_obj.gtdbtk_dir_cct
-        elif(bin_choice == "mbat2"):
-            bin_select = self.dir_obj.mbat2_bins_dir
-            out_dir = self.dir_obj.gtdbtk_dir_mbat2
-        elif(bin_choice == "mbin2"):
-            bin_select = self.dir_obj.mbin2_bins_dir
-            out_dir = self.dir_obj.gtdbtk_dir_mbin2
-
+        extension = "fasta"  # Refined bins use .fasta extension
+        
+        if(bin_choice == "refined"):
+            bin_select = self.dir_obj.mwrap_refined_bins_dir  # A+B+C (BEST)
+            out_dir = self.dir_obj.gtdbtk_dir_refined
+        elif(bin_choice == "refined_ab"):
+            bin_select = self.dir_obj.mwrap_refined_ab_dir
+            out_dir = self.dir_obj.gtdbtk_dir_refined_ab
+        elif(bin_choice == "refined_bc"):
+            bin_select = self.dir_obj.mwrap_refined_bc_dir
+            out_dir = self.dir_obj.gtdbtk_dir_refined_bc
+        elif(bin_choice == "refined_ac"):
+            bin_select = self.dir_obj.mwrap_refined_ac_dir
+            out_dir = self.dir_obj.gtdbtk_dir_refined_ac
+        else:
+            raise ValueError(f"Invalid bin_choice: {bin_choice}. Use 'refined', 'refined_ab', 'refined_bc', or 'refined_ac'")
+        
+        # Environment setup
         set_env = "export" + " "
         set_env += "GTDBTK_DATA_PATH="
         set_env += self.path_obj.gtdbtk_ref
-
+        
+        # GTDB-Tk classification with optimizations for large refined datasets
         classify = self.path_obj.gtdbtk_path + " " + "classify_wf" + " "
         classify += "--skip_ani_screen" + " "
         classify += "--genome_dir" + " " + bin_select + " "
-        classify += "--extension" + " " + "fa" + " "
+        classify += "--extension" + " " + extension + " "
         classify += "--out_dir" + " " + out_dir + " "
-        classify += "--cpus" + " " + str(os.cpu_count())
-
+        classify += "--cpus" + " " + str(os.cpu_count()) + " "
+        classify += "--pplacer_cpus" + " " + str(min(16, os.cpu_count()//4)) + " "
+        classify += "--min_perc_aa" + " " + "10" + " "
+        classify += "--scratch_dir" + " " + "/tmp/gtdbtk_scratch" + " "
+        
         make_marker = "touch" + " " + marker_path
-
         return [set_env, classify + " && " + make_marker]
     
-    def metawrap_quantify_command(self, bin_choice, forward, reverse, single, marker_path):
 
+    def metawrap_quantify_command(self, bin_choice, forward, reverse, single, marker_path):
+        """Generate metaWRAP quantification command for refined bins."""
         bin_select = ""
         out_dir = ""
+        
+        # Read selection based on sequencing mode
         reads_selection = ""
         if(self.op_mode == "single"):
             reads_selection = single
         elif(self.op_mode == "paired"):
             reads_selection = forward + " " + reverse
         
-        if(bin_choice == "cct"):
-            out_dir = self.dir_obj.mwrap_quant_cct_dir 
-            bin_select = self.dir_obj.cct_bins_dir
-        elif(bin_choice == "mbat2"):
-            out_dir = self.dir_obj.mwrap_quant_mbat2_dir
-            bin_select = self.dir_obj.mbat2_bins_dir
+        if(bin_choice == "refined"):
+            bin_select = self.dir_obj.mwrap_refined_bins_dir  # A+B+C (BEST)
+            out_dir = self.dir_obj.mwrap_quant_refined_dir
+        elif(bin_choice == "refined_ab"):
+            bin_select = self.dir_obj.mwrap_refined_ab_dir
+            out_dir = self.dir_obj.mwrap_quant_refined_ab_dir
+        elif(bin_choice == "refined_bc"):
+            bin_select = self.dir_obj.mwrap_refined_bc_dir
+            out_dir = self.dir_obj.mwrap_quant_refined_bc_dir
+        elif(bin_choice == "refined_ac"):
+            bin_select = self.dir_obj.mwrap_refined_ac_dir
+            out_dir = self.dir_obj.mwrap_quant_refined_ac_dir
+        else:
+            raise ValueError(f"Invalid bin_choice: {bin_choice}. Use 'refined', 'refined_ab', 'refined_bc', or 'refined_ac'")
         
-        elif(bin_choice == "mbin2"):
-            out_dir = self.dir_obj.mwrap_quant_mbin2_dir
-            bin_select = self.dir_obj.mbin2_bins_dir
-
+        # Build quantification command
         quant = self.path_obj.mwrap_quant_tool + " "
         quant += "-b" + " " + bin_select + " "
         quant += "-o" + " " + out_dir + " "
         quant += "-a" + " " + self.dir_obj.assembly_contigs + " "
         quant += reads_selection + " "
-        quant += "-t" + " " + str(os.cpu_count()) 
+        quant += "-t" + " " + str(os.cpu_count()) + " "
+        
+        # Memory optimization for large refined bin sets
+        try:
+            
+            memory_gb = int(psutil.virtual_memory().total / (1024**3) * 0.8)
+            quant += "--memory" + " " + str(memory_gb) + " "
+        except ImportError:
+            pass
+        
         make_marker = "touch" + " " + marker_path
-
         return [quant + " && " + make_marker]

@@ -229,6 +229,7 @@ RUN mkdir -p scripts modded_scripts && \
     wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/clean_reads_reconcile.py & \
     wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/read_orphan.py & \
     wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/bowtie2_sift.py & \
+    wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/sequential_refiner.py & \
     wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/scripts/megahit_reconcile.py & \
     wait; \
     } && \

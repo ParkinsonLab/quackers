@@ -362,20 +362,12 @@ class q_stage:
     def gtdbtk_classify(self):
         print("running GTDB-tk classify")
         
-        for bin_choice in self.bin_tools:
-            marker_path = ""
-            job_path = ""
-            if(bin_choice == "cct"):
-                marker_path = self.dir_obj.gtdbtk_cct_mkr
-                job_path = self.dir_obj.gtdbtk_cct_job
-            elif(bin_choice == "mbat2"):
-                marker_path = self.dir_obj.gtdbtk_mbat2_mkr
-                job_path = self.dir_obj.gtdbtk_mbat2_job
-            elif(bin_choice == "mbin2"):
-                marker_path = self.dir_obj.gtdbtk_mbin2_mkr
-                job_path = self.dir_obj.gtdbtk_mbin2_job
-            command = self.command_obj.gtdbtk_command(bin_choice, marker_path)
-            self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
+        marker_path = self.dir_obj.gtdbtk_mkr
+        job_path = self.dir_obj.gtdbtk_job
+        bin_choice = "refined"
+            
+        command = self.command_obj.gtdbtk_command(bin_choice, marker_path)
+        self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         self.job_control.wait_for_mp_store()
         if(self.dir_obj.check_mkr_gtdbtk()):
@@ -387,21 +379,11 @@ class q_stage:
 
     def metawrap_quant(self):
         print(dt.today(), "running metawrap quant bin")
-        marker_path = ""
-        job_path = ""
-        for bin_choice in self.bin_tools:
-            if(bin_choice == "cct"):
-                marker_path = self.dir_obj.mwrap_quant_cct_mkr
-                job_path = self.dir_obj.mwrap_quant_cct_job
-            elif(bin_choice == "mbat2"):
-                marker_path = self.dir_obj.mwrap_quant_mbat2_mkr
-                job_path = self.dir_obj.mwrap_quant_mbat2_job
-            elif(bin_choice == "mbin2"):
-                marker_path = self.dir_obj.mwrap_quant_mbin2_mkr
-                job_path = self.dir_obj.mwrap_quant_mbin2_job
-
-            command = self.command_obj.metawrap_quantify_command(bin_choice, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, marker_path)
-            self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
+        marker_path = self.dir_obj.mwrap_quant_mkr
+        job_path = self.dir_obj.mwrap_quant_job
+        bin_choice = "refined"
+        command = self.command_obj.metawrap_quantify_command(bin_choice, self.dir_obj.host_final_f, self.dir_obj.host_final_r, self.dir_obj.host_final_s, marker_path)
+        self.job_control.launch_and_create_v2_with_mp_store(job_path, command)
         
         
         self.job_control.wait_for_mp_store()
