@@ -210,6 +210,8 @@ class dir_structure:
 
         make_folder(self.mwrap_quant_dir_top)
         make_folder(self.mwrap_quant_dir_data)
+        make_folder(self.mwrap_quant_refined_dir)
+        
 
 
     def check_mkr_host(self, list_of_mkrs):

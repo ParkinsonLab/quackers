@@ -538,13 +538,7 @@ class command_obj:
         quant += reads_selection + " "
         quant += "-t" + " " + str(os.cpu_count()) + " "
         
-        # Memory optimization for large refined bin sets
-        try:
-            
-            memory_gb = int(psutil.virtual_memory().total / (1024**3) * 0.8)
-            quant += "--memory" + " " + str(memory_gb) + " "
-        except ImportError:
-            pass
+        
         
         make_marker = "touch" + " " + marker_path
         return [quant + " && " + make_marker]
