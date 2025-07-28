@@ -504,41 +504,93 @@ class command_obj:
     
 
     def metawrap_quantify_command(self, bin_choice, forward, reverse, single, marker_path):
-        """Generate metaWRAP quantification command for refined bins."""
+        # Step 1: Clear Python cache
+        python_clear_cache = "find /opt/conda -name \"*.pyc\" -delete 2>/dev/null || true && "
+        python_clear_cache += "find /opt/conda -name \"__pycache__\" -type d -exec rm -rf {} + 2>/dev/null || true"
+        
+        # Step 2: Set threading environment variables for optimal performance
+        cpu_count = str(os.cpu_count())
+        set_env = "export OMP_NUM_THREADS=" + cpu_count + " && "
+        set_env += "export NUMEXPR_NUM_THREADS=" + cpu_count + " && "
+        set_env += "export MKL_NUM_THREADS=" + cpu_count + " && "
+        set_env += "export OPENBLAS_NUM_THREADS=" + cpu_count + " && "
+        set_env += "export BLIS_NUM_THREADS=" + cpu_count + " && "
+        set_env += "export VECLIB_MAXIMUM_THREADS=" + cpu_count + " && "
+        # Disable thread affinity to prevent conflicts
+        set_env += "export OMP_PROC_BIND=false && "
+        set_env += "export OMP_PLACES=threads"
+        
+        # Step 3: Test numpy (FIXED - added import os)
+        test_numpy = "python3 -c \"import numpy as np; import os; print('NumPy ready with', str(os.cpu_count()), 'threads')\""
+        
+        # Step 4: Determine bin and output paths
         bin_select = ""
         out_dir = ""
         
-        # Read selection based on sequencing mode
-        reads_selection = ""
-        if(self.op_mode == "single"):
-            reads_selection = single
-        elif(self.op_mode == "paired"):
-            reads_selection = forward + " " + reverse
+        # Handle bin choice selection
+        bin_choice_map = {
+            "refined": (self.dir_obj.mwrap_refined_bins_dir, self.dir_obj.mwrap_quant_refined_dir),
+            "refined_ab": (self.dir_obj.mwrap_refined_ab_dir, self.dir_obj.mwrap_quant_refined_ab_dir),
+            "refined_bc": (self.dir_obj.mwrap_refined_bc_dir, self.dir_obj.mwrap_quant_refined_bc_dir),
+            "refined_ac": (self.dir_obj.mwrap_refined_ac_dir, self.dir_obj.mwrap_quant_refined_ac_dir)
+        }
         
-        if(bin_choice == "refined"):
-            bin_select = self.dir_obj.mwrap_refined_bins_dir  # A+B+C (BEST)
-            out_dir = self.dir_obj.mwrap_quant_refined_dir
-        elif(bin_choice == "refined_ab"):
-            bin_select = self.dir_obj.mwrap_refined_ab_dir
-            out_dir = self.dir_obj.mwrap_quant_refined_ab_dir
-        elif(bin_choice == "refined_bc"):
-            bin_select = self.dir_obj.mwrap_refined_bc_dir
-            out_dir = self.dir_obj.mwrap_quant_refined_bc_dir
-        elif(bin_choice == "refined_ac"):
-            bin_select = self.dir_obj.mwrap_refined_ac_dir
-            out_dir = self.dir_obj.mwrap_quant_refined_ac_dir
+        if bin_choice not in bin_choice_map:
+            raise ValueError("Invalid bin_choice: " + str(bin_choice) + ". Valid options: " + str(list(bin_choice_map.keys())))
+        
+        bin_select, out_dir = bin_choice_map[bin_choice]
+        
+        # Step 5: Create output directory and concatenated assembly with error checking
+        setup_dirs = "mkdir -p " + out_dir
+        create_assembly = "cat " + bin_select + "/*.fasta > " + out_dir + "/bins_assembly.fasta"
+        validate_assembly = "if [ ! -s " + out_dir + "/bins_assembly.fasta ]; then echo 'Error: Assembly file is empty or missing'; exit 1; fi"
+        
+        # Step 6: Build salmon index with full threading and optimizations
+        build_index = "salmon index "
+        build_index += "-t " + out_dir + "/bins_assembly.fasta "
+        build_index += "-i " + out_dir + "/salmon_index "
+        build_index += "-p " + cpu_count + " "
+        build_index += "--type puff "
+        build_index += "--tmpdir " + out_dir + "/tmp"
+        
+        # Step 7: Quantify with salmon directly based on read mode
+        quantify = ""
+        if self.op_mode == "single":
+            quantify = "salmon quant "
+            quantify += "-i " + out_dir + "/salmon_index "
+            quantify += "-l U "
+            quantify += "-r " + single + " "
+            quantify += "-o " + out_dir + "/quant_output "
+            quantify += "--meta "
+            quantify += "--validateMappings "
+            quantify += "-p " + cpu_count
+        elif self.op_mode == "paired":
+            quantify = "salmon quant "
+            quantify += "-i " + out_dir + "/salmon_index "
+            quantify += "-l IU "
+            quantify += "-1 " + forward + " "
+            quantify += "-2 " + reverse + " "
+            quantify += "-o " + out_dir + "/quant_output "
+            quantify += "--meta "
+            quantify += "--validateMappings "
+            quantify += "--seqBias "
+            quantify += "--gcBias "
+            quantify += "-p " + cpu_count
         else:
-            raise ValueError(f"Invalid bin_choice: {bin_choice}. Use 'refined', 'refined_ab', 'refined_bc', or 'refined_ac'")
+            raise ValueError("Invalid op_mode: " + str(self.op_mode))
         
-        # Build quantification command
-        quant = self.path_obj.mwrap_quant_tool + " "
-        quant += "-b" + " " + bin_select + " "
-        quant += "-o" + " " + out_dir + " "
-        quant += "-a" + " " + self.dir_obj.assembly_contigs + " "
-        quant += reads_selection + " "
-        quant += "-t" + " " + str(os.cpu_count()) + " "
+        # Step 8: Create marker file
+        make_marker = "touch " + marker_path
         
-        
-        
-        make_marker = "touch" + " " + marker_path
-        return [quant + " && " + make_marker]
+        # Return commands to be executed in sequence
+        return [
+            python_clear_cache,     # Command 1: Clear cache
+            set_env,               # Command 2: Set threading environment
+            test_numpy,            # Command 3: Test numpy
+            setup_dirs,            # Command 4: Create directories
+            create_assembly,       # Command 5: Concatenate bin fastas
+            validate_assembly,     # Command 6: Validate assembly was created
+            build_index,           # Command 7: Build salmon index with full threading
+            quantify,              # Command 8: Run salmon quantification directly
+            make_marker            # Command 9: Create completion marker
+        ]
