@@ -209,6 +209,10 @@ RUN { \
 # Set up pipeline directory and download scripts
 WORKDIR /quackers_pipe
 
+# Force cache bust for GitHub downloads using build date
+ARG CACHE_BUST_GITHUB
+RUN echo "Forcing fresh GitHub downloads at build time"
+
 # Download pipeline files in parallel
 RUN { \
     wget -q https://raw.githubusercontent.com/ParkinsonLab/quackers/v1.0.5/quackers_pipe.py & \
